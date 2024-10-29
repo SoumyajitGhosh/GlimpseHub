@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const socketio = require('socket.io');
@@ -11,7 +10,7 @@ const PORT = process.env.PORT || 9000;
 
 app.use(helmet());
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
 
 (async function () {
