@@ -9,7 +9,7 @@ import axios from 'axios';
  */
 export const retrieveFeedPosts = async (authToken, offset = 0) => {
   try {
-    const response = await axios.get(`/api/post/feed/${offset}`, {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/post/feed/${offset}`, {
       headers: {
         authorization: authToken,
       },

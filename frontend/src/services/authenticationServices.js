@@ -14,7 +14,7 @@ export const login = async (usernameOrEmail, password, authToken) => {
       usernameOrEmail && password
         ? { data: { usernameOrEmail, password } }
         : { headers: { authorization: authToken } };
-    const response = await axios('/api/auth/login', {
+    const response = await axios(`${import.meta.env.VITE_BACKEND_URI}/api/auth/login`, {
       method: 'POST',
       ...request,
     });
@@ -32,7 +32,7 @@ export const login = async (usernameOrEmail, password, authToken) => {
  */
 export const githubAuthentication = async (code) => {
   try {
-    const response = await axios.post('/api/auth/login/github', {
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/auth/login/github`, {
       code,
       state: sessionStorage.getItem('authState'),
     });
@@ -52,7 +52,7 @@ export const githubAuthentication = async (code) => {
  */
 export const registerUser = async (email, fullName, username, password) => {
   try {
-    const response = await axios.post('http://localhost:8585/api/auth/register', {
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/auth/register`, {
       email,
       fullName,
       username,
@@ -74,7 +74,7 @@ export const registerUser = async (email, fullName, username, password) => {
 export const changePassword = async (oldPassword, newPassword, authToken) => {
   try {
     await axios.put(
-      '/api/auth/password',
+      `${import.meta.env.VITE_BACKEND_URI}/api/auth/password`,
       {
         oldPassword,
         newPassword,

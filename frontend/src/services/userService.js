@@ -9,7 +9,7 @@ import axios from 'axios';
  */
 export const searchUsers = async (username, offset = 0) => {
   try {
-    const response = await axios.get(`/api/user/${username}/${offset}/search`);
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/user/${username}/${offset}/search`);
     return response.data;
   } catch (err) {
     console.warn(err);
@@ -25,7 +25,7 @@ export const searchUsers = async (username, offset = 0) => {
 export const confirmUser = async (authToken, confirmationToken) => {
   try {
     await axios.put(
-      '/api/user/confirm',
+      `${import.meta.env.VITE_BACKEND_URI}/api/user/confirm`,
       {
         token: confirmationToken,
       },
@@ -51,7 +51,7 @@ export const changeAvatar = async (image, authToken) => {
   const formData = new FormData();
   formData.append('image', image);
   try {
-    const response = await axios.put('/api/user/avatar', formData, {
+    const response = await axios.put(`${import.meta.env.VITE_BACKEND_URI}/api/user/avatar`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         authorization: authToken,
@@ -70,7 +70,7 @@ export const changeAvatar = async (image, authToken) => {
  */
 export const removeAvatar = async (authToken) => {
   try {
-    axios.delete('/api/user/avatar', {
+    axios.delete(`${import.meta.env.VITE_BACKEND_URI}/api/user/avatar`, {
       headers: {
         authorization: authToken,
       },
@@ -90,7 +90,7 @@ export const removeAvatar = async (authToken) => {
 export const updateProfile = async (authToken, updates) => {
   try {
     const response = await axios.put(
-      '/api/user',
+      `${import.meta.env.VITE_BACKEND_URI}/api/user`,
       {
         ...updates,
       },
@@ -114,7 +114,7 @@ export const updateProfile = async (authToken, updates) => {
  */
 export const getSuggestedUsers = async (authToken, max) => {
   try {
-    const response = await axios.get(`/api/user/suggested/${max || ''}`, {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/user/suggested/${max || ''}`, {
       headers: {
         authorization: authToken,
       },

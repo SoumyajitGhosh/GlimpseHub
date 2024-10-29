@@ -1,6 +1,6 @@
 import React from "react";
 
-import LoaderSvg from "../../assets/svg/loader.svg";
+import LoaderSvg from "../../assets/svg/loader.svg?react";
 
 const Loader = () => (
   <div className="loader">

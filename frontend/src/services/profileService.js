@@ -8,7 +8,7 @@ import axios from 'axios';
 export const getUserProfile = async (username, authToken) => {
   try {
     const response = await axios.get(
-      `/api/user/${username}`,
+      `${import.meta.env.VITE_BACKEND_URI}/api/user/${username}`,
       authToken && { headers: { authorization: authToken } }
     );
     return response.data;
@@ -26,7 +26,7 @@ export const getUserProfile = async (username, authToken) => {
  */
 export const followUser = async (userId, authToken) => {
   try {
-    const response = await axios.post(`/api/user/${userId}/follow`, null, {
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/user/${userId}/follow`, null, {
       headers: { authorization: authToken },
     });
     return response.data;
@@ -45,7 +45,7 @@ export const followUser = async (userId, authToken) => {
 export const retrieveUserFollowing = async (userId, offset, authToken) => {
   try {
     const response = await axios.get(
-      `/api/user/${userId}/${offset}/following`,
+      `${import.meta.env.VITE_BACKEND_URI}/api/user/${userId}/${offset}/following`,
       {
         headers: { authorization: authToken },
       }
@@ -66,7 +66,7 @@ export const retrieveUserFollowing = async (userId, offset, authToken) => {
 export const retrieveUserFollowers = async (userId, offset, authToken) => {
   try {
     const response = await axios.get(
-      `/api/user/${userId}/${offset}/followers`,
+      `${import.meta.env.VITE_BACKEND_URI}/api/user/${userId}/${offset}/followers`,
       {
         headers: { authorization: authToken },
       }

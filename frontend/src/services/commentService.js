@@ -11,7 +11,7 @@ import axios from 'axios';
 export const createComment = async (message, postId, authToken) => {
   try {
     const response = await axios.post(
-      `/api/comment/${postId}`,
+      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${postId}`,
       { message },
       {
         headers: {
@@ -33,7 +33,7 @@ export const createComment = async (message, postId, authToken) => {
  */
 export const deleteComment = async (commentId, authToken) => {
   try {
-    await axios.delete(`/api/comment/${commentId}`, {
+    await axios.delete(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentId}`, {
       headers: {
         authorization: authToken,
       },
@@ -51,7 +51,7 @@ export const deleteComment = async (commentId, authToken) => {
  */
 export const voteComment = async (commentId, authToken) => {
   try {
-    await axios.post(`/api/comment/${commentId}/vote`, null, {
+    await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentId}/vote`, null, {
       headers: { authorization: authToken },
     });
   } catch (err) {
@@ -74,7 +74,7 @@ export const createCommentReply = async (
 ) => {
   try {
     const response = await axios.post(
-      `/api/comment/${parentCommentId}/reply`,
+      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${parentCommentId}/reply`,
       { message },
       {
         headers: {
@@ -96,7 +96,7 @@ export const createCommentReply = async (
  */
 export const deleteCommentReply = async (commentReplyId, authToken) => {
   try {
-    await axios.delete(`/api/comment/${commentReplyId}/reply`, {
+    await axios.delete(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentReplyId}/reply`, {
       headers: {
         authorization: authToken,
       },
@@ -114,7 +114,7 @@ export const deleteCommentReply = async (commentReplyId, authToken) => {
  */
 export const voteCommentReply = async (commentReplyId, authToken) => {
   try {
-    await axios.post(`/api/comment/${commentReplyId}/replyVote`, null, {
+    await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentReplyId}/replyVote`, null, {
       headers: { authorization: authToken },
     });
   } catch (err) {
@@ -132,7 +132,7 @@ export const voteCommentReply = async (commentReplyId, authToken) => {
 export const getCommentReplies = async (parentCommentId, offset = 0) => {
   try {
     const response = await axios.get(
-      `/api/comment/${parentCommentId}/${offset}/replies`
+      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${parentCommentId}/${offset}/replies`
     );
     return response.data;
   } catch (err) {
@@ -151,7 +151,7 @@ export const getCommentReplies = async (parentCommentId, offset = 0) => {
 export const getComments = async (postId, offset, exclude = 0) => {
   try {
     const response = await axios.get(
-      `/api/comment/${postId}/${offset}/${exclude}`
+      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${postId}/${offset}/${exclude}`
     );
     return response.data;
   } catch (err) {

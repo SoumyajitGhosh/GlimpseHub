@@ -8,7 +8,7 @@ import axios from 'axios';
  */
 export const retrieveNotifications = async (authToken) => {
   try {
-    const response = await axios.get('/api/notification', {
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/notification`, {
       headers: {
         authorization: authToken,
       },
@@ -26,7 +26,7 @@ export const retrieveNotifications = async (authToken) => {
  */
 export const readNotifications = async (authToken) => {
   try {
-    await axios.put('/api/notification', null, {
+    await axios.put(`${import.meta.env.VITE_BACKEND_URI}/api/notification`, null, {
       headers: {
         authorization: authToken,
       },
