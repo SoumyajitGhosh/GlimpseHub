@@ -1,6 +1,7 @@
-import React, { useEffect, Fragment, Suspense, lazy } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { connect } from "react-redux";
+// import { useTransition } from "react-spring";
 
 import { selectCurrentUser } from "./redux/user/userSelectors";
 import { signInStart } from "./redux/user/userActions";
@@ -15,7 +16,6 @@ import Footer from "./components/Footer/Footer";
 import MobileNav from "./components/MobileNav/MobileNav";
 
 import LoadingPage from "./pages/LoadingPage/LoadingPage";
-
 const ProfilePage = lazy(() => import("./pages/ProfilePage/ProfilePage"));
 const PostPage = lazy(() => import("./pages/PostPage/PostPage"));
 const ConfirmationPage = lazy(() =>
@@ -51,6 +51,7 @@ export function UnconnectedApp({
 
   const renderModals = () => {
     if (modal.modals.length > 0) {
+      // Disable scrolling on the body while a modal is active
       document.querySelector("body").setAttribute("style", "overflow: hidden;");
       return modal.modals.map((modal, idx) => (
         <Modal key={idx} component={modal.component} {...modal.props} />
@@ -60,7 +61,24 @@ export function UnconnectedApp({
     }
   };
 
+  // const transitions = useTransition(alert.showAlert, null, {
+  //   from: {
+  //     transform: "translateY(4rem)",
+  //   },
+  //   enter: {
+  //     transform: "translateY(0rem)",
+  //   },
+  //   leave: {
+  //     transform: "translateY(4rem)",
+  //   },
+  //   config: {
+  //     tension: 500,
+  //     friction: 50,
+  //   },
+  // });
+
   const renderApp = () => {
+    // Wait for authentication
     if (!currentUser && token) {
       return <LoadingPage />;
     }
@@ -68,6 +86,14 @@ export function UnconnectedApp({
       <>
         {pathname !== "/login" && pathname !== "/signup" && <Header />}
         {renderModals()}
+        {/* {transitions.map(
+          ({ item, props, key }) =>
+            item && (
+              <Alert key={key} style={props} onClick={alert.onClick}>
+                {alert.text}
+              </Alert>
+            )
+        )} */}
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
@@ -128,5 +154,4 @@ const mapDispatchToProps = (dispatch) => ({
   fetchNotificationsStart: (authToken) =>
     dispatch(fetchNotificationsStart(authToken)),
 });
-
 export default connect(mapStateToProps, mapDispatchToProps)(UnconnectedApp);

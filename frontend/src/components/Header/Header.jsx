@@ -41,7 +41,7 @@ const Header = memo(({ currentUser }) => {
             <LogoCamera />
           </div>
           <div className="header__logo-header">
-            <h3 className="heading-logo">Instaclone</h3>
+            <h3 className="heading-logo">GlimpseHub</h3>
           </div>
         </Link>
         <SearchBox />

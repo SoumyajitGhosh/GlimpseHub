@@ -14,7 +14,7 @@ const NotFoundPage = () => (
       <h3 className="heading-3 font-medium">
         The link you followed may be broken, or the page may have been removed.{" "}
         <Link to="/" className="link">
-          Go back to Instaclone.
+          Go back to GlimpseHub.
         </Link>
       </h3>
     </div>
