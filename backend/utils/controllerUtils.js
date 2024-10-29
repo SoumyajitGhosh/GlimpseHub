@@ -5,7 +5,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
 const linkify = require('linkifyjs');
-require('linkifyjs/plugins/mention')(linkify);
+require("linkify-plugin-mention");
 const fs = require('fs');
 
 const socketHandler = require('../handlers/socketHandler');

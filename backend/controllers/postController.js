@@ -1,7 +1,7 @@
 const cloudinary = require('cloudinary').v2;
 const linkify = require('linkifyjs');
 const axios = require('axios');
-require('linkifyjs/plugins/hashtag')(linkify);
+require('linkify-plugin-hashtag');
 const Post = require('../models/Post');
 const PostVote = require('../models/PostVote');
 const Following = require('../models/Following');
