@@ -49,7 +49,7 @@ const UserSchema = new Schema({
             },
         },
     ],
-    githubId: Number,
+    // githubId: Number,
     private: {
         type: Boolean,
         default: false,

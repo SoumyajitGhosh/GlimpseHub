@@ -6,10 +6,10 @@ const {
     register,
     requireAuth,
     changePassword,
-    githubLoginAuthentication,
+    // githubLoginAuthentication,
 } = require('../controllers/authController');
 
-authRouter.post('/login/github', githubLoginAuthentication);
+// authRouter.post('/login/github', githubLoginAuthentication);
 authRouter.post('/login', loginAuthentication);
 authRouter.post('/register', register);
 
