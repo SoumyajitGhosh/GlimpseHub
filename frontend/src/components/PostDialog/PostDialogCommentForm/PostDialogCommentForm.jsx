@@ -14,9 +14,9 @@ import {
 } from '../../../services/commentService';
 
 import {
-    INITIAL_STATE,
-    postDialogCommentFormReducer,
-} from './postDialogCommentFormReducer';
+  INITIAL_STATE,
+  postDialogCommentFormReducer,
+} from "./postDialogFormReducer";
 
 import useSearchUsersDebounced from '../../../hooks/useSearchUsersDebounced';
 

@@ -4,30 +4,27 @@ import PropTypes from 'prop-types';
 import { formatDateDistance } from '../../utils/timeUtils';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames';
-import Linkify from 'linkifyjs/react';
-import * as linkify from 'linkifyjs';
-import mention from 'linkifyjs/plugins/mention';
-import hashtag from 'linkifyjs/plugins/hashtag';
+import Linkify from "linkify-react";
+import * as linkify from "linkifyjs";
+import "linkify-plugin-mention";
+import "linkify-plugin-hashtag";
 
-import { linkifyOptions } from '../../utils/linkifyUtils';
+import { linkifyOptions } from "../../utils/linkifyUtils";
 
-import Icon from '../Icon/Icon';
+import Icon from "../Icon/Icon";
 
-import { showModal, hideModal } from '../../redux/modal/modalActions';
-import { showAlert } from '../../redux/alert/alertActions';
+import { showModal, hideModal } from "../../redux/modal/modalActions";
+import { showAlert } from "../../redux/alert/alertActions";
 
 import {
-    voteComment,
-    getCommentReplies,
-    deleteComment,
-} from '../../services/commentService';
+  voteComment,
+  getCommentReplies,
+  deleteComment,
+} from "../../services/commentService";
 
-import Avatar from '../Avatar/Avatar';
-import PulsatingIcon from '../Icon/PulsatingIcon/PulsatingIcon';
-import CommentReply from './CommentReply/CommentReply';
-
-mention(linkify);
-hashtag(linkify);
+import Avatar from "../Avatar/Avatar";
+import PulsatingIcon from "../Icon/PulsatingIcon/PulsatingIcon";
+import CommentReply from "./CommentReply/CommentReply";
 
 const Comment = ({
     comment,

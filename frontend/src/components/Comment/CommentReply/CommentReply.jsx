@@ -1,23 +1,22 @@
 import React, { useState, useRef, useEffect, Fragment } from 'react';
 import { formatDateDistance } from '../../../utils/timeUtils';
 import { Link } from 'react-router-dom';
-import Linkify from 'linkifyjs/react';
-import * as linkify from 'linkifyjs';
-import mention from 'linkifyjs/plugins/mention';
+import Linkify from "linkify-react";
+import * as linkify from "linkifyjs";
+import "linkify-plugin-mention";
+import "linkify-plugin-hashtag";
 
-import { linkifyOptions } from '../../../utils/linkifyUtils';
+import { linkifyOptions } from "../../../utils/linkifyUtils";
 
-import Icon from '../../Icon/Icon';
+import Icon from "../../Icon/Icon";
 
 import {
-    voteCommentReply,
-    deleteCommentReply,
-} from '../../../services/commentService';
+  voteCommentReply,
+  deleteCommentReply,
+} from "../../../services/commentService";
 
-import Avatar from '../../Avatar/Avatar';
-import PulsatingIcon from '../../Icon/PulsatingIcon/PulsatingIcon';
-
-mention(linkify);
+import Avatar from "../../Avatar/Avatar";
+import PulsatingIcon from "../../Icon/PulsatingIcon/PulsatingIcon";
 
 const CommentReply = ({
     comment,
