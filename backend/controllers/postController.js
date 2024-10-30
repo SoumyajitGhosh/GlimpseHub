@@ -198,40 +198,42 @@ module.exports.votePost = async (req, res, next) => {
     const user = res.locals.user;
 
     try {
-        // Update the vote array if the user has not already liked the post
-        const postLikeUpdate = await PostVote.updateOne(
-            { post: postId, 'votes.author': { $ne: user._id } },
-            {
-                $push: { votes: { author: user._id } },
-            }
-        );
-        if (!postLikeUpdate.nModified) {
-            if (!postLikeUpdate.ok) {
-                return res.status(500).send({ error: 'Could not vote on the post.' });
-            }
-            // Nothing was modified in the previous query meaning that the user has already liked the post
-            // Remove the user's like
+        // Find the existing vote document
+        const postVote = await PostVote.findOne({ post: postId });
+
+        if (!postVote) {
+            return res.status(404).send({ error: 'Post not found.' });
+        }
+
+        // Check if the user has already liked the post
+        const hasUserLiked = postVote.votes.some(vote => String(vote.author) === String(user._id));
+
+        if (hasUserLiked) {
+            // User has liked; remove their like
             const postDislikeUpdate = await PostVote.updateOne(
                 { post: postId },
                 { $pull: { votes: { author: user._id } } }
             );
 
-            if (!postDislikeUpdate.nModified) {
-                return res.status(500).send({ error: 'Could not vote on the post.' });
+            if (postDislikeUpdate.modifiedCount === 0) {
+                return res.status(500).send({ error: 'Could not remove the like.' });
             }
         } else {
-            // Sending a like notification
+            // User has not liked; add their like
+            const postLikeUpdate = await PostVote.updateOne(
+                { post: postId },
+                { $push: { votes: { author: user._id } } }
+            );
+
+            if (postLikeUpdate.modifiedCount === 0) {
+                return res.status(500).send({ error: 'Could not add the like.' });
+            }
+
+            // Sending a like notification if the post author is not the same as the user
             const post = await Post.findById(postId);
             if (String(post.author) !== String(user._id)) {
-                // Create thumbnail link
-                const image = formatCloudinaryUrl(
-                    post.image,
-                    {
-                        height: 50,
-                        width: 50,
-                    },
-                    true
-                );
+                const image = formatCloudinaryUrl(post.image, { height: 50, width: 50 }, true);
+
                 const notification = new Notification({
                     sender: user._id,
                     receiver: post.author,
@@ -255,11 +257,13 @@ module.exports.votePost = async (req, res, next) => {
                 });
             }
         }
+
         return res.send({ success: true });
     } catch (err) {
         next(err);
     }
 };
+
 
 module.exports.retrievePostFeed = async (req, res, next) => {
     const user = res.locals.user;

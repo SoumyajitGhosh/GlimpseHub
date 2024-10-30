@@ -16,6 +16,10 @@ import Footer from "./components/Footer/Footer";
 import MobileNav from "./components/MobileNav/MobileNav";
 
 import LoadingPage from "./pages/LoadingPage/LoadingPage";
+import EditProfileForm from "./components/EditProfileForm/EditProfileForm";
+import ChangePasswordForm from "./components/ChangePasswordForm/ChangePasswordForm";
+import SuggestedPosts from "./components/SuggestedPosts/SuggestedPosts";
+import HashtagPosts from "./components/HashtagPosts/HashtagPosts";
 const ProfilePage = lazy(() => import("./pages/ProfilePage/ProfilePage"));
 const PostPage = lazy(() => import("./pages/PostPage/PostPage"));
 const ConfirmationPage = lazy(() =>
@@ -61,7 +65,7 @@ export function UnconnectedApp({
     }
   };
 
-  const transitions = useTransition(alert?.showAlert, () => ({
+  const [transitions, api] = useTransition(alert?.showAlert, () => ({
     from: { opacity: 0, transform: "translateY(4rem)" },
     enter: { opacity: 1, transform: "translateY(0rem)" },
     leave: { opacity: 0, transform: "translateY(4rem)" },
@@ -78,7 +82,7 @@ export function UnconnectedApp({
         {pathname !== "/login" && pathname !== "/signup" && <Header />}
         {renderModals()}
         {transitions &&
-          transitions.map(({ item, key, props }) =>
+          transitions(({ item, key, props }) =>
             item ? (
               <animated.div key={key} style={props}>
                 <Alert>{alert.text}</Alert>
@@ -88,33 +92,22 @@ export function UnconnectedApp({
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
-          <Route
-            path="/"
-            element={<ProtectedRoute component={<HomePage />} />}
-          />
-          <Route
-            path="/settings"
-            element={<ProtectedRoute component={<SettingsPage />} />}
-          />
-          <Route
-            path="/activity"
-            element={<ProtectedRoute component={<ActivityPage />} />}
-          />
-          <Route
-            path="/new"
-            element={<ProtectedRoute component={<NewPostPage />} />}
-          />
-          <Route
-            path="/explore"
-            element={<ProtectedRoute component={<ExplorePage />} />}
-          />
           <Route path="/:username" element={<ProfilePage />} />
           <Route path="/post/:postId" element={<PostPage />} />
-          <Route
-            path="/confirm/:token"
-            element={<ProtectedRoute component={<ConfirmationPage />} />}
-          />
           <Route path="*" element={<NotFoundPage />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/activity" element={<ActivityPage />} />
+            <Route path="/settings" element={<SettingsPage />}>
+              <Route path="edit" element={<EditProfileForm />} />
+              <Route path="password" element={<ChangePasswordForm />} />
+            </Route>
+            <Route path="/explore" element={<ExplorePage />}>
+              <Route path="" element={<SuggestedPosts />} />
+              <Route path="tags/:hashtag" element={<HashtagPosts />} />
+            </Route>
+            <Route path="/new" element={<NewPostPage />} />
+          </Route>
         </Routes>
         {pathname !== "/" && <Footer />}
         {pathname !== "/login" &&
