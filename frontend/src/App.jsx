@@ -1,7 +1,7 @@
 import React, { useEffect, Suspense, lazy } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { connect } from "react-redux";
-// import { useTransition } from "react-spring";
+import { useTransition, animated } from "react-spring";
 
 import { selectCurrentUser } from "./redux/user/userSelectors";
 import { signInStart } from "./redux/user/userActions";
@@ -61,21 +61,12 @@ export function UnconnectedApp({
     }
   };
 
-  // const transitions = useTransition(alert.showAlert, null, {
-  //   from: {
-  //     transform: "translateY(4rem)",
-  //   },
-  //   enter: {
-  //     transform: "translateY(0rem)",
-  //   },
-  //   leave: {
-  //     transform: "translateY(4rem)",
-  //   },
-  //   config: {
-  //     tension: 500,
-  //     friction: 50,
-  //   },
-  // });
+  const transitions = useTransition(alert?.showAlert, () => ({
+    from: { opacity: 0, transform: "translateY(4rem)" },
+    enter: { opacity: 1, transform: "translateY(0rem)" },
+    leave: { opacity: 0, transform: "translateY(4rem)" },
+    config: { tension: 500, friction: 50 },
+  }));
 
   const renderApp = () => {
     // Wait for authentication
@@ -86,14 +77,14 @@ export function UnconnectedApp({
       <>
         {pathname !== "/login" && pathname !== "/signup" && <Header />}
         {renderModals()}
-        {/* {transitions.map(
-          ({ item, props, key }) =>
-            item && (
-              <Alert key={key} style={props} onClick={alert.onClick}>
-                {alert.text}
-              </Alert>
-            )
-        )} */}
+        {transitions &&
+          transitions.map(({ item, key, props }) =>
+            item ? (
+              <animated.div key={key} style={props}>
+                <Alert>{alert.text}</Alert>
+              </animated.div>
+            ) : null
+          )}
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />

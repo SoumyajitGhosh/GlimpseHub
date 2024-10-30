@@ -1,40 +1,40 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
-import { showModal } from '../../redux/modal/modalActions';
-import { signOut } from '../../redux/user/userActions';
+import { showModal } from "../../redux/modal/modalActions";
+import { signOut } from "../../redux/user/userActions";
 
-import Icon from '../Icon/Icon';
+import Icon from "../Icon/Icon";
 
 const SettingsButton = ({ showModal, signOut }) => {
-    const history = useHistory();
-    return (
-        <Icon
-            icon="aperture-outline"
-            style={{ cursor: 'pointer' }}
-            onClick={() => {
-                showModal(
-                    {
-                        options: [
-                            {
-                                text: 'Change Password',
-                                onClick: () => history.push('/settings/password'),
-                            },
-                            {
-                                text: 'Log Out',
-                                onClick: () => {
-                                    signOut();
-                                    history.push('/');
-                                },
-                            },
-                        ],
-                    },
-                    'OptionsDialog/OptionsDialog'
-                );
-            }}
-        />
-    );
+  const navigate = useNavigate();
+  return (
+    <Icon
+      icon="aperture-outline"
+      style={{ cursor: "pointer" }}
+      onClick={() => {
+        showModal(
+          {
+            options: [
+              {
+                text: "Change Password",
+                onClick: () => navigate("/settings/password"),
+              },
+              {
+                text: "Log Out",
+                onClick: () => {
+                  signOut();
+                  navigate("/");
+                },
+              },
+            ],
+          },
+          "OptionsDialog/OptionsDialog"
+        );
+      }}
+    />
+  );
 };
 
 const mapDispatchToProps = (dispatch) => ({

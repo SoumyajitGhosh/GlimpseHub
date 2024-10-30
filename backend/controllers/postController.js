@@ -146,7 +146,7 @@ module.exports.retrievePost = async (req, res, next) => {
     try {
         // Retrieve the post and the post's votes
         const post = await Post.aggregate([
-            { $match: { _id: ObjectId(postId) } },
+            { $match: { _id: new ObjectId(postId) } },
             {
                 $lookup: {
                     from: 'postvotes',
@@ -288,7 +288,7 @@ module.exports.retrievePostFeed = async (req, res, next) => {
         const posts = await Post.aggregate([
             {
                 $match: {
-                    $or: [{ author: { $in: following } }, { author: ObjectId(user._id) }],
+                    $or: [{ author: { $in: following } }, { author: new ObjectId(user._id) }],
                 },
             },
             { $sort: { date: -1 } },

@@ -45,28 +45,27 @@ const NotificationButton = ({
     }, [showNotifications, notificationPopupTimeout]);
 
     const transitions = useTransition(
-        notificationState.unreadCount > 0 && showNotificationPopup
-            ? { notifications }
-            : false,
-        null,
-        {
-            from: {
-                transform: 'scale(0) translateX(-50%)',
-                opacity: 0,
-            },
-            enter: {
-                transform: 'scale(1) translateX(-50%)',
-                opacity: 1,
-            },
-            leave: {
-                transform: 'scale(0) translateX(-50%)',
-                opacity: 0,
-            },
-            config: {
-                tension: 280,
-                friction: 20,
-            },
-        }
+      notificationState.unreadCount > 0 && showNotificationPopup
+        ? { notifications }
+        : false,
+      () => ({
+        from: {
+          transform: "scale(0) translateX(-50%)",
+          opacity: 0,
+        },
+        enter: {
+          transform: "scale(1) translateX(-50%)",
+          opacity: 1,
+        },
+        leave: {
+          transform: "scale(0) translateX(-50%)",
+          opacity: 0,
+        },
+        config: {
+          tension: 280,
+          friction: 20,
+        },
+      })
     );
 
     return (

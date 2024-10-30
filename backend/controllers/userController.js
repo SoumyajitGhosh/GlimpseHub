@@ -37,7 +37,7 @@ module.exports.retrieveUser = async (req, res, next) => {
             {
                 $facet: {
                     data: [
-                        { $match: { author: ObjectId(user._id) } },
+                        { $match: { author: new ObjectId(user._id) } },
                         { $sort: { date: -1 } },
                         { $limit: 12 },
                         {
@@ -88,7 +88,7 @@ module.exports.retrieveUser = async (req, res, next) => {
                         },
                     ],
                     postCount: [
-                        { $match: { author: ObjectId(user._id) } },
+                        { $match: { author: new ObjectId(user._id) } },
                         { $count: 'postCount' },
                     ],
                 },
@@ -103,11 +103,11 @@ module.exports.retrieveUser = async (req, res, next) => {
         ]);
 
         const followersDocument = await Followers.findOne({
-            user: ObjectId(user._id),
+            user: new ObjectId(user._id),
         });
 
         const followingDocument = await Following.findOne({
-            user: ObjectId(user._id),
+            user: new ObjectId(user._id),
         });
 
         return res.send({
@@ -316,7 +316,7 @@ module.exports.followUser = async (req, res, next) => {
 const retrieveRelatedUsers = async (user, userId, offset, followers) => {
     const pipeline = [
         {
-            $match: { user: ObjectId(userId) },
+            $match: { user: new ObjectId(userId) },
         },
         {
             $lookup: {
@@ -636,7 +636,7 @@ module.exports.retrieveSuggestedUsers = async (req, res, next) => {
     try {
         const users = await User.aggregate([
             {
-                $match: { _id: { $ne: ObjectId(user._id) } },
+                $match: { _id: { $ne: new ObjectId(user._id) } },
             },
             {
                 $lookup: {

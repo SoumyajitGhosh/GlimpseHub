@@ -293,7 +293,7 @@ module.exports.retrieveCommentReplies = async (req, res, next) => {
         }
 
         const commentReplies = await CommentReply.aggregate([
-            { $match: { parentComment: ObjectId(parentCommentId) } },
+            { $match: { parentComment: new ObjectId(parentCommentId) } },
             { $sort: { date: -1 } },
             { $skip: Number(offset) },
             { $limit: 3 },

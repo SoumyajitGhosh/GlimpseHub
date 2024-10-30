@@ -10,18 +10,18 @@ const PulsatingIcon = ({
     toggledProps,
     elementRef
 }) => {
-    const transitions = useTransition(toggle, null, {
-        from: { transform: 'scale(1.3)' },
-        enter: { transform: 'scale(1)' },
-        leave: { display: 'none' },
-        config: {
-            mass: 1,
-            tension: 500,
-            friction: 20
-        },
-        // Prevent animating on initial render
-        immediate: !elementRef.current
-    });
+    const transitions = useTransition(toggle, () => ({
+      from: { transform: "scale(1.3)" },
+      enter: { transform: "scale(1)" },
+      leave: { display: "none" },
+      config: {
+        mass: 1,
+        tension: 500,
+        friction: 20,
+      },
+      // Prevent animating on initial render
+      immediate: !elementRef.current,
+    }));
 
     return (
         <Fragment>

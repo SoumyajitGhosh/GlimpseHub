@@ -23,7 +23,7 @@ module.exports.retrieveComments = async (postId, offset, exclude = 0) => {
             {
                 $facet: {
                     comments: [
-                        { $match: { post: ObjectId(postId) } },
+                        { $match: { post: new ObjectId(postId) } },
                         // Sort the newest comments to the top
                         { $sort: { date: -1 } },
                         // Skip the comments we do not want
@@ -78,7 +78,7 @@ module.exports.retrieveComments = async (postId, offset, exclude = 0) => {
                     ],
                     commentCount: [
                         {
-                            $match: { post: ObjectId(postId) },
+                            $match: { post: new ObjectId(postId) },
                         },
                         { $group: { _id: null, count: { $sum: 1 } } },
                     ],

@@ -12,16 +12,16 @@ const OptionsDialog = ({
     title,
     cancelButton = true,
 }) => {
-    const transitions = useTransition(true, null, {
-        from: { transform: 'scale(1.2)', opacity: 0.5 },
-        enter: { transform: 'scale(1)', opacity: 1 },
-        leave: { opacity: 0 },
-        config: {
-            mass: 1,
-            tension: 500,
-            friction: 30,
-        },
-    });
+    const transitions = useTransition(true, () => ({
+      from: { transform: "scale(1.2)", opacity: 0.5 },
+      enter: { transform: "scale(1)", opacity: 1 },
+      leave: { opacity: 0 },
+      config: {
+        mass: 1,
+        tension: 500,
+        friction: 30,
+      },
+    }));
 
     return transitions.map(({ item, key, props }) => (
         <animated.div style={props} key={key} className="options-dialog">
