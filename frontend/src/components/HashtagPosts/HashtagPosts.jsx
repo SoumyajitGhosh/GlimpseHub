@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 import { getHashtagPosts } from "../../services/postService";
@@ -19,11 +19,11 @@ const HashtagPosts = ({ token, showModal, showAlert }) => {
   });
 
   const { hashtag } = useParams();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleClick = (postId, avatar) => {
     if (window.outerWidth <= 600) {
-      history.push(`/post/${postId}`);
+      navigate(`/post/${postId}`);
     } else {
       showModal(
         {

@@ -1,14 +1,16 @@
 import React from "react";
-import { useHistory, Redirect } from "react-router-dom";
+import { useNavigate, Navigate, useLocation } from "react-router-dom";
 
 import NewPost from "../../components/NewPost/NewPost";
 
-const NewPostPage = ({ location }) => {
-  const history = useHistory();
+const NewPostPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation(); // useLocation hook to access location
+
   return location.state && location.state.file ? (
-    <NewPost file={location.state.file} hide={() => history.push("/")} />
+    <NewPost file={location.state.file} hide={() => navigate("/")} />
   ) : (
-    <Redirect to="/" />
+    <Navigate to="/" />
   );
 };
 

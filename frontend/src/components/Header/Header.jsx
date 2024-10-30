@@ -18,8 +18,8 @@ import Icon from "../Icon/Icon";
 
 const Header = memo(({ currentUser }) => {
   const [shouldMinimizeHeader, setShouldMinimizeHeader] = useState(false);
-  const navigate = useNavigate(); // Replaces useHistory
-  const { pathname } = useLocation(); // Replaces history.location.pathname
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   // Shrink header height and remove logo on scroll
   useScrollPositionThrottled(({ currentScrollPosition }) => {

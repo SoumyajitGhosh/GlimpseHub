@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 import { getSuggestedPosts } from "../../services/postService";
@@ -13,7 +13,7 @@ import SkeletonLoader from "../SkeletonLoader/SkeletonLoader";
 import ImageGrid from "../ImageGrid/ImageGrid";
 
 const SuggestedPosts = ({ token, showModal, showAlert }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [result, setResult] = useState([]);
   const [search, setSearch] = useState(false);
   const [posts, setPosts] = useState({
@@ -24,7 +24,7 @@ const SuggestedPosts = ({ token, showModal, showAlert }) => {
 
   const handleClick = (postId, avatar) => {
     if (window.outerWidth <= 600) {
-      history.push(`/post/${postId}`);
+      navigate(`/post/${postId}`);
     } else {
       showModal(
         {

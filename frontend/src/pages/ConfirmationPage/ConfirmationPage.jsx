@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { showModal } from "../../redux/modal/modalActions";
 import { selectToken } from "../../redux/user/userSelectors";
@@ -11,11 +11,11 @@ import { confirmUser } from "../../services/userService";
 import Loader from "../../components/Loader/Loader";
 
 const VerificationPage = ({ authToken, showModal }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { token } = useParams();
   useEffect(() => {
     if (!authToken) {
-      return history.push("/");
+      return navigate("/");
     }
     (async function () {
       let children = null;
@@ -42,9 +42,9 @@ const VerificationPage = ({ authToken, showModal }) => {
         },
         "OptionsDialog/OptionsDialog"
       );
-      return history.push("/");
+      return navigate("/");
     })();
-  }, [authToken, history, showModal, token]);
+  }, [authToken, navigate, showModal, token]);
 
   return (
     <main className="verification-page">
