@@ -113,36 +113,47 @@ module.exports.voteComment = async (req, res, next) => {
     const user = res.locals.user;
 
     try {
-        const commentLikeUpdate = await CommentVote.updateOne(
-            {
-                comment: commentId,
-                'votes.author': { $ne: user._id },
-            },
-            { $push: { votes: { author: user._id } } }
-        );
-        if (!commentLikeUpdate.nModified) {
-            if (!commentLikeUpdate.ok) {
-                return res
-                    .status(500)
-                    .send({ error: 'Could not vote on the comment.' });
-            }
-            // Nothing was modified in the previous query meaning that the user has already liked the comment
-            // Remove the user's like
+        // Find the existing vote document for the comment
+        const commentVote = await CommentVote.findOne({ comment: commentId });
+
+        if (!commentVote) {
+            return res.status(404).send({ error: 'Comment not found.' });
+        }
+
+        // Check if the user has already liked the comment
+        const hasUserLiked = commentVote.votes.some(vote => String(vote.author) === String(user._id));
+
+        if (hasUserLiked) {
+            // User has liked; remove their like
             const commentDislikeUpdate = await CommentVote.updateOne(
                 { comment: commentId },
                 { $pull: { votes: { author: user._id } } }
             );
-            if (!commentDislikeUpdate.nModified) {
-                return res
-                    .status(500)
-                    .send({ error: 'Could not vote on the comment.' });
+
+            if (commentDislikeUpdate.modifiedCount === 0) {
+                return res.status(500).send({ error: 'Could not remove the like from the comment.' });
             }
+
+            return res.send({ success: true, operation: 'unlike' });
+        } else {
+            // User has not liked; add their like
+            const commentLikeUpdate = await CommentVote.updateOne(
+                { comment: commentId },
+                { $push: { votes: { author: user._id } } },
+                { upsert: true }
+            );
+
+            if (commentLikeUpdate.modifiedCount === 0) {
+                return res.status(500).send({ error: 'Could not add the like to the comment.' });
+            }
+
+            return res.send({ success: true, operation: 'like' });
         }
-        return res.send({ success: true });
     } catch (err) {
         next(err);
     }
 };
+
 
 module.exports.createCommentReply = async (req, res, next) => {
     const { parentCommentId } = req.params;
@@ -249,37 +260,47 @@ module.exports.voteCommentReply = async (req, res, next) => {
     const user = res.locals.user;
 
     try {
-        const commentReplyLikeUpdate = await CommentReplyVote.updateOne(
-            {
-                comment: commentReplyId,
-                'votes.author': { $ne: user._id },
-            },
-            { $push: { votes: { author: user._id } } }
-        );
-        // Nothing was modified in the previous query meaning that the user has already liked the comment
-        // Remove the user's like
-        if (!commentReplyLikeUpdate.nModified) {
-            if (!commentReplyLikeUpdate.ok) {
-                return res
-                    .status(500)
-                    .send({ error: 'Could not vote on the comment reply.' });
-            }
+        // Find the existing vote document for the comment reply
+        const commentReplyVote = await CommentReplyVote.findOne({ comment: commentReplyId });
+
+        if (!commentReplyVote) {
+            return res.status(404).send({ error: 'Comment reply not found.' });
+        }
+
+        // Check if the user has already liked the comment reply
+        const hasUserLiked = commentReplyVote.votes.some(vote => String(vote.author) === String(user._id));
+
+        if (hasUserLiked) {
+            // User has liked; remove their like
             const commentReplyDislikeUpdate = await CommentReplyVote.updateOne(
                 { comment: commentReplyId },
                 { $pull: { votes: { author: user._id } } }
             );
-            if (!commentReplyDislikeUpdate.nModified) {
-                return res
-                    .status(500)
-                    .send({ error: 'Could not vote on the comment reply.' });
-            }
-        }
 
-        return res.send({ success: true });
+            if (commentReplyDislikeUpdate.modifiedCount === 0) {
+                return res.status(500).send({ error: 'Could not remove the like from the comment reply.' });
+            }
+
+            return res.send({ success: true, operation: 'unlike' });
+        } else {
+            // User has not liked; add their like
+            const commentReplyLikeUpdate = await CommentReplyVote.updateOne(
+                { comment: commentReplyId },
+                { $push: { votes: { author: user._id } } },
+                { upsert: true }
+            );
+
+            if (commentReplyLikeUpdate.modifiedCount === 0) {
+                return res.status(500).send({ error: 'Could not add the like to the comment reply.' });
+            }
+
+            return res.send({ success: true, operation: 'like' });
+        }
     } catch (err) {
         next(err);
     }
 };
+
 
 module.exports.retrieveCommentReplies = async (req, res, next) => {
     const { parentCommentId, offset = 0 } = req.params;
