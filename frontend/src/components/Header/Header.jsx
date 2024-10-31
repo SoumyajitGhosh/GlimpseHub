@@ -1,9 +1,7 @@
 import React, { useState, memo, Fragment } from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
-import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import classNames from "classnames";
-import { useNavigate } from "react-router-dom";
 
 import { selectCurrentUser } from "../../redux/user/userSelectors";
 
@@ -16,10 +14,11 @@ import NotificationButton from "../Notification/NotificationButton/NotificationB
 import Button from "../Button/Button";
 import Icon from "../Icon/Icon";
 
-const Header = memo(({ currentUser }) => {
+const Header = memo(() => {
   const [shouldMinimizeHeader, setShouldMinimizeHeader] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const currentUser = useSelector(selectCurrentUser);
 
   // Shrink header height and remove logo on scroll
   useScrollPositionThrottled(({ currentScrollPosition }) => {
@@ -54,10 +53,10 @@ const Header = memo(({ currentUser }) => {
                 />
               </Link>
               <NotificationButton />
-              <Link to={"/" + currentUser.username}>
+              <Link to={`/${currentUser.username}`}>
                 <Icon
                   icon={
-                    pathname === "/" + currentUser.username
+                    pathname === `/${currentUser.username}`
                       ? "person-circle"
                       : "person-circle-outline"
                   }
@@ -85,8 +84,4 @@ const Header = memo(({ currentUser }) => {
 
 Header.whyDidYouRender = true;
 
-const mapStateToProps = createStructuredSelector({
-  currentUser: selectCurrentUser,
-});
-
-export default connect(mapStateToProps)(Header);
+export default Header;

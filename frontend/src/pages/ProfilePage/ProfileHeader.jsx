@@ -7,6 +7,7 @@ import UsersList from "../../components/UsersList/UsersList";
 import UnfollowPrompt from "../../components/UnfollowPrompt/UnfollowPrompt";
 import Button from "../../components/Button/Button";
 import SettingsButton from "../../components/SetttingsButton/SettingsButton";
+import { useDispatch } from "react-redux";
 
 const ProfileHeader = ({
   currentUser,
@@ -16,27 +17,30 @@ const ProfileHeader = ({
   follow,
   loading,
 }) => {
+  const dispatch = useDispatch();
   const { avatar, username, bio, website, fullName } = data.user;
   const { following, followers, postCount } = data;
 
   const showUsersModal = (followers, following) => {
     token &&
-      showModal(
-        {
-          options: [],
-          title: followers ? "Followers" : "Following",
-          cancelButton: false,
-          children: (
-            <UsersList
-              userId={data.user._id}
-              token={token}
-              followersCount={followers}
-              followingCount={following}
-              following={following}
-            />
-          ),
-        },
-        "OptionsDialog/OptionsDialog"
+      dispatch(
+        showModal(
+          {
+            options: [],
+            title: followers ? "Followers" : "Following",
+            cancelButton: false,
+            children: (
+              <UsersList
+                userId={data.user._id}
+                token={token}
+                followersCount={followers}
+                followingCount={following}
+                following={following}
+              />
+            ),
+          },
+          "OptionsDialog/OptionsDialog"
+        )
       );
   };
 
@@ -56,23 +60,25 @@ const ProfileHeader = ({
           <Button
             loading={loading}
             onClick={() =>
-              showModal(
-                {
-                  options: [
-                    {
-                      warning: true,
-                      text: "Unfollow",
-                      onClick: () => follow(),
-                    },
-                  ],
-                  children: (
-                    <UnfollowPrompt
-                      avatar={data.user.avatar}
-                      username={data.user.username}
-                    />
-                  ),
-                },
-                "OptionsDialog/OptionsDialog"
+              dispatch(
+                showModal(
+                  {
+                    options: [
+                      {
+                        warning: true,
+                        text: "Unfollow",
+                        onClick: () => follow(),
+                      },
+                    ],
+                    children: (
+                      <UnfollowPrompt
+                        avatar={data.user.avatar}
+                        username={data.user.username}
+                      />
+                    ),
+                  },
+                  "OptionsDialog/OptionsDialog"
+                )
               )
             }
             inverted

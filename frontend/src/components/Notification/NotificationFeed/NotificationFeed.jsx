@@ -1,6 +1,5 @@
 import React, { useEffect, Fragment } from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 import {
@@ -26,32 +25,22 @@ import "linkify-plugin-mention";
 
 import { linkifyOptions } from "../../../utils/linkifyUtils";
 
-// Initialize the mention plugin with linkify
+const NotificationFeed = ({ setShowNotifications }) => {
+  const dispatch = useDispatch();
+  const notifications = useSelector(selectNotifications);
+  const notificationState = useSelector(selectNotificationState);
+  const token = useSelector(selectToken);
 
-const NotificationFeed = ({
-  notifications,
-  fetchNotificationsStart,
-  readNotificationsStart,
-  notificationState,
-  clearNotifications,
-  setShowNotifications,
-  token,
-}) => {
   useEffect(() => {
     (async function () {
-      await fetchNotificationsStart(token);
-      await readNotificationsStart(token);
+      await dispatch(fetchNotificationsStart(token));
+      await dispatch(readNotificationsStart(token));
     })();
 
     return () => {
-      clearNotifications();
+      dispatch(clearNotifications());
     };
-  }, [
-    fetchNotificationsStart,
-    readNotificationsStart,
-    clearNotifications,
-    token,
-  ]);
+  }, [dispatch, token]);
 
   return (
     <Fragment>
@@ -149,18 +138,4 @@ const NotificationFeed = ({
   );
 };
 
-const mapStateToProps = createStructuredSelector({
-  notifications: selectNotifications,
-  notificationState: selectNotificationState,
-  token: selectToken,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  fetchNotificationsStart: (authToken) =>
-    dispatch(fetchNotificationsStart(authToken)),
-  readNotificationsStart: (authToken) =>
-    dispatch(readNotificationsStart(authToken)),
-  clearNotifications: () => dispatch(clearNotifications()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(NotificationFeed);
+export default NotificationFeed;

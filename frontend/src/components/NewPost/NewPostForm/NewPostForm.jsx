@@ -1,6 +1,5 @@
 import React, { useState, Fragment } from 'react';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import {
@@ -19,16 +18,11 @@ import TextButton from "../../Button/TextButton/TextButton";
 import Loader from "../../Loader/Loader";
 import defaultAvatar from "../../../assets/img/default-avatar.png";
 
-const NewPostForm = ({
-  token,
-  file,
-  previewImage,
-  currentUser,
-  hide,
-  back,
-  showAlert,
-  addPost,
-}) => {
+const NewPostForm = ({ file, previewImage, hide, back }) => {
+  const dispatch = useDispatch();
+  const token = useSelector(selectToken);
+  const currentUser = useSelector(selectCurrentUser);
+
   const [caption, setCaption] = useState("");
   const [loading, setLoading] = useState(false);
   const { pathname } = useLocation();
@@ -41,20 +35,23 @@ const NewPostForm = ({
     formData.set("caption", caption);
     formData.set("crop", JSON.stringify(previewImage.crop));
     previewImage.filterName && formData.set("filter", previewImage.filterName);
+
     try {
       setLoading(true);
       const post = await createPost(formData, token);
       setLoading(false);
       hide();
       if (pathname === "/") {
-        addPost(post);
+        dispatch(addPost(post));
       } else {
         navigate("/");
       }
     } catch (err) {
       setLoading(false);
-      showAlert(err.message || "Could not share post.", () =>
-        handleClick(event)
+      dispatch(
+        showAlert(err.message || "Could not share post.", () =>
+          handleClick(event)
+        )
       );
     }
   };
@@ -65,7 +62,7 @@ const NewPostForm = ({
       <MobileHeader show>
         <Icon
           icon="chevron-back"
-          onClick={() => back()}
+          onClick={back}
           style={{ cursor: "pointer" }}
         />
         <h3 className="heading-3">New Post</h3>
@@ -73,7 +70,7 @@ const NewPostForm = ({
           bold
           blue
           style={{ fontSize: "1.5rem" }}
-          onClick={(event) => handleClick(event)}
+          onClick={handleClick}
         >
           Share
         </TextButton>
@@ -88,9 +85,7 @@ const NewPostForm = ({
               <Avatar
                 size="3rem"
                 className="avatar--small"
-                imageSrc={
-                  currentUser.avatar ? currentUser.avatar : defaultAvatar
-                }
+                imageSrc={currentUser.avatar || defaultAvatar}
               />
             </div>
             <textarea
@@ -112,14 +107,4 @@ const NewPostForm = ({
   );
 };
 
-const mapStateToProps = createStructuredSelector({
-    token: selectToken,
-    currentUser: selectCurrentUser,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-    showAlert: (text, onClick) => dispatch(showAlert(text, onClick)),
-    addPost: (post) => dispatch(addPost(post)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(NewPostForm);
+export default NewPostForm;

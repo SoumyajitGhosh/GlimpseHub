@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
+import { useDispatch, useSelector } from "react-redux";
 
 import {
     selectCurrentUser,
@@ -14,81 +13,66 @@ import { followUser } from '../../../services/profileService';
 import Button from '../Button';
 import UnfollowPrompt from '../../UnfollowPrompt/UnfollowPrompt';
 
-const FollowButton = ({
-    userId,
-    token,
-    currentUser,
-    showModal,
-    following,
-    username,
-    avatar,
-    showAlert,
-    style,
-}) => {
-    const [isFollowing, setIsFollowing] = useState(following);
-    const [loading, setLoading] = useState(false);
+const FollowButton = ({ userId, following, username, avatar, style }) => {
+  const dispatch = useDispatch();
+  const currentUser = useSelector(selectCurrentUser);
+  const token = useSelector(selectToken);
 
-    const follow = async () => {
-        try {
-            setLoading(true);
-            await followUser(userId, token);
-            if (!isFollowing) {
-                setIsFollowing(true);
-            } else {
-                setIsFollowing(false);
-            }
-            setLoading(false);
-        } catch (err) {
-            setLoading(false);
-            showAlert('Could not follow the user.', () => follow());
-        }
-    };
+  const [isFollowing, setIsFollowing] = useState(following);
+  const [loading, setLoading] = useState(false);
 
-    if (username === currentUser.username) {
-        return <Button disabled>Follow</Button>;
+  const follow = async () => {
+    try {
+      setLoading(true);
+      await followUser(userId, token);
+      setIsFollowing(!isFollowing);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      dispatch(showAlert("Could not follow the user.", () => follow()));
     }
+  };
 
-    if (isFollowing) {
-        return (
-            <Button
-                style={style}
-                loading={loading}
-                onClick={() =>
-                    showModal(
-                        {
-                            options: [
-                                {
-                                    warning: true,
-                                    text: 'Unfollow',
-                                    onClick: () => follow(),
-                                },
-                            ],
-                            children: <UnfollowPrompt avatar={avatar} username={username} />,
-                        },
-                        'OptionsDialog/OptionsDialog'
-                    )
-                }
-                inverted
-            >
-                Following
-            </Button>
-        );
-    }
+  if (username === currentUser.username) {
+    return <Button disabled>Follow</Button>;
+  }
+
+  if (isFollowing) {
     return (
-        <Button style={style} loading={loading} onClick={() => follow()}>
-            Follow
-        </Button>
+      <Button
+        style={style}
+        loading={loading}
+        onClick={() =>
+          dispatch(
+            showModal(
+              {
+                options: [
+                  {
+                    warning: true,
+                    text: "Unfollow",
+                    onClick: () => follow(),
+                  },
+                ],
+                children: (
+                  <UnfollowPrompt avatar={avatar} username={username} />
+                ),
+              },
+              "OptionsDialog/OptionsDialog"
+            )
+          )
+        }
+        inverted
+      >
+        Following
+      </Button>
     );
+  }
+
+  return (
+    <Button style={style} loading={loading} onClick={() => follow()}>
+      Follow
+    </Button>
+  );
 };
 
-const mapStateToProps = createStructuredSelector({
-    currentUser: selectCurrentUser,
-    token: selectToken,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-    showModal: (props, component) => dispatch(showModal(props, component)),
-    showAlert: (text, onClick) => dispatch(showAlert(text, onClick)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(FollowButton);
+export default FollowButton;

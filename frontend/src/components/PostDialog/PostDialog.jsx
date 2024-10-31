@@ -1,12 +1,10 @@
 import React, { useEffect, useReducer, Fragment, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
-import classNames from 'classnames';
+import { useSelector, useDispatch } from "react-redux";
+import classNames from "classnames";
 import { Link, useNavigate } from "react-router-dom";
 
 import { selectToken, selectCurrentUser } from "../../redux/user/userSelectors";
-
 import { showModal, hideModal } from "../../redux/modal/modalActions";
 import { showAlert } from "../../redux/alert/alertActions";
 
@@ -24,29 +22,27 @@ import { INITIAL_STATE, postDialogReducer } from "./postDialogReducer";
 
 const PostDialog = ({
   postId,
-  token,
-  currentUser,
   profileDispatch,
-  showModal,
-  hideModal,
-  showAlert,
   style,
   className,
   postData,
   loading,
   simple,
 }) => {
+  const dispatch = useDispatch();
+  const token = useSelector(selectToken);
+  const currentUser = useSelector(selectCurrentUser);
+
   const commentsRef = useRef();
-  const [state, dispatch] = useReducer(postDialogReducer, INITIAL_STATE);
+  const [state, localDispatch] = useReducer(postDialogReducer, INITIAL_STATE);
   const navigate = useNavigate();
 
   const fetching = loading !== undefined ? loading : state.fetching;
 
   useEffect(() => {
     if (!loading) {
-      // Check if the post data is already provided by another component
       if (postData) {
-        dispatch({ type: "FETCH_POST_SUCCESS", payload: postData });
+        localDispatch({ type: "FETCH_POST_SUCCESS", payload: postData });
       } else {
         window.history.pushState(
           { prevUrl: window.location.href },
@@ -56,10 +52,10 @@ const PostDialog = ({
         (async function () {
           try {
             const response = await getPost(postId);
-            dispatch({ type: "FETCH_POST_SUCCESS", payload: response });
+            localDispatch({ type: "FETCH_POST_SUCCESS", payload: response });
           } catch (err) {
             navigate("/");
-            dispatch({ type: "FETCH_POST_FAILURE", payload: err });
+            localDispatch({ type: "FETCH_POST_FAILURE", payload: err });
           }
         })();
       }
@@ -83,10 +79,13 @@ const PostDialog = ({
         state.data.comments.length,
         state.localStateComments.size
       );
-      dispatch({ type: "ADD_COMMENT", payload: commentData.comments });
+      localDispatch({ type: "ADD_COMMENT", payload: commentData.comments });
     } catch (err) {
-      showAlert("Unable to fetch additional comments.", () =>
-        fetchAdditionalComments()
+      dispatch(
+        showAlert(
+          "Unable to fetch additional comments.",
+          fetchAdditionalComments
+        )
       );
     }
   };
@@ -99,16 +98,15 @@ const PostDialog = ({
           type: "DELETE_POST",
           payload: postId,
         });
-      hideModal("PostDialog/PostDialog");
+      dispatch(hideModal("PostDialog/PostDialog"));
     } catch (err) {
-      showAlert("Unable to delete post.", () => handleDeletePost());
+      dispatch(showAlert("Unable to delete post.", handleDeletePost));
     }
   };
 
   return (
     <div
-      className={classNames({
-        "post-dialog": true,
+      className={classNames("post-dialog", {
         "post-dialog--simple": simple,
         [className]: className,
       })}
@@ -117,8 +115,7 @@ const PostDialog = ({
     >
       <Fragment>
         <div
-          className={classNames({
-            "post-dialog__image": true,
+          className={classNames("post-dialog__image", {
             "post-dialog__image--simple": simple,
           })}
         >
@@ -133,8 +130,7 @@ const PostDialog = ({
           )}
         </div>
         <header
-          className={classNames({
-            "post-dialog__header": true,
+          className={classNames("post-dialog__header", {
             "post-dialog__header--simple": simple,
           })}
         >
@@ -177,7 +173,7 @@ const PostDialog = ({
                   {
                     text: "Go to post",
                     onClick: () => {
-                      hideModal("PostDialog/PostDialog");
+                      dispatch(hideModal("PostDialog/PostDialog"));
                       navigate(`/post/${postId}`);
                     },
                   },
@@ -186,32 +182,38 @@ const PostDialog = ({
                     onClick: () => {
                       navigator.clipboard
                         .writeText(document.URL)
-                        .then(() => showAlert("Link copied to clipboard."))
+                        .then(() =>
+                          dispatch(showAlert("Link copied to clipboard."))
+                        )
                         .catch(() =>
-                          showAlert("Could not copy link to clipboard.")
+                          dispatch(
+                            showAlert("Could not copy link to clipboard.")
+                          )
                         );
                     },
                   },
                 ];
-                showModal(
-                  {
-                    options:
-                      currentUser &&
-                      currentUser.username === state.data.author.username
-                        ? [
-                            ...options,
-                            {
-                              text: "Delete post",
-                              warning: true,
-                              onClick: () => {
-                                handleDeletePost();
-                                navigate("/" + currentUser.username);
+                dispatch(
+                  showModal(
+                    {
+                      options:
+                        currentUser &&
+                        currentUser.username === state.data.author.username
+                          ? [
+                              ...options,
+                              {
+                                text: "Delete post",
+                                warning: true,
+                                onClick: () => {
+                                  handleDeletePost();
+                                  navigate(`/${currentUser.username}`);
+                                },
                               },
-                            },
-                          ]
-                        : options,
-                  },
-                  "OptionsDialog/OptionsDialog"
+                            ]
+                          : options,
+                    },
+                    "OptionsDialog/OptionsDialog"
+                  )
                 );
               }}
               style={{ cursor: "pointer" }}
@@ -223,20 +225,15 @@ const PostDialog = ({
         </header>
         <div
           data-test="component-post-dialog-content"
-          className={classNames({
-            "post-dialog__content": true,
+          className={classNames("post-dialog__content", {
             "post-dialog__content--simple": simple,
           })}
         >
           <div
             ref={commentsRef}
-            className={classNames({
-              comments: true,
-              "comments--simple": simple,
-            })}
+            className={classNames("comments", { "comments--simple": simple })}
           >
-            {/* Render a caption if there is one as a Comment component with the caption prop */}
-            {state.data.caption && !fetching ? (
+            {state.data.caption && !fetching && (
               <Comment
                 comment={{
                   message: state.data.caption,
@@ -249,7 +246,7 @@ const PostDialog = ({
                 caption
                 simple={simple}
               />
-            ) : null}
+            )}
             {!fetching &&
               state.data.comments.map((comment, idx) => (
                 <Comment
@@ -258,7 +255,7 @@ const PostDialog = ({
                   token={token}
                   post={state.data}
                   key={idx}
-                  dialogDispatch={dispatch}
+                  dialogDispatch={localDispatch}
                   profileDispatch={profileDispatch}
                   simple={simple}
                 />
@@ -268,12 +265,10 @@ const PostDialog = ({
                 state.data.commentCount - state.localStateComments.size && (
                 <div
                   style={{ padding: "2rem", cursor: "pointer" }}
-                  onClick={() => fetchAdditionalComments()}
+                  onClick={fetchAdditionalComments}
                 >
                   <Icon
-                    style={{
-                      margin: "0 auto",
-                    }}
+                    style={{ margin: "0 auto" }}
                     icon="add-circle-outline"
                   />
                 </div>
@@ -300,7 +295,7 @@ const PostDialog = ({
               currentUser={currentUser}
               token={token}
               post={state.data}
-              dispatch={dispatch}
+              dispatch={localDispatch}
               profileDispatch={profileDispatch}
               simple={simple}
             />
@@ -311,7 +306,7 @@ const PostDialog = ({
               token={token}
               currentUser={currentUser}
               commentsRef={commentsRef}
-              dialogDispatch={dispatch}
+              dialogDispatch={localDispatch}
               profileDispatch={profileDispatch}
               replying={state.replying}
             />
@@ -323,23 +318,10 @@ const PostDialog = ({
 };
 
 PostDialog.propTypes = {
-    postId: PropTypes.string,
-    token: PropTypes.string,
-    currentUser: PropTypes.object,
-    profileDispatch: PropTypes.func,
+  postId: PropTypes.string,
+  profileDispatch: PropTypes.func,
 };
-
-const mapStateToProps = createStructuredSelector({
-    token: selectToken,
-    currentUser: selectCurrentUser,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-    showModal: (props, component) => dispatch(showModal(props, component)),
-    hideModal: (component) => dispatch(hideModal(component)),
-    showAlert: (text, onClick) => dispatch(showAlert(text, onClick)),
-});
 
 PostDialog.whyDidYouRender = true;
 
-export default connect(mapStateToProps, mapDispatchToProps)(PostDialog);
+export default PostDialog;

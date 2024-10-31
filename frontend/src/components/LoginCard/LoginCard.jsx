@@ -1,11 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 import { signInStart } from "../../redux/user/userActions";
-
 import {
   selectError,
   selectFetching,
@@ -16,26 +14,28 @@ import Button from "../Button/Button";
 import FormInput from "../FormInput/FormInput";
 import Divider from "../Divider/Divider";
 import TextButton from "../Button/TextButton/TextButton";
-// import ViewOnGithubButton from '../ViewOnGithubButton/ViewOnGithubButton';
-// import GithubLoginButton from "../GithubLoginButton/GithubLoginButton";
 import Card from "../Card/Card";
 
-const LoginCard = ({
-  signInStart,
-  error,
-  fetching,
-  currentUser,
-  onClick,
-  modal,
-}) => {
+const LoginCard = ({ onClick, modal }) => {
+  const dispatch = useDispatch();
+  const error = useSelector(selectError);
+  const fetching = useSelector(selectFetching);
+  const currentUser = useSelector(selectCurrentUser);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    signInStart(email, password);
+    dispatch(signInStart(email, password));
   };
 
-  currentUser && onClick();
+  // Navigate away if user is already logged in
+  useEffect(() => {
+    if (currentUser && onClick) {
+      onClick();
+    }
+  }, [currentUser, onClick]);
 
   return (
     <div
@@ -50,10 +50,7 @@ const LoginCard = ({
     >
       <Card className="form-card">
         <h1 className="heading-logo text-center">GlimpseHub</h1>
-        <form
-          onSubmit={(event) => handleSubmit(event)}
-          className="form-card__form"
-        >
+        <form onSubmit={handleSubmit} className="form-card__form">
           <FormInput
             placeholder="Username or email address"
             type="text"
@@ -71,7 +68,6 @@ const LoginCard = ({
           </Button>
         </form>
         <Divider>OR</Divider>
-        {/* <GithubLoginButton /> */}
         {error && (
           <p style={{ padding: "1rem 0" }} className="error">
             {error}
@@ -100,23 +96,13 @@ const LoginCard = ({
           </Link>
         </section>
       </Card>
-      {/* <ViewOnGithubButton /> */}
     </div>
   );
 };
 
 LoginCard.propTypes = {
-  signInStart: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
+  modal: PropTypes.bool,
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  signInStart: (email, password) => dispatch(signInStart(email, password)),
-});
-
-const mapStateToProps = createStructuredSelector({
-  error: selectError,
-  fetching: selectFetching,
-  currentUser: selectCurrentUser,
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(LoginCard);
+export default LoginCard;

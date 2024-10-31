@@ -1,6 +1,5 @@
 import React, { Fragment } from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { useFormik } from "formik";
 
@@ -19,10 +18,12 @@ import TextButton from "../Button/TextButton/TextButton";
 import Divider from "../Divider/Divider";
 import Card from "../Card/Card";
 import FormInput from "../FormInput/FormInput";
-// import ViewOnGithubButton from '../ViewOnGithubButton/ViewOnGithubButton';
-// import GithubLoginButton from "../GithubLoginButton/GithubLoginButton";
 
-const SignUpCard = ({ signUpStart, error, fetching }) => {
+const SignUpCard = () => {
+  const dispatch = useDispatch();
+  const error = useSelector(selectError);
+  const fetching = useSelector(selectFetching);
+
   const validate = (values) => {
     const errors = {};
     const emailError = validateEmail(values.email);
@@ -48,11 +49,13 @@ const SignUpCard = ({ signUpStart, error, fetching }) => {
     },
     validate,
     onSubmit: (values) =>
-      signUpStart(
-        values.email,
-        values.fullName,
-        values.username,
-        values.password
+      dispatch(
+        signUpStart(
+          values.email,
+          values.fullName,
+          values.username,
+          values.password
+        )
       ),
   });
 
@@ -61,25 +64,15 @@ const SignUpCard = ({ signUpStart, error, fetching }) => {
       <Card className="form-card">
         <h1 className="heading-logo text-center">GlimpseHub</h1>
         <h2
-          style={{ fontSize: "1.7rem" }}
           className="heading-2 color-grey text-center"
+          style={{ fontSize: "1.7rem" }}
         >
           Sign up to see photos and videos from your friends.
         </h2>
-        {/* <GithubLoginButton
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            color: "white",
-          }}
-          button
-        /> */}
         <Divider>OR</Divider>
-        {Object.keys(formik.errors).map((field) => {
-          if (formik.touched[field]) {
-            return (
+        {Object.keys(formik.errors).map(
+          (field) =>
+            formik.touched[field] && (
               <p
                 className="error"
                 key={formik.errors[field]}
@@ -87,9 +80,8 @@ const SignUpCard = ({ signUpStart, error, fetching }) => {
               >
                 {formik.errors[field]}
               </p>
-            );
-          }
-        })}
+            )
+        )}
         <form className="form-card__form" onSubmit={formik.handleSubmit}>
           <FormInput
             name="email"
@@ -119,22 +111,19 @@ const SignUpCard = ({ signUpStart, error, fetching }) => {
           <Button
             loading={fetching}
             disabled={
-              Object.keys(formik.touched).length === 0 ? true : !formik.isValid
+              Object.keys(formik.touched).length === 0 || !formik.isValid
             }
           >
             Sign Up
           </Button>
-          <p></p>
         </form>
         <p className="error">
-          {error
-            ? error
-            : formik.submitCount > 0 && Object.values(formik.errors)[0]}
+          {error || (formik.submitCount > 0 && Object.values(formik.errors)[0])}
         </p>
         <p className="heading-5 color-grey">
-          By signing up, you agree to our Terms . Learn how we collect, use and
+          By signing up, you agree to our Terms. Learn how we collect, use, and
           share your data in our Data Policy and how we use cookies and similar
-          technology in our Cookies Policy .
+          technology in our Cookies Policy.
         </p>
       </Card>
       <Card>
@@ -146,7 +135,7 @@ const SignUpCard = ({ signUpStart, error, fetching }) => {
             padding: "2rem",
           }}
         >
-          <h4 style={{ marginRight: "5px" }} className="heading-4 font-thin">
+          <h4 className="heading-4 font-thin" style={{ marginRight: "5px" }}>
             Have an account?
           </h4>
           <Link to="/login">
@@ -156,19 +145,8 @@ const SignUpCard = ({ signUpStart, error, fetching }) => {
           </Link>
         </section>
       </Card>
-      {/* <ViewOnGithubButton /> */}
     </Fragment>
   );
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  signUpStart: (email, fullName, username, password) =>
-    dispatch(signUpStart(email, fullName, username, password)),
-});
-
-const mapStateToProps = createStructuredSelector({
-  error: selectError,
-  fetching: selectFetching,
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(SignUpCard);
+export default SignUpCard;

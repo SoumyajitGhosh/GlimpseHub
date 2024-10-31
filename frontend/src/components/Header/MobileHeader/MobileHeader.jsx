@@ -1,6 +1,5 @@
 import React, { Fragment } from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { selectCurrentUser } from "../../../redux/user/userSelectors";
@@ -9,11 +8,13 @@ import Icon from "../../Icon/Icon";
 import Button from "../../Button/Button";
 import TextButton from "../../Button/TextButton/TextButton";
 
-const MobileHeader = ({ children, backArrow, style, show, currentUser }) => {
+const MobileHeader = ({ children, backArrow, style, show }) => {
   const navigate = useNavigate();
+  const currentUser = useSelector(selectCurrentUser);
+
   return (
     <header
-      style={{ ...style, display: `${show && "grid"}` }}
+      style={{ ...style, display: `${show ? "grid" : "none"}` }}
       className="header--mobile"
     >
       {currentUser ? (
@@ -49,8 +50,4 @@ const MobileHeader = ({ children, backArrow, style, show, currentUser }) => {
   );
 };
 
-const mapStateToProps = createStructuredSelector({
-  currentUser: selectCurrentUser,
-});
-
-export default connect(mapStateToProps)(MobileHeader);
+export default MobileHeader;
