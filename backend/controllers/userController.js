@@ -37,7 +37,7 @@ module.exports.retrieveUser = async (req, res, next) => {
             {
                 $facet: {
                     data: [
-                        { $match: { author: ObjectId(user._id) } },
+                        { $match: { author: new ObjectId(user._id) } },
                         { $sort: { date: -1 } },
                         { $limit: 12 },
                         {
@@ -88,7 +88,7 @@ module.exports.retrieveUser = async (req, res, next) => {
                         },
                     ],
                     postCount: [
-                        { $match: { author: ObjectId(user._id) } },
+                        { $match: { author: new ObjectId(user._id) } },
                         { $count: 'postCount' },
                     ],
                 },
@@ -103,11 +103,11 @@ module.exports.retrieveUser = async (req, res, next) => {
         ]);
 
         const followersDocument = await Followers.findOne({
-            user: ObjectId(user._id),
+            user: new ObjectId(user._id),
         });
 
         const followingDocument = await Following.findOne({
-            user: ObjectId(user._id),
+            user: new ObjectId(user._id),
         });
 
         return res.send({
@@ -187,121 +187,129 @@ module.exports.bookmarkPost = async (req, res, next) => {
     const user = res.locals.user;
 
     try {
+        // Check if the post exists
         const post = await Post.findById(postId);
         if (!post) {
-            return res
-                .status(404)
-                .send({ error: 'Could not find a post with that id.' });
+            return res.status(404).send({ error: 'Could not find a post with that id.' });
         }
 
-        const userBookmarkUpdate = await User.updateOne(
-            {
-                _id: user._id,
-                'bookmarks.post': { $ne: postId },
-            },
-            { $push: { bookmarks: { post: postId } } }
-        );
-        if (!userBookmarkUpdate.nModified) {
-            if (!userBookmarkUpdate.ok) {
-                return res.status(500).send({ error: 'Could not bookmark the post.' });
-            }
-            // The above query did not modify anything meaning that the user has already bookmarked the post
-            // Remove the bookmark instead
+        // Check if the user has already bookmarked the post
+        const hasBookmarked = await User.findOne({
+            _id: user._id,
+            'bookmarks.post': postId,
+        });
+
+        if (hasBookmarked) {
+            // If already bookmarked, remove the bookmark
             const userRemoveBookmarkUpdate = await User.updateOne(
                 { _id: user._id },
                 { $pull: { bookmarks: { post: postId } } }
             );
-            if (!userRemoveBookmarkUpdate.nModified) {
-                return res.status(500).send({ error: 'Could not bookmark the post.' });
+
+            if (userRemoveBookmarkUpdate.modifiedCount === 0) {
+                return res.status(500).send({ error: 'Could not remove the bookmark.' });
             }
+
             return res.send({ success: true, operation: 'remove' });
+        } else {
+            // If not bookmarked, add the bookmark
+            const userBookmarkUpdate = await User.updateOne(
+                { _id: user._id },
+                { $push: { bookmarks: { post: postId } } }
+            );
+
+            if (userBookmarkUpdate.modifiedCount === 0) {
+                return res.status(500).send({ error: 'Could not add the bookmark.' });
+            }
+
+            return res.send({ success: true, operation: 'add' });
         }
-        return res.send({ success: true, operation: 'add' });
     } catch (err) {
         next(err);
     }
 };
+
 
 module.exports.followUser = async (req, res, next) => {
     const { userId } = req.params;
     const user = res.locals.user;
 
     try {
+        // Check if the user to follow exists
         const userToFollow = await User.findById(userId);
         if (!userToFollow) {
-            return res
-                .status(400)
-                .send({ error: 'Could not find a user with that id.' });
+            return res.status(404).send({ error: 'User not found.' });
         }
 
-        const followerUpdate = await Followers.updateOne(
-            { user: userId, 'followers.user': { $ne: user._id } },
-            { $push: { followers: { user: user._id } } }
-        );
+        // Check if the current user is already following the target user
+        const followers = await Followers.findOne({ user: userId });
+        const isAlreadyFollower = followers && followers.followers.some(follower => String(follower.user) === String(user._id));
 
-        const followingUpdate = await Following.updateOne(
-            { user: user._id, 'following.user': { $ne: userId } },
-            { $push: { following: { user: userId } } }
-        );
-
-        if (!followerUpdate.nModified || !followingUpdate.nModified) {
-            if (!followerUpdate.ok || !followingUpdate.ok) {
-                return res
-                    .status(500)
-                    .send({ error: 'Could not follow user please try again later.' });
-            }
-            // Nothing was modified in the above query meaning that the user is already following
-            // Unfollow instead
+        if (isAlreadyFollower) {
+            // Unfollow the user
             const followerUnfollowUpdate = await Followers.updateOne(
-                {
-                    user: userId,
-                },
+                { user: userId },
                 { $pull: { followers: { user: user._id } } }
             );
-
             const followingUnfollowUpdate = await Following.updateOne(
                 { user: user._id },
                 { $pull: { following: { user: userId } } }
             );
-            if (!followerUnfollowUpdate.ok || !followingUnfollowUpdate.ok) {
-                return res
-                    .status(500)
-                    .send({ error: 'Could not follow user please try again later.' });
+
+            if (followerUnfollowUpdate.modifiedCount === 0 || followingUnfollowUpdate.modifiedCount === 0) {
+                return res.status(500).send({ error: 'Could not unfollow user. Please try again later.' });
             }
+
             return res.send({ success: true, operation: 'unfollow' });
+        } else {
+            // Follow the user
+            const followerUpdate = await Followers.updateOne(
+                { user: userId },
+                { $push: { followers: { user: user._id } } },
+                { upsert: true }
+            );
+
+            const followingUpdate = await Following.updateOne(
+                { user: user._id },
+                { $push: { following: { user: userId } } },
+                { upsert: true }
+            );
+
+            if (followerUpdate.modifiedCount === 0 || followingUpdate.modifiedCount === 0) {
+                return res.status(500).send({ error: 'Could not follow user. Please try again later.' });
+            }
+
+            // Send a follow notification if the user is not following themselves
+            if (String(userId) !== String(user._id)) {
+                const notification = new Notification({
+                    notificationType: 'follow',
+                    sender: user._id,
+                    receiver: userId,
+                    date: Date.now(),
+                });
+
+                await notification.save();
+
+                const senderData = await User.findById(user._id, 'username avatar');
+                socketHandler.sendNotification(req, {
+                    notificationType: 'follow',
+                    sender: {
+                        _id: senderData._id,
+                        username: senderData.username,
+                        avatar: senderData.avatar,
+                    },
+                    receiver: userId,
+                    date: notification.date,
+                });
+            }
+
+            return res.send({ success: true, operation: 'follow' });
         }
-
-        const notification = new Notification({
-            notificationType: 'follow',
-            sender: user._id,
-            receiver: userId,
-            date: Date.now(),
-        });
-
-        const sender = await User.findById(user._id, 'username avatar');
-        const isFollowing = await Following.findOne({
-            user: userId,
-            'following.user': user._id,
-        });
-
-        await notification.save();
-        socketHandler.sendNotification(req, {
-            notificationType: 'follow',
-            sender: {
-                _id: sender._id,
-                username: sender.username,
-                avatar: sender.avatar,
-            },
-            receiver: userId,
-            date: notification.date,
-            isFollowing: !!isFollowing,
-        });
-
-        res.send({ success: true, operation: 'follow' });
     } catch (err) {
         next(err);
     }
 };
+
 
 /**
  * Retrieves either who a specific user follows or who is following the user.
@@ -316,7 +324,7 @@ module.exports.followUser = async (req, res, next) => {
 const retrieveRelatedUsers = async (user, userId, offset, followers) => {
     const pipeline = [
         {
-            $match: { user: ObjectId(userId) },
+            $match: { user: new ObjectId(userId) },
         },
         {
             $lookup: {
@@ -495,9 +503,7 @@ module.exports.changeAvatar = async (req, res, next) => {
     const user = res.locals.user;
 
     if (!req.file) {
-        return res
-            .status(400)
-            .send({ error: 'Please provide the image to upload.' });
+        return res.status(400).send({ error: 'Please provide the image to upload.' });
     }
 
     cloudinary.config({
@@ -507,24 +513,31 @@ module.exports.changeAvatar = async (req, res, next) => {
     });
 
     try {
+        // Upload the file to Cloudinary
         const response = await cloudinary.uploader.upload(req.file.path, {
             width: 200,
             height: 200,
             gravity: 'face',
             crop: 'thumb',
         });
-        fs.unlinkSync(req.file.path);
 
-        const avatarUpdate = await User.updateOne(
-            { _id: user._id },
-            { avatar: response.secure_url }
+        // Delete the file from the server after uploading
+        fs.unlink(req.file.path, (err) => {
+            if (err) console.error("Error deleting file:", err);
+        });
+
+        // Update user's avatar URL
+        const userUpdate = await User.findByIdAndUpdate(
+            user._id,
+            { avatar: response.secure_url },
+            { new: true }
         );
 
-        if (!avatarUpdate.nModified) {
+        if (!userUpdate) {
             throw new Error('Could not update user avatar.');
         }
 
-        return res.send({ avatar: response.secure_url });
+        return res.send({ avatar: userUpdate.avatar });
     } catch (err) {
         next(err);
     }
@@ -534,18 +547,22 @@ module.exports.removeAvatar = async (req, res, next) => {
     const user = res.locals.user;
 
     try {
-        const avatarUpdate = await User.updateOne(
-            { _id: user._id },
-            { $unset: { avatar: '' } }
+        const avatarUpdate = await User.findByIdAndUpdate(
+            user._id,
+            { $unset: { avatar: "" } },
+            { new: true }
         );
-        if (!avatarUpdate.nModified) {
-            next(err);
+
+        if (!avatarUpdate) {
+            return res.status(500).send({ error: 'Could not remove avatar.' });
         }
+
         return res.status(204).send();
     } catch (err) {
         next(err);
     }
 };
+
 
 module.exports.updateProfile = async (req, res, next) => {
     const user = res.locals.user;
@@ -636,7 +653,7 @@ module.exports.retrieveSuggestedUsers = async (req, res, next) => {
     try {
         const users = await User.aggregate([
             {
-                $match: { _id: { $ne: ObjectId(user._id) } },
+                $match: { _id: { $ne: new ObjectId(user._id) } },
             },
             {
                 $lookup: {

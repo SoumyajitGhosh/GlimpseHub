@@ -23,7 +23,7 @@ module.exports.retrieveComments = async (postId, offset, exclude = 0) => {
             {
                 $facet: {
                     comments: [
-                        { $match: { post: ObjectId(postId) } },
+                        { $match: { post: new ObjectId(postId) } },
                         // Sort the newest comments to the top
                         { $sort: { date: -1 } },
                         // Skip the comments we do not want
@@ -78,7 +78,7 @@ module.exports.retrieveComments = async (postId, offset, exclude = 0) => {
                     ],
                     commentCount: [
                         {
-                            $match: { post: ObjectId(postId) },
+                            $match: { post: new ObjectId(postId) },
                         },
                         { $group: { _id: null, count: { $sum: 1 } } },
                     ],
@@ -116,7 +116,7 @@ module.exports.sendEmail = async (to, subject, template) => {
         },
     });
     await transporter.sendMail({
-        from: '"Instaclone Support" <support@instaclone.net>',
+        from: '"GlimpseHub Support" <support@GlimpseHub.net>',
         to,
         subject,
         html: template,
@@ -147,7 +147,7 @@ module.exports.sendConfirmationEmail = async (
                 confirmationUrl: `${process.env.HOME_URL}/confirm/${confirmationToken}`,
                 url: process.env.HOME_URL,
             });
-            await this.sendEmail(email, 'Confirm your instaclone account', html);
+            await this.sendEmail(email, 'Confirm your GlimpseHub account', html);
         } catch (err) {
             console.log(err);
         }

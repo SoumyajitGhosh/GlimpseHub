@@ -7,7 +7,7 @@ module.exports.retrieveNotifications = async (req, res, next) => {
     try {
         const notifications = await Notification.aggregate([
             {
-                $match: { receiver: ObjectId(user._id) },
+                $match: { receiver: new ObjectId(user._id) },
             },
             {
                 $sort: { date: -1 },
