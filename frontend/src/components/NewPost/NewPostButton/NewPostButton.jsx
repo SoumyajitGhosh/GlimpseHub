@@ -19,7 +19,7 @@ const NewPostButton = ({ showModal, hideModal, plusIcon, children, style }) => {
           "NewPost/NewPost"
         );
       } else {
-        navigate("/new", { file });
+        navigate("/new", { state: { file } });
       }
       // Resetting the input value so you are able to
       // use the same file twice

@@ -1,7 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 
 import { selectToken } from "../../redux/user/userSelectors";
 import { showAlert } from "../../redux/alert/alertActions";
@@ -10,7 +9,14 @@ import SuggestedPosts from "../../components/SuggestedPosts/SuggestedPosts";
 import HashtagPosts from "../../components/HashtagPosts/HashtagPosts";
 import NotFoundPage from "../NotFoundPage/NotFoundPage";
 
-const ExplorePage = ({ token, showAlert, showModal }) => {
+const ExplorePage = () => {
+  const dispatch = useDispatch();
+  const token = useSelector(selectToken);
+
+  const handleShowAlert = (text, onClick) => dispatch(showAlert(text, onClick));
+  const handleShowModal = (props, component) =>
+    dispatch(showModal(props, component));
+
   return (
     <main className="explore-page grid">
       <Routes>
@@ -19,8 +25,8 @@ const ExplorePage = ({ token, showAlert, showModal }) => {
           element={
             <SuggestedPosts
               token={token}
-              showModal={showModal}
-              showAlert={showAlert}
+              showModal={handleShowModal}
+              showAlert={handleShowAlert}
             />
           }
         />
@@ -29,8 +35,8 @@ const ExplorePage = ({ token, showAlert, showModal }) => {
           element={
             <HashtagPosts
               token={token}
-              showModal={showModal}
-              showAlert={showAlert}
+              showModal={handleShowModal}
+              showAlert={handleShowAlert}
             />
           }
         />
@@ -40,13 +46,4 @@ const ExplorePage = ({ token, showAlert, showModal }) => {
   );
 };
 
-const mapStateToProps = createStructuredSelector({
-  token: selectToken,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  showAlert: (text, onClick) => dispatch(showAlert(text, onClick)),
-  showModal: (props, component) => dispatch(showModal(props, component)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ExplorePage);
+export default ExplorePage;

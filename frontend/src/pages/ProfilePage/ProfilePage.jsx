@@ -1,10 +1,8 @@
 import React, { useReducer, useEffect, Fragment } from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 
 import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
-
 import { INITIAL_STATE, profileReducer } from "./ProfilePageReducer";
 import { showModal, hideModal } from "../../redux/modal/modalActions";
 
@@ -24,34 +22,46 @@ import NotFoundPage from "../NotFoundPage/NotFoundPage";
 import ProfileHeader from "./ProfileHeader";
 import EmptyProfile from "./EmptyProfile";
 
-const ProfilePage = ({ currentUser, token, showModal, hideModal }) => {
+const ProfilePage = () => {
+  const dispatch = useDispatch();
   const { username } = useParams();
   const navigate = useNavigate();
-  const [state, dispatch] = useReducer(profileReducer, INITIAL_STATE);
+
+  const currentUser = useSelector(selectCurrentUser);
+  const token = useSelector(selectToken);
+
+  const [state, profileDispatch] = useReducer(profileReducer, INITIAL_STATE);
 
   const follow = async () => {
     if (!currentUser) {
-      return showModal(
-        {
-          children: <LoginCard onClick={() => hideModal("Card/Card")} modal />,
-          style: {
-            gridColumn: "center-start / center-end",
-            justifySelf: "center",
-            width: "40rem",
+      return dispatch(
+        showModal(
+          {
+            children: (
+              <LoginCard
+                onClick={() => dispatch(hideModal("Card/Card"))}
+                modal
+              />
+            ),
+            style: {
+              gridColumn: "center-start / center-end",
+              justifySelf: "center",
+              width: "40rem",
+            },
           },
-        },
-        "Card/Card"
+          "Card/Card"
+        )
       );
     }
     try {
-      dispatch({ type: "FOLLOW_USER_START" });
+      profileDispatch({ type: "FOLLOW_USER_START" });
       const response = await followUser(state.data.user._id, token);
-      dispatch({
+      profileDispatch({
         type: "FOLLOW_USER_SUCCESS",
         payload: response.operation,
       });
     } catch (err) {
-      dispatch({
+      profileDispatch({
         type: "FOLLOW_USER_FAILURE",
         payload: err,
       });
@@ -66,12 +76,15 @@ const ProfilePage = ({ currentUser, token, showModal, hideModal }) => {
       !state.fetchingAdditionalPosts
     ) {
       try {
-        dispatch({ type: "FETCH_ADDITIONAL_POSTS_START" });
+        profileDispatch({ type: "FETCH_ADDITIONAL_POSTS_START" });
         const posts = await getPosts(username, state.data.posts.length);
-        dispatch({ type: "FETCH_ADDITIONAL_POSTS_SUCCESS" });
-        dispatch({ type: "ADD_POSTS", payload: posts });
+        profileDispatch({ type: "FETCH_ADDITIONAL_POSTS_SUCCESS" });
+        profileDispatch({ type: "ADD_POSTS", payload: posts });
       } catch (err) {
-        dispatch({ type: "FETCH_ADDITIONAL_POSTS_FAILURE", payload: err });
+        profileDispatch({
+          type: "FETCH_ADDITIONAL_POSTS_FAILURE",
+          payload: err,
+        });
       }
     }
   }, null);
@@ -80,11 +93,11 @@ const ProfilePage = ({ currentUser, token, showModal, hideModal }) => {
     document.title = `@${username} • GlimpseHub photos`;
     (async function () {
       try {
-        dispatch({ type: "FETCH_PROFILE_START" });
+        profileDispatch({ type: "FETCH_PROFILE_START" });
         const profile = await getUserProfile(username, token);
-        dispatch({ type: "FETCH_PROFILE_SUCCESS", payload: profile });
+        profileDispatch({ type: "FETCH_PROFILE_SUCCESS", payload: profile });
       } catch (err) {
-        dispatch({ type: "FETCH_PROFILE_FAILURE", payload: err });
+        profileDispatch({ type: "FETCH_PROFILE_FAILURE", payload: err });
       }
     })();
   }, [username, token]);
@@ -93,13 +106,15 @@ const ProfilePage = ({ currentUser, token, showModal, hideModal }) => {
     if (window.outerWidth <= 600) {
       navigate(`/post/${postId}`);
     } else {
-      showModal(
-        {
-          postId,
-          avatar: state.data.avatar,
-          profileDispatch: dispatch,
-        },
-        "PostDialog/PostDialog"
+      dispatch(
+        showModal(
+          {
+            postId,
+            avatar: state.data.avatar,
+            profileDispatch: profileDispatch,
+          },
+          "PostDialog/PostDialog"
+        )
       );
     }
   };
@@ -122,18 +137,16 @@ const ProfilePage = ({ currentUser, token, showModal, hideModal }) => {
           <ProfileCategory category="POSTS" icon="apps-outline" />
           {state.data.posts.length > 0 ? (
             <div className="profile-images">
-              {state.data.posts.map((post, idx) => {
-                return (
-                  <PreviewImage
-                    onClick={() => handleClick(post._id)}
-                    image={post.image}
-                    likes={post.postVotes}
-                    comments={post.comments}
-                    filter={post.filter}
-                    key={idx}
-                  />
-                );
-              })}
+              {state.data.posts.map((post, idx) => (
+                <PreviewImage
+                  onClick={() => handleClick(post._id)}
+                  image={post.image}
+                  likes={post.postVotes}
+                  comments={post.comments}
+                  filter={post.filter}
+                  key={idx}
+                />
+              ))}
               {state.fetchingAdditionalPosts && (
                 <Fragment>
                   <div>
@@ -182,14 +195,4 @@ const ProfilePage = ({ currentUser, token, showModal, hideModal }) => {
   );
 };
 
-const mapStateToProps = createStructuredSelector({
-  currentUser: selectCurrentUser,
-  token: selectToken,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  showModal: (props, component) => dispatch(showModal(props, component)),
-  hideModal: (component) => dispatch(hideModal(component)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ProfilePage);
+export default ProfilePage;

@@ -1,17 +1,19 @@
 import React, { useEffect } from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { selectCurrentUser } from "../../redux/user/userSelectors";
 
 import SignUpCard from "../../components/SignUpCard/SignUpCard";
 
-const SignUpPage = ({ currentUser }) => {
+const SignUpPage = () => {
   const navigate = useNavigate();
+  const currentUser = useSelector(selectCurrentUser);
+
   useEffect(() => {
     if (currentUser) navigate("/");
   }, [currentUser, navigate]);
+
   return (
     <main className="sign-up-page">
       <SignUpCard />
@@ -19,8 +21,4 @@ const SignUpPage = ({ currentUser }) => {
   );
 };
 
-const mapStateToProps = createStructuredSelector({
-  currentUser: selectCurrentUser,
-});
-
-export default connect(mapStateToProps)(SignUpPage);
+export default SignUpPage;

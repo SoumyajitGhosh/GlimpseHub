@@ -1,30 +1,33 @@
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { githubSignInStart } from "../../redux/user/userActions";
+// import { githubSignInStart } from "../../redux/user/userActions";
 import { selectCurrentUser } from "../../redux/user/userSelectors";
 
 import LoginCard from "../../components/LoginCard/LoginCard";
 
-const LoginPage = ({ currentUser, githubSignInStart }) => {
+const LoginPage = () => {
+  // const dispatch = useDispatch();
   const navigate = useNavigate();
   const { search } = useLocation();
-  if (currentUser) navigate("/");
-  const params = new URLSearchParams(search);
-  const code = params.get("code");
-  const authState = params.get("state");
+  const currentUser = useSelector(selectCurrentUser);
 
-  useEffect(() => {
-    if (code) {
-      if (!authState === sessionStorage.getItem("authState")) {
-        return console.warn("Auth state does not match.");
-      }
-      githubSignInStart(code);
-    }
-  }, [authState, code, githubSignInStart]);
+  if (currentUser) navigate("/");
+
+  const params = new URLSearchParams(search);
+  // const code = params.get("code");
+  // const authState = params.get("state");
+
+  // useEffect(() => {
+  //   if (code) {
+  //     if (authState !== sessionStorage.getItem("authState")) {
+  //       return console.warn("Auth state does not match.");
+  //     }
+  //     dispatch(githubSignInStart(code));
+  //   }
+  // }, [authState, code, dispatch]);
 
   return (
     <main data-test="page-login" className="login-page">
@@ -38,12 +41,4 @@ LoginPage.propTypes = {
   currentUser: PropTypes.object,
 };
 
-const mapStateToProps = createStructuredSelector({
-  currentUser: selectCurrentUser,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  githubSignInStart: (code) => dispatch(githubSignInStart(code)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(LoginPage);
+export default LoginPage;

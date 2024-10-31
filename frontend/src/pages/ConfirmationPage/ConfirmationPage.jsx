@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { showModal } from "../../redux/modal/modalActions";
@@ -10,9 +9,13 @@ import { confirmUser } from "../../services/userService";
 
 import Loader from "../../components/Loader/Loader";
 
-const VerificationPage = ({ authToken, showModal }) => {
+const VerificationPage = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { token } = useParams();
+
+  const authToken = useSelector(selectToken);
+
   useEffect(() => {
     if (!authToken) {
       return navigate("/");
@@ -33,18 +36,20 @@ const VerificationPage = ({ authToken, showModal }) => {
           </h3>
         );
       }
-      showModal(
-        {
-          options: [],
-          title: "Confirmation",
-          cancelButton: false,
-          children,
-        },
-        "OptionsDialog/OptionsDialog"
+      dispatch(
+        showModal(
+          {
+            options: [],
+            title: "Confirmation",
+            cancelButton: false,
+            children,
+          },
+          "OptionsDialog/OptionsDialog"
+        )
       );
       return navigate("/");
     })();
-  }, [authToken, navigate, showModal, token]);
+  }, [authToken, navigate, dispatch, token]);
 
   return (
     <main className="verification-page">
@@ -53,12 +58,4 @@ const VerificationPage = ({ authToken, showModal }) => {
   );
 };
 
-const mapStateToProps = createStructuredSelector({
-  authToken: selectToken,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  showModal: (props, component) => dispatch(showModal(props, component)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(VerificationPage);
+export default VerificationPage;

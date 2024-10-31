@@ -1,6 +1,6 @@
 import React, { useEffect, Suspense, lazy } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { connect } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useTransition, animated } from "react-spring";
 
 import { selectCurrentUser } from "./redux/user/userSelectors";
@@ -20,6 +20,7 @@ import EditProfileForm from "./components/EditProfileForm/EditProfileForm";
 import ChangePasswordForm from "./components/ChangePasswordForm/ChangePasswordForm";
 import SuggestedPosts from "./components/SuggestedPosts/SuggestedPosts";
 import HashtagPosts from "./components/HashtagPosts/HashtagPosts";
+
 const ProfilePage = lazy(() => import("./pages/ProfilePage/ProfilePage"));
 const PostPage = lazy(() => import("./pages/PostPage/PostPage"));
 const ConfirmationPage = lazy(() =>
@@ -34,28 +35,25 @@ const NewPostPage = lazy(() => import("./pages/NewPostPage/NewPostPage"));
 const ExplorePage = lazy(() => import("./pages/ExplorePage/ExplorePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage/NotFoundPage"));
 
-export function UnconnectedApp({
-  signInStart,
-  modal,
-  alert,
-  currentUser,
-  connectSocket,
-  fetchNotificationsStart,
-}) {
+const App = () => {
+  const dispatch = useDispatch();
   const token = localStorage.getItem("token");
   const { pathname } = useLocation();
 
+  const modal = useSelector((state) => state.modal);
+  const alert = useSelector((state) => state.alert);
+  const currentUser = useSelector(selectCurrentUser);
+
   useEffect(() => {
     if (token) {
-      signInStart(null, null, token);
-      connectSocket();
-      fetchNotificationsStart(token);
+      dispatch(signInStart(null, null, token));
+      dispatch(connectSocket());
+      dispatch(fetchNotificationsStart(token));
     }
-  }, [signInStart, connectSocket, fetchNotificationsStart, token]);
+  }, [dispatch, token]);
 
   const renderModals = () => {
     if (modal.modals.length > 0) {
-      // Disable scrolling on the body while a modal is active
       document.querySelector("body").setAttribute("style", "overflow: hidden;");
       return modal.modals.map((modal, idx) => (
         <Modal key={idx} component={modal.component} {...modal.props} />
@@ -65,15 +63,14 @@ export function UnconnectedApp({
     }
   };
 
-  const [transitions, api] = useTransition(alert?.showAlert, () => ({
+  const transitions = useTransition(alert?.showAlert, {
     from: { opacity: 0, transform: "translateY(4rem)" },
     enter: { opacity: 1, transform: "translateY(0rem)" },
     leave: { opacity: 0, transform: "translateY(4rem)" },
     config: { tension: 500, friction: 50 },
-  }));
+  });
 
   const renderApp = () => {
-    // Wait for authentication
     if (!currentUser && token) {
       return <LoadingPage />;
     }
@@ -81,14 +78,14 @@ export function UnconnectedApp({
       <>
         {pathname !== "/login" && pathname !== "/signup" && <Header />}
         {renderModals()}
-        {transitions &&
-          transitions(({ item, key, props }) =>
-            item ? (
-              <animated.div key={key} style={props}>
+        {transitions(
+          (style, item) =>
+            item && (
+              <animated.div style={style}>
                 <Alert>{alert.text}</Alert>
               </animated.div>
-            ) : null
-          )}
+            )
+        )}
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
@@ -98,6 +95,7 @@ export function UnconnectedApp({
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/activity" element={<ActivityPage />} />
+            <Route path="/confirm/:token" element={<ConfirmationPage />} />
             <Route path="/settings" element={<SettingsPage />}>
               <Route path="edit" element={<EditProfileForm />} />
               <Route path="password" element={<ChangePasswordForm />} />
@@ -123,19 +121,6 @@ export function UnconnectedApp({
       <Suspense fallback={<LoadingPage />}>{renderApp()}</Suspense>
     </div>
   );
-}
+};
 
-const mapStateToProps = (state) => ({
-  modal: state.modal,
-  alert: state.alert,
-  currentUser: selectCurrentUser(state),
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  signInStart: (usernameOrEmail, password, token) =>
-    dispatch(signInStart(usernameOrEmail, password, token)),
-  connectSocket: () => dispatch(connectSocket()),
-  fetchNotificationsStart: (authToken) =>
-    dispatch(fetchNotificationsStart(authToken)),
-});
-export default connect(mapStateToProps, mapDispatchToProps)(UnconnectedApp);
+export default App;

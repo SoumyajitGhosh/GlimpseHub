@@ -1,6 +1,5 @@
 import React, { useEffect, Fragment } from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 
 import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
 import {
@@ -20,31 +19,31 @@ import Icon from "../../components/Icon/Icon";
 import NewPostButton from "../../components/NewPost/NewPostButton/NewPostButton";
 import SuggestedUsers from "../../components/Suggestion/SuggestedUsers/SuggestedUsers";
 
-const HomePage = ({
-  currentUser,
-  fetchFeedPostsStart,
-  clearPosts,
-  token,
-  feedPosts,
-  hasMore,
-  fetching,
-}) => {
+const HomePage = () => {
+  const dispatch = useDispatch();
+
+  const currentUser = useSelector(selectCurrentUser);
+  const token = useSelector(selectToken);
+  const feedPosts = useSelector(selectFeedPosts);
+  const hasMore = useSelector(selectHasMore);
+  const fetching = useSelector(selectFeedFetching);
+
   useEffect(() => {
     document.title = `GlimpseHub`;
-    fetchFeedPostsStart(token);
+    dispatch(fetchFeedPostsStart(token));
     return () => {
-      clearPosts();
+      dispatch(clearPosts());
     };
-  }, [clearPosts, fetchFeedPostsStart, token]);
+  }, [dispatch, token]);
 
   useScrollPositionThrottled(
     ({ atBottom }) => {
       if (atBottom && hasMore && !fetching) {
-        fetchFeedPostsStart(token, feedPosts.length);
+        dispatch(fetchFeedPostsStart(token, feedPosts.length));
       }
     },
     null,
-    [hasMore, fetching]
+    [hasMore, fetching, token, dispatch, feedPosts.length]
   );
 
   return (
@@ -82,18 +81,4 @@ const HomePage = ({
   );
 };
 
-const mapStateToProps = createStructuredSelector({
-  currentUser: selectCurrentUser,
-  token: selectToken,
-  feedPosts: selectFeedPosts,
-  hasMore: selectHasMore,
-  fetching: selectFeedFetching,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  fetchFeedPostsStart: (authToken, offset) =>
-    dispatch(fetchFeedPostsStart(authToken, offset)),
-  clearPosts: () => dispatch(clearPosts()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
+export default HomePage;

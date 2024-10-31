@@ -10,7 +10,7 @@ const NewPostPage = () => {
   return location.state && location.state.file ? (
     <NewPost file={location.state.file} hide={() => navigate("/")} />
   ) : (
-    <Navigate to="/" />
+    <Navigate to="/" replace />
   );
 };
 
