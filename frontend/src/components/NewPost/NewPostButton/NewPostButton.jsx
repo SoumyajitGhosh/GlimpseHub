@@ -23,7 +23,8 @@ const NewPostButton = ({ showModal, hideModal, plusIcon, children, style }) => {
       }
       // Resetting the input value so you are able to
       // use the same file twice
-      fileInputRef.current.value = "";
+      // fileInputRef.current.value = "";
+      setFile(undefined);
     }
   }, [file, showModal, hideModal, navigate]);
   return (
