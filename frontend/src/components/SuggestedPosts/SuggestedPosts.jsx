@@ -16,6 +16,7 @@ const SuggestedPosts = ({ token, showModal, showAlert }) => {
   const navigate = useNavigate();
   const [result, setResult] = useState([]);
   const [search, setSearch] = useState(false);
+
   const [posts, setPosts] = useState({
     posts: null,
     fetching: false,
@@ -41,9 +42,17 @@ const SuggestedPosts = ({ token, showModal, showAlert }) => {
       setPosts((previous) => ({ ...previous, fetching: true }));
       const response = await getSuggestedPosts(token, offset);
       setPosts((previous) => ({
-        posts: previous.posts ? [...previous.posts, ...response] : response,
+        posts: previous.posts
+          ? [
+              ...previous.posts,
+              ...response.filter(
+                (newPost) =>
+                  !previous.posts.some((post) => post.id === newPost.id)
+              ),
+            ]
+          : response,
         fetching: false,
-        hasMore: response.length === 20,
+        hasMore: response.length >= 20,
       }));
     } catch (err) {
       showAlert(err.message);
