@@ -12,6 +12,7 @@ import { followUser } from '../../../services/profileService';
 
 import Button from '../Button';
 import UnfollowPrompt from '../../UnfollowPrompt/UnfollowPrompt';
+import { fetchProfileAction } from "../../../redux/profilePage/profilePageActions";
 
 const FollowButton = ({ userId, following, username, avatar, style }) => {
   const dispatch = useDispatch();
@@ -27,6 +28,7 @@ const FollowButton = ({ userId, following, username, avatar, style }) => {
       await followUser(userId, token);
       setIsFollowing(!isFollowing);
       setLoading(false);
+      dispatch(fetchProfileAction(currentUser.username, token));
     } catch (err) {
       setLoading(false);
       dispatch(showAlert("Could not follow the user.", () => follow()));

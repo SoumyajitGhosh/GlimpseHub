@@ -7,20 +7,19 @@ import UsersList from "../../components/UsersList/UsersList";
 import UnfollowPrompt from "../../components/UnfollowPrompt/UnfollowPrompt";
 import Button from "../../components/Button/Button";
 import SettingsButton from "../../components/SetttingsButton/SettingsButton";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchProfileAction,
+  followUserAction,
+} from "../../redux/profilePage/profilePageActions";
 
-const ProfileHeader = ({
-  currentUser,
-  data,
-  showModal,
-  token,
-  follow,
-  loading,
-}) => {
+const ProfileHeader = ({ currentUser, showModal, token, follow }) => {
   const dispatch = useDispatch();
+  const state = useSelector((state) => state?.profile);
+  const { data } = state;
   const { avatar, username, bio, website, fullName } = data.user;
   const { following, followers, postCount } = data;
-
+  const loading = useSelector((state) => state?.profile.fetching);
   const showUsersModal = (followers, following) => {
     token &&
       dispatch(
@@ -89,7 +88,14 @@ const ProfileHeader = ({
       }
     }
     return (
-      <Button loading={loading} onClick={() => follow(data.user._id, token)}>
+      <Button
+        loading={loading}
+        onClick={() => {
+          dispatch(followUserAction(data.user._id, token));
+          if (currentUser.username === username)
+            dispatch(fetchProfileAction(username, token));
+        }}
+      >
         Follow
       </Button>
     );
