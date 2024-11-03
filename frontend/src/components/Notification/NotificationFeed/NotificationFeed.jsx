@@ -32,10 +32,8 @@ const NotificationFeed = ({ setShowNotifications }) => {
   const token = useSelector(selectToken);
 
   useEffect(() => {
-    (async function () {
-      await dispatch(fetchNotificationsStart(token));
-      await dispatch(readNotificationsStart(token));
-    })();
+    dispatch(fetchNotificationsStart(token));
+    dispatch(readNotificationsStart(token));
 
     return () => {
       dispatch(clearNotifications());

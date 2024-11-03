@@ -85,21 +85,27 @@ export const postDialogReducer = (state, action) => {
             };
         }
         case 'ADD_COMMENT': {
-            let comment = action.payload;
-            let localStateComments = new Set(state.localStateComments);
-            if (!Array.isArray(comment)) {
-                localStateComments.add(comment._id);
-                comment = [comment];
-            }
-            return {
-                ...state,
-                localStateComments,
-                data: {
-                    ...state.data,
-                    comments: [...state.data.comments, ...comment],
-                },
-            };
-        }
+          let comment = action.payload;
+          let localStateComments = new Set(state.localStateComments);
+
+          if (!Array.isArray(comment)) {
+            comment = [comment];
+          }
+
+          const newComments = comment.filter(
+            (c) => !localStateComments.has(c._id)
+          );
+          newComments.forEach((c) => localStateComments.add(c._id));
+
+          return {
+            ...state,
+            localStateComments,
+            data: {
+              ...state.data,
+              comments: [...state.data.comments, ...newComments],
+            },
+          };
+        }        
         case 'REMOVE_COMMENT': {
             const commentId = action.payload;
             const localStateComments = new Set(state.localStateComments);

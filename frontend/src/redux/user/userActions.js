@@ -5,7 +5,7 @@ import { bookmarkPost as bookmark } from '../../services/postService';
 import {
     registerUser,
     login,
-    githubAuthentication,
+    // githubAuthentication,
 } from '../../services/authenticationServices';
 import {
     changeAvatar,
@@ -45,16 +45,16 @@ export const signInStart = (usernameOrEmail, password, authToken) => async (
     }
 };
 
-export const githubSignInStart = (code) => async (dispatch) => {
-    try {
-        dispatch({ type: userTypes.GITHUB_SIGN_IN_START });
-        const response = await githubAuthentication(code);
-        localStorage.setItem('token', response.token);
-        dispatch({ type: userTypes.GITHUB_SIGN_IN_SUCCESS, payload: response });
-    } catch (err) {
-        dispatch({ type: userTypes.GITHUB_SIGN_IN_FAILURE, payload: err.message });
-    }
-};
+// export const githubSignInStart = (code) => async (dispatch) => {
+//     try {
+//         dispatch({ type: userTypes.GITHUB_SIGN_IN_START });
+//         const response = await githubAuthentication(code);
+//         localStorage.setItem('token', response.token);
+//         dispatch({ type: userTypes.GITHUB_SIGN_IN_SUCCESS, payload: response });
+//     } catch (err) {
+//         dispatch({ type: userTypes.GITHUB_SIGN_IN_FAILURE, payload: err.message });
+//     }
+// };
 
 export const signUpStart = (email, fullName, username, password) => async (
     dispatch

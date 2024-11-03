@@ -1,11 +1,12 @@
 import React, { useEffect, memo, lazy, Suspense } from "react";
-import { connect } from "react-redux";
+import { useDispatch } from "react-redux";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 
 import { hideModal } from "../../redux/modal/modalActions";
 
-const Modal = memo(({ component, hideModal, ...additionalProps }) => {
+const Modal = memo(({ component, ...additionalProps }) => {
+  const dispatch = useDispatch();
   const modalRoot = document.querySelector("#modal-root");
   const el = document.createElement("div");
   el.className = "modal grid";
@@ -16,7 +17,7 @@ const Modal = memo(({ component, hideModal, ...additionalProps }) => {
   useEffect(() => {
     const hide = ({ target }) => {
       if (target === el || !el.contains(target)) {
-        hideModal(component);
+        dispatch(hideModal(component));
       }
     };
     el.addEventListener("mousedown", hide, false);
@@ -26,11 +27,11 @@ const Modal = memo(({ component, hideModal, ...additionalProps }) => {
       el.removeEventListener("mousedown", hide, false);
       modalRoot.removeChild(el);
     };
-  }, [el, modalRoot, hideModal, component]);
+  }, [el, modalRoot, dispatch, component]);
 
   return ReactDOM.createPortal(
     <Suspense fallback={<div>Loading...</div>}>
-      <Child hide={() => hideModal(component)} {...additionalProps} />
+      <Child hide={() => dispatch(hideModal(component))} {...additionalProps} />
     </Suspense>,
     el
   );
@@ -43,8 +44,4 @@ Modal.propTypes = {
   props: PropTypes.object,
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  hideModal: (component) => dispatch(hideModal(component)),
-});
-
-export default connect(null, mapDispatchToProps)(Modal);
+export default Modal;
