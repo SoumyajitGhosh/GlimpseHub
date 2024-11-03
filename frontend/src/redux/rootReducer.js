@@ -6,6 +6,7 @@ import alertReducer from './alert/alertReducer';
 import socketReducer from './socket/socketReducer';
 import notificationReducer from './notification/notificationReducer';
 import feedReducer from './feed/feedReducer';
+import profilePageReducer from './profilePage/profilePageReducer.js';
 
 const rootReducer = combineReducers({
     user: userReducer,
@@ -14,6 +15,7 @@ const rootReducer = combineReducers({
     socket: socketReducer,
     notifications: notificationReducer,
     feed: feedReducer,
+    profile: profilePageReducer,
 });
 
 export default rootReducer;

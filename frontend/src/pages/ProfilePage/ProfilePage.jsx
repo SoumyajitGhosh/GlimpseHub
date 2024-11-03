@@ -1,13 +1,9 @@
-import React, { useReducer, useEffect, Fragment } from "react";
+import React, { useEffect, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 
 import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
-import { INITIAL_STATE, profileReducer } from "./ProfilePageReducer";
 import { showModal, hideModal } from "../../redux/modal/modalActions";
-
-import { getUserProfile, followUser } from "../../services/profileService";
-import { getPosts } from "../../services/postService";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 
@@ -21,6 +17,18 @@ import LoginCard from "../../components/LoginCard/LoginCard";
 import NotFoundPage from "../NotFoundPage/NotFoundPage";
 import ProfileHeader from "./ProfileHeader";
 import EmptyProfile from "./EmptyProfile";
+import {
+  fetchProfileAction,
+  fetchingAdditionalPostsAction,
+  followUserAction,
+} from "../../redux/profilePage/profilePageActions";
+import {
+  fetchingAdditionalPostsProfile,
+  selectProfileData,
+  selectProfileError,
+  selectProfileFetching,
+  selectProfileFollowing,
+} from "../../redux/profilePage/profilePageSelectors";
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -30,7 +38,11 @@ const ProfilePage = () => {
   const currentUser = useSelector(selectCurrentUser);
   const token = useSelector(selectToken);
 
-  const [state, profileDispatch] = useReducer(profileReducer, INITIAL_STATE);
+  const fetching = useSelector(selectProfileFetching);
+  const following = useSelector(selectProfileFollowing);
+  const fetchingAdditionalPosts = useSelector(fetchingAdditionalPostsProfile);
+  const error = useSelector(selectProfileError);
+  const data = useSelector(selectProfileData);
 
   const follow = async () => {
     if (!currentUser) {
@@ -53,54 +65,30 @@ const ProfilePage = () => {
         )
       );
     }
-    try {
-      profileDispatch({ type: "FOLLOW_USER_START" });
-      const response = await followUser(state.data.user._id, token);
-      profileDispatch({
-        type: "FOLLOW_USER_SUCCESS",
-        payload: response.operation,
-      });
-    } catch (err) {
-      profileDispatch({
-        type: "FOLLOW_USER_FAILURE",
-        payload: err,
-      });
-    }
+    dispatch(followUserAction(data.user._id, token));
+    dispatch(fetchProfileAction(username, token));
   };
 
   useScrollPositionThrottled(async () => {
     if (
       window.innerHeight + document.documentElement.scrollTop ===
         document.documentElement.offsetHeight &&
-      state.data.posts.length < state.data.postCount &&
-      !state.fetchingAdditionalPosts
+      data.posts.length < data.postCount &&
+      !fetchingAdditionalPosts
     ) {
-      try {
-        profileDispatch({ type: "FETCH_ADDITIONAL_POSTS_START" });
-        const posts = await getPosts(username, state.data.posts.length);
-        profileDispatch({ type: "FETCH_ADDITIONAL_POSTS_SUCCESS" });
-        profileDispatch({ type: "ADD_POSTS", payload: posts });
-      } catch (err) {
-        profileDispatch({
-          type: "FETCH_ADDITIONAL_POSTS_FAILURE",
-          payload: err,
-        });
-      }
+      dispatch(fetchingAdditionalPostsAction(username, data.posts.length));
     }
   }, null);
 
   useEffect(() => {
     document.title = `@${username} • GlimpseHub photos`;
-    (async function () {
-      try {
-        profileDispatch({ type: "FETCH_PROFILE_START" });
-        const profile = await getUserProfile(username, token);
-        profileDispatch({ type: "FETCH_PROFILE_SUCCESS", payload: profile });
-      } catch (err) {
-        profileDispatch({ type: "FETCH_PROFILE_FAILURE", payload: err });
-      }
-    })();
+    dispatch(fetchProfileAction(username, token));
   }, [username, token]);
+
+  console.log(
+    "Fetch Profile:",
+    useSelector((state) => state)
+  );
 
   const handleClick = (postId) => {
     if (window.outerWidth <= 600) {
@@ -110,8 +98,8 @@ const ProfilePage = () => {
         showModal(
           {
             postId,
-            avatar: state.data.avatar,
-            profileDispatch: profileDispatch,
+            avatar: data.avatar,
+            profileDispatch: dispatch,
           },
           "PostDialog/PostDialog"
         )
@@ -120,24 +108,22 @@ const ProfilePage = () => {
   };
 
   const renderProfile = () => {
-    if (state.fetching) {
+    if (fetching) {
       return <Loader />;
     }
-    if (!state.fetching && state.data) {
+    if (!fetching && data) {
       return (
         <Fragment>
           <ProfileHeader
             currentUser={currentUser}
-            data={state.data}
             showModal={showModal}
             token={token}
             follow={follow}
-            loading={state.following}
           />
           <ProfileCategory category="POSTS" icon="apps-outline" />
-          {state.data.posts.length > 0 ? (
+          {data.posts.length > 0 ? (
             <div className="profile-images">
-              {state.data.posts.map((post, idx) => (
+              {data.posts.map((post, idx) => (
                 <PreviewImage
                   onClick={() => handleClick(post._id)}
                   image={post.image}
@@ -147,7 +133,7 @@ const ProfilePage = () => {
                   key={idx}
                 />
               ))}
-              {state.fetchingAdditionalPosts && (
+              {fetchingAdditionalPosts && (
                 <Fragment>
                   <div>
                     <SkeletonLoader animated />
@@ -174,7 +160,7 @@ const ProfilePage = () => {
     }
   };
 
-  return state.error ? (
+  return error ? (
     <NotFoundPage />
   ) : (
     <Fragment>
