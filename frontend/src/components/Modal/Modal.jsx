@@ -12,7 +12,7 @@ const Modal = memo(({ component, ...additionalProps }) => {
   el.className = "modal grid";
 
   // Dynamically import the component based on the `component` prop
-  const Child = lazy(() => import(`../../components/${component}`));
+  const Child = lazy(() => import(`../../components/${component}.js`));
 
   useEffect(() => {
     const hide = ({ target }) => {
