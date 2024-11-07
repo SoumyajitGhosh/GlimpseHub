@@ -8,7 +8,6 @@ import ChatSidebar from "../../components/ChatSidebar/ChatSidebar";
 const ChatPage = () => {
   useEffect(() => {
     document.documentElement.style.overflowY = "hidden";
-
     return () => {
       document.documentElement.style.overflowY = "auto";
     };
