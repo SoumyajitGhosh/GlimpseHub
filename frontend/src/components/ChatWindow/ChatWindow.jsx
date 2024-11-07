@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import Icon from "../Icon/Icon";
 
-export const ChatWindow = () => {
+const ChatWindow = () => {
   return (
     <Fragment>
       <Icon
@@ -12,3 +12,5 @@ export const ChatWindow = () => {
     </Fragment>
   );
 };
+
+export default ChatWindow;

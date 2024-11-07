@@ -2,8 +2,8 @@ import React, { Fragment, useEffect } from "react";
 import MobileHeader from "../../components/Header/MobileHeader/MobileHeader";
 import NewPostButton from "../../components/NewPost/NewPostButton/NewPostButton";
 import Icon from "../../components/Icon/Icon";
-import ChatUsers from "../../components/ChatUsers/ChatUsers";
-import { ChatWindow } from "../../components/ChatWindow/ChatWindow";
+import ChatWindow from "../../components/ChatWindow/ChatWindow";
+import ChatSidebar from "../../components/ChatSidebar/ChatSidebar";
 
 const ChatPage = () => {
   useEffect(() => {
@@ -24,8 +24,8 @@ const ChatPage = () => {
         <Icon icon="paper-plane-outline" />
       </MobileHeader>
       <main data-test="page-chat" className="chat-page grid">
-        <div style={{ overflowY: "auto", height: "90vh" }}>
-          <ChatUsers />
+        <div>
+          <ChatSidebar />
         </div>
         <div className="chat-window">
           <ChatWindow />

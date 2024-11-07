@@ -96,7 +96,7 @@ const App = () => {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/activity" element={<ActivityPage />} />
-            <Route path="/direct/inbox" element={<ChatPage />} />
+            <Route path="/direct/:id" element={<ChatPage />} />
             <Route path="/confirm/:token" element={<ConfirmationPage />} />
             <Route path="/settings" element={<SettingsPage />}>
               <Route path="edit" element={<EditProfileForm />} />
