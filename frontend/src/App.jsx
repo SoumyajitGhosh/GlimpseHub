@@ -23,6 +23,7 @@ import HashtagPosts from "./components/HashtagPosts/HashtagPosts";
 
 const ProfilePage = lazy(() => import("./pages/ProfilePage/ProfilePage"));
 const PostPage = lazy(() => import("./pages/PostPage/PostPage"));
+const ChatPage = lazy(() => import("./pages/ChatPage/ChatPage"));
 const ConfirmationPage = lazy(() =>
   import("./pages/ConfirmationPage/ConfirmationPage")
 );
@@ -95,6 +96,7 @@ const App = () => {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/activity" element={<ActivityPage />} />
+            <Route path="/direct/inbox" element={<ChatPage />} />
             <Route path="/confirm/:token" element={<ConfirmationPage />} />
             <Route path="/settings" element={<SettingsPage />}>
               <Route path="edit" element={<EditProfileForm />} />
@@ -107,7 +109,7 @@ const App = () => {
             <Route path="/new" element={<NewPostPage />} />
           </Route>
         </Routes>
-        {pathname !== "/" && <Footer />}
+        {pathname !== "/" || (!pathname.includes("/direct") && <Footer />)}
         {pathname !== "/login" &&
           pathname !== "/signup" &&
           pathname !== "/new" &&

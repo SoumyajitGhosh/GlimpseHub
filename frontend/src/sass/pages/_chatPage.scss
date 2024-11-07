@@ -1,0 +1,23 @@
+.chat-page {
+    grid-column: center-start / center-end;
+    display: grid;
+    padding-top: 8rem;
+    overflow-y: hidden;
+    grid-template-columns: 30% 70%; 
+  
+    .first-div {
+      grid-column: 1 / 2;
+    }
+  
+    .second-div {
+      grid-column: 2 / 3; 
+      
+    }
+  }
+  
+.chat-window {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}

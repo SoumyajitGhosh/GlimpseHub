@@ -53,6 +53,15 @@ const Header = memo(() => {
                 />
               </Link>
               <NotificationButton />
+              <Link to={`/direct/inbox`}>
+                <Icon
+                  icon={
+                    pathname.includes(`direct`)
+                      ? "chatbubble-ellipses"
+                      : "chatbubble-ellipses-outline"
+                  }
+                />
+              </Link>
               <Link to={`/${currentUser.username}`}>
                 <Icon
                   icon={

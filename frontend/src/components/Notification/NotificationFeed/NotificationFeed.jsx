@@ -20,7 +20,6 @@ import Icon from "../../Icon/Icon";
 import FollowButton from "../../Button/FollowButton/FollowButton";
 import Divider from "../../Divider/Divider";
 import Linkify from "linkify-react";
-import * as linkify from "linkifyjs";
 import "linkify-plugin-mention";
 
 import { linkifyOptions } from "../../../utils/linkifyUtils";
