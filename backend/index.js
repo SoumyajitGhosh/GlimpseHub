@@ -3,7 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const compression = require('compression');
-const { server, app } = require('./socket/index');
+const { server, app } = require('./socket');
 
 const apiRouter = require('./routes');
 

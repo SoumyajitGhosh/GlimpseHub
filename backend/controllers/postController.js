@@ -96,7 +96,6 @@ module.exports.createPost = async (req, res, next) => {
         // socketHandler.sendPost(req, postObject, user._id);
         followers.forEach((follower) => {
             socketHandler.sendPost(
-                req,
                 // Since the post is new there is no need to look up any fields
                 postObject,
                 follower.user
@@ -133,9 +132,9 @@ module.exports.deletePost = async (req, res, next) => {
     try {
         const followersDocument = await Followers.find({ user: user._id });
         const followers = followersDocument[0].followers;
-        socketHandler.deletePost(req, postId, user._id);
+        socketHandler.deletePost(postId, user._id);
         followers.forEach((follower) =>
-            socketHandler.deletePost(req, postId, follower.user)
+            socketHandler.deletePost(postId, follower.user)
         );
     } catch (err) {
         console.log(err);
@@ -247,7 +246,7 @@ module.exports.votePost = async (req, res, next) => {
                 });
 
                 await notification.save();
-                socketHandler.sendNotification(req, {
+                socketHandler.sendNotification({
                     ...notification.toObject(),
                     sender: {
                         _id: user._id,

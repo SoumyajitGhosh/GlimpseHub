@@ -204,7 +204,7 @@ module.exports.sendCommentNotification = async (
                 },
             });
             await notification.save();
-            socketHandler.sendNotification(req, {
+            socketHandler.sendNotification({
                 ...notification.toObject(),
                 sender: {
                     _id: sender._id,
@@ -259,7 +259,7 @@ module.exports.sendMentionNotification = (req, message, image, post, user) => {
                     },
                 });
                 await notification.save();
-                socketHandler.sendNotification(req, {
+                socketHandler.sendNotification({
                     ...notification.toObject(),
                     sender: {
                         _id: user._id,
