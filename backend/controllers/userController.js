@@ -291,7 +291,7 @@ module.exports.followUser = async (req, res, next) => {
                 await notification.save();
 
                 const senderData = await User.findById(user._id, 'username avatar');
-                socketHandler.sendNotification(req, {
+                socketHandler.sendNotification({
                     notificationType: 'follow',
                     sender: {
                         _id: senderData._id,
