@@ -3,13 +3,14 @@
 // import { getReceiverSocketId, io } from "../socket/socket.js";
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
-const { getReceiverSocketId, io } = require("../socket");
+const socketHandler = require('../handlers/socketHandler');
 
 module.exports.sendMessage = async (req, res) => {
     try {
         const { message } = req.body;
         const { id: receiverId } = req.params;
-        const senderId = req.user._id;
+        const user = res.locals.user;
+        const senderId = user._id;
 
         let conversation = await Conversation.findOne({
             participants: { $all: [senderId, receiverId] },
@@ -38,11 +39,8 @@ module.exports.sendMessage = async (req, res) => {
         await Promise.all([conversation.save(), newMessage.save()]);
 
         // SOCKET IO FUNCTIONALITY WILL GO HERE
-        const receiverSocketId = getReceiverSocketId(receiverId);
-        if (receiverSocketId) {
-            // io.to(<socket_id>).emit() used to send events to specific client
-            io.to(receiverSocketId).emit("newMessage", newMessage);
-        }
+        socketHandler.newMessage(newMessage, receiverId);
+        socketHandler.newMessage(newMessage, senderId);
 
         res.status(201).json(newMessage);
     } catch (error) {
@@ -54,7 +52,8 @@ module.exports.sendMessage = async (req, res) => {
 module.exports.getMessages = async (req, res) => {
     try {
         const { id: userToChatId } = req.params;
-        const senderId = req.user._id;
+        const user = res.locals.user;
+        const senderId = user._id;
 
         const conversation = await Conversation.findOne({
             participants: { $all: [senderId, userToChatId] },

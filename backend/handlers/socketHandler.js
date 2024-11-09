@@ -20,3 +20,11 @@ module.exports.deletePost = (postId, receiver) => {
         io.sockets.to(receiverSocketId).emit('deletePost', postId);
     }
 };
+
+module.exports.newMessage = (newMessage, receiver) => {
+    const receiverSocketId = getReceiverSocketId(receiver);
+    if (receiverSocketId) {
+        // io.to(<socket_id>).emit() used to send events to specific client
+        io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
+} 
