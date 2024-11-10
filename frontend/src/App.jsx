@@ -82,9 +82,9 @@ const App = () => {
         {transitions(
           (style, item) =>
             item && (
-              <animated.div style={style}>
-                <Alert>{alert.text}</Alert>
-              </animated.div>
+              <Alert style={style} onClick={alert.onClick}>
+                {alert.text}
+              </Alert>
             )
         )}
         <Routes>

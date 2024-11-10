@@ -1,90 +1,104 @@
-import React, { Fragment, useRef, useEffect } from 'react';
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
+import { showAlert } from "../../redux/alert/alertActions";
+import { validatePassword } from "../../utils/validation";
+import { changePassword } from "../../services/authenticationServices";
+import Avatar from "../Avatar/Avatar";
+import FormInput from "../FormInput/FormInput";
+import Button from "../Button/Button";
+import TextButton from "../Button/TextButton/TextButton";
+import SettingsForm from "../SettingsForm/SettingsForm";
+import SettingsFormGroup from "../SettingsForm/SettingsFormGroup/SettingsFormGroup";
 
-import {
-    changeAvatarStart,
-    removeAvatarStart,
-} from '../../redux/user/userActions';
-import {
-  selectCurrentUser,
-  selectToken,
-  selectError,
-} from "../../redux/user/userSelectors";
-import { showModal } from '../../redux/modal/modalActions';
-import { showAlert } from '../../redux/alert/alertActions';
-
-const ChangeAvatarButton = ({ children }) => {
+const ChangePasswordForm = () => {
   const dispatch = useDispatch();
   const currentUser = useSelector(selectCurrentUser);
   const token = useSelector(selectToken);
-  const error = useSelector(selectError);
 
-  const inputRef = useRef();
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
-    if (error) {
-      dispatch(showAlert(error));
-    }
-  }, [error, dispatch]);
+    document.title = "Change Password • Instaclone";
+  }, []);
 
-  const handleClick = (event) => {
-    if (currentUser.avatar) {
-      event.preventDefault();
-      return dispatch(
-        showModal(
-          {
-            options: [
-              {
-                text: "Upload Photo",
-                className: "color-blue font-bold",
-                onClick: () => {
-                  inputRef.current.click();
-                },
-              },
-              {
-                warning: true,
-                text: "Remove Current Photo",
-                onClick: () => {
-                  changeAvatar(null, true);
-                },
-              },
-            ],
-          },
-          "OptionsDialog/OptionsDialog"
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (newPassword !== confirmNewPassword) {
+      return dispatch(showAlert("Please make sure both passwords match."));
+    }
+    const newPasswordError = validatePassword(newPassword);
+    if (newPasswordError) return dispatch(showAlert(newPasswordError));
+
+    try {
+      setFetching(true);
+      await changePassword(oldPassword, newPassword, token);
+      dispatch(
+        showAlert(
+          "Your password has been changed. You'll have to log in with the new one next time."
         )
       );
+      setFetching(false);
+    } catch (err) {
+      setFetching(false);
+      dispatch(showAlert(err.message));
     }
-    inputRef.current.click();
-  };
-
-  const changeAvatar = async (event, remove) => {
-    if (remove) {
-      await dispatch(removeAvatarStart(token));
-    } else {
-      await dispatch(changeAvatarStart(event.target.files[0], token));
-    }
-    if (!error) dispatch(showAlert("Profile picture updated."));
   };
 
   return (
-    <Fragment>
-      <label
-        className="color-blue font-bold heading-4"
-        style={{ cursor: "pointer", position: "relative" }}
-        onClick={handleClick}
-      >
-        {children || "Change Profile Photo"}
-      </label>
-      <input
-        id="avatar-upload"
-        type="file"
-        accept="image/*"
-        style={{ display: "none" }}
-        ref={inputRef}
-        onChange={(event) => changeAvatar(event)}
-      />
-    </Fragment>
+    <SettingsForm onSubmit={handleSubmit}>
+      <SettingsFormGroup>
+        <Avatar className="avatar--small" imageSrc={currentUser.avatar} />
+        <h1 className="font-medium" style={{ fontSize: "2.5rem" }}>
+          {currentUser.username}
+        </h1>
+      </SettingsFormGroup>
+      <SettingsFormGroup>
+        <label className="heading-3 font-bold">Old Password</label>
+        <FormInput
+          onChange={(event) => setOldPassword(event.target.value)}
+          type="password"
+        />
+      </SettingsFormGroup>
+      <SettingsFormGroup>
+        <label className="heading-3 font-bold">New Password</label>
+        <FormInput
+          onChange={(event) => setNewPassword(event.target.value)}
+          type="password"
+        />
+      </SettingsFormGroup>
+      <SettingsFormGroup>
+        <label className="heading-3 font-bold">Confirm New Password</label>
+        <FormInput
+          onChange={(event) => setConfirmNewPassword(event.target.value)}
+          type="password"
+        />
+      </SettingsFormGroup>
+      <SettingsFormGroup>
+        <label></label>
+        <Button
+          style={{ width: "15rem" }}
+          loading={fetching}
+          disabled={
+            oldPassword.length < 6 ||
+            newPassword.length < 6 ||
+            confirmNewPassword.length < 6
+          }
+        >
+          Change Password
+        </Button>
+      </SettingsFormGroup>
+      <SettingsFormGroup>
+        <label></label>
+        {/* <TextButton style={{ width: "15rem", textAlign: "left" }} blue bold>
+          Forgot Password?
+        </TextButton> */}
+      </SettingsFormGroup>
+    </SettingsForm>
   );
 };
 
-export default ChangeAvatarButton;
+export default ChangePasswordForm;
