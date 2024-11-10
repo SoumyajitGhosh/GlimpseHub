@@ -2,9 +2,11 @@ import React, { Fragment } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import UserCard from "../../UserCard/UserCard";
 import Divider from "../../Divider/Divider";
+import { useSelector } from "react-redux";
 
 const ChatUsers = ({ chattableUsers }) => {
   const navigate = useNavigate();
+  const { chatUser } = useSelector((state) => state.chat);
 
   const ChatUserBody = ({ userCardProps }) => {
     return (
@@ -39,7 +41,9 @@ const ChatUsers = ({ chattableUsers }) => {
     return (
       <div
         onClick={() => {
-          navigate(`/direct/${chattableUser?._id}`);
+          if (chatUser?._id) {
+            navigate(`/direct/${chattableUser?._id}`);
+          }
         }}
         style={{ cursor: "pointer" }}
       >
