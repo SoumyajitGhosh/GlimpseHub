@@ -2,6 +2,7 @@ import socketTypes from './socketTypes';
 import { connect } from '../../services/socketService';
 import { addNotification } from '../notification/notificationActions';
 import { addPost, removePost } from '../feed/feedActions';
+import { addSocketMessagesAction } from '../chat/chatActions';
 
 export const connectSocket = () => (dispatch) => {
     const socket = connect();
@@ -18,6 +19,10 @@ export const connectSocket = () => (dispatch) => {
     socket.on('deletePost', (data) => {
         dispatch(removePost(data));
     });
+
+    socket.on('newMessage', (data) => {
+        dispatch(addSocketMessagesAction(data));
+    })
 };
 
 export const disconnectSocket = () => ({

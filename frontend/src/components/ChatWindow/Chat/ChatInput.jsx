@@ -39,9 +39,23 @@
 // export default MessageInput;
 
 // STARTER CODE SNIPPET
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Icon from "../../Icon/Icon";
+import { pushMessageAction } from "../../../redux/chat/chatActions.js";
+import { selectToken } from "../../../redux/user/userSelectors.js";
 
-const ChatInput = () => {
+const ChatInput = ({ userToChatId }) => {
+  const dispatch = useDispatch();
+  const token = useSelector(selectToken);
+  const [message, setMessage] = useState();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!message) return;
+    dispatch(pushMessageAction(userToChatId, token, message));
+    setMessage("");
+  };
   return (
     <form className="message-input">
       <input
@@ -49,9 +63,15 @@ const ChatInput = () => {
         style={{
           flex: 1, // Makes input take all available space
         }}
+        value={message}
         placeholder="Send a message"
+        onChange={(e) => setMessage(e.target.value)}
       />
-      <Icon icon={"send"} style={{ cursor: "pointer" }} />
+      <Icon
+        icon={"send"}
+        style={{ cursor: "pointer" }}
+        onClick={(e) => handleSubmit(e)}
+      />
     </form>
   );
 };

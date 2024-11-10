@@ -1,10 +1,16 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import Icon from "../Icon/Icon";
 import { useParams } from "react-router-dom";
 import ChatContainer from "./Chat/ChatContainer";
+import { useDispatch } from "react-redux";
+import { setChatUserAction } from "../../redux/chat/chatActions";
 
 const ChatWindow = () => {
+  const dispatch = useDispatch();
   const { id } = useParams();
+  useEffect(() => {
+    dispatch(setChatUserAction(id));
+  }, [id]);
   return (
     <Fragment>
       {id === "inbox" ? (
@@ -17,7 +23,7 @@ const ChatWindow = () => {
         </Fragment>
       ) : (
         <div className="chat-container">
-          <ChatContainer />
+          <ChatContainer userToChatId={id} />
         </div>
       )}
     </Fragment>

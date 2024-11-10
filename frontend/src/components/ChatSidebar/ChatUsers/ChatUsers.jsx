@@ -3,50 +3,51 @@ import { Link, useNavigate } from "react-router-dom";
 import UserCard from "../../UserCard/UserCard";
 import Divider from "../../Divider/Divider";
 
-const ChatUsers = () => {
+const ChatUsers = ({ chattableUsers }) => {
   const navigate = useNavigate();
 
-  const userCardProps = {
-    username: "username",
-    subTextDark: true,
-    date: new Date(),
-    style: { minHeight: "7rem", padding: "1rem 1.5rem" },
-    subText: "Hey",
-    linkTo: `/direct/1`,
-  };
-  const ChatUserBody = () => {
+  const ChatUserBody = ({ userCardProps }) => {
     return (
       <Fragment>
-        <Link to={`/direct/1`}>
+        <Link to={userCardProps.linkTo}>
           <img
             src={"S"}
             style={{
               display: "flex",
             }}
             onClick={() => {
-              navigate(`/direct/1`);
+              navigate(userCardProps.linkTo);
             }}
           />
         </Link>
       </Fragment>
     );
   };
-  const ChatUser = () => {
+  const ChatUser = ({ id, userCardProps }) => {
     return <UserCard {...userCardProps}>{ChatUserBody}</UserCard>;
   };
-  return [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-  ].map((chat, idx) => (
-    <div
-      onClick={() => {
-        navigate(`/direct/1`);
-      }}
-      style={{ cursor: "pointer" }}
-    >
-      <ChatUser key={idx} />
-      <Divider />
-    </div>
-  ));
+  return chattableUsers?.map((chattableUser, idx) => {
+    const userCardProps = {
+      username: chattableUser?.username,
+      subTextDark: true,
+      avatar: chattableUser?.avatar,
+      // date: new Date(),
+      style: { minHeight: "7rem", padding: "1rem 1.5rem" },
+      subText: chattableUser?.fullName,
+      linkTo: `/direct/${chattableUser?._id}`,
+    };
+    return (
+      <div
+        onClick={() => {
+          navigate(`/direct/${chattableUser?._id}`);
+        }}
+        style={{ cursor: "pointer" }}
+      >
+        <ChatUser key={idx} userCardProps={userCardProps} />
+        <Divider />
+      </div>
+    );
+  });
 };
 
 export default ChatUsers;

@@ -23,7 +23,7 @@ const ChatPage = () => {
         <Icon icon="paper-plane-outline" />
       </MobileHeader>
       <main data-test="page-chat" className="chat-page grid">
-        <div>
+        <div style={{ border: "1px solid lightgray" }}>
           <ChatSidebar />
         </div>
         <div className="chat-window">
