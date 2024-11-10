@@ -1,9 +1,10 @@
 .chat-page {
     grid-column: center-start / center-end;
     display: grid;
-    padding-top: 8rem;
+    padding-top: 7rem;
     overflow-y: hidden;
-    grid-template-columns: 30% 70%; 
+    // grid-template-columns: 30% 70%; 
+    grid-template-columns: minmax(30rem, min-content) 65rem;
   
     .first-div {
       grid-column: 1 / 2;
@@ -20,4 +21,104 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: space-around;
+}
+
+input {
+  flex:auto;
+  border-width: 1px;
+  height: 30px;
+  border-radius: 8px;
+  margin: 0px 4px 0px 4px;
+  padding: 16px;
+}
+
+.chat-container{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.chats {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.message-input {
+  padding: 1rem;
+  margin: 0.75rem 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.chat-header {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid lightgray;
+}
+
+.chat-sender{
+  position: relative;
+  font-size: 16px;
+  padding: 10px;
+  width: fit-content;
+  border-radius: 10px;
+  background-color: #0095f6;
+  color: white;
+  margin-left: auto;
+  margin-bottom: 15px;
+
+  span:nth-child(1){
+    position: absolute;
+    top: -15px;
+    font-weight: 800;
+    font-size: xx-small;
+    color: black;
+  }
+  
+  span:nth-child(2){
+    margin-left: 10px; 
+    font-size: xx-small;
+  }
+}
+
+.chatbody-div {
+    flex: 1;
+    // background-image: url(${MessagesBG});
+    background-repeat: repeat;
+    background-position: center;
+    padding: 30px;
+    height: 76vh;
+}
+
+.chat-receiver {
+    position: relative;
+    font-size: 16px;
+    padding: 10px;
+    width: fit-content;
+    border-radius: 10px;
+    background-color: rgba(239, 239, 239, 0.8);
+    margin-bottom: 15px;
+
+    span:nth-child(1){
+      position: absolute;
+      top: -15px;
+      font-weight: 800;
+      font-size: xx-small;
+    }
+
+    span:nth-child(2){
+      margin-left: 10px;
+      font-size: xx-small;
+    }
 }

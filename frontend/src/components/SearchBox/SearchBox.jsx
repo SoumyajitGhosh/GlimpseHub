@@ -9,7 +9,7 @@ import UserCard from "../UserCard/UserCard";
 import Divider from "../Divider/Divider";
 import Loader from "../Loader/Loader";
 
-const SearchBox = ({ style, setResult, onClick }) => {
+const SearchBox = ({ style, setResult, onClick, type = undefined }) => {
   const [query, setQuery] = useState("");
   const { handleSearchDebouncedRef, result, fetching, setFetching } =
     useSearchUsersDebounced();
@@ -20,6 +20,8 @@ const SearchBox = ({ style, setResult, onClick }) => {
       setResult(result);
     }
   }, [result, setResult]);
+
+  console.log("Result check:", result, 1, query && !fetching && !setResult);
 
   return (
     <Fragment>
@@ -63,7 +65,13 @@ const SearchBox = ({ style, setResult, onClick }) => {
                   subText={user.fullName}
                   style={{ padding: "1.5rem 1.5rem" }}
                   onClick={() => {
-                    navigate(`/${user.username}`);
+                    navigate(
+                      `/${
+                        type === "messenger"
+                          ? `direct/${user.username}`
+                          : user.username
+                      }`
+                    );
                     setQuery("");
                   }}
                 />

@@ -19,6 +19,7 @@ const UserCard = ({
   onClick,
   children,
   avatarMedium,
+  linkTo = undefined,
 }) => {
   const avatarClassNames = classNames({
     "avatar--small": !avatarMedium,
@@ -37,7 +38,7 @@ const UserCard = ({
         <Link
           style={{ display: "flex" }}
           onClick={() => hideModal("OptionsDialog")}
-          to={`/${username}`}
+          to={linkTo ? linkTo : `/${username}`}
         >
           <Avatar className={avatarClassNames} imageSrc={avatar} />
         </Link>
@@ -55,7 +56,7 @@ const UserCard = ({
           <Link
             onClick={() => hideModal("OptionsDialog")}
             style={{ textDecoration: "none" }}
-            to={`/${username}`}
+            to={linkTo ? linkTo : `/${username}`}
           >
             <p className="heading-4 font-bold">{username}</p>
           </Link>
