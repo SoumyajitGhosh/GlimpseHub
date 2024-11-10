@@ -34,7 +34,7 @@ const Chats = ({ userToChatId } /*{ message }*/) => {
                     fontSize: "xx-small",
                   }}
                 >
-                  {chatUser}
+                  {chatUser?.username}
                 </span>
                 {message.message}
                 <span>{extractTime(message.createdAt)}</span>
