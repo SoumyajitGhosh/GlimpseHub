@@ -39,11 +39,11 @@ const ChatSidebar = () => {
     }
   }, componentRef.current);
 
-  const stateRef = useRef(chat.data).current;
+  const stateRef = useRef(chat.data)?.current;
 
-  useEffect(() => {
-    stateRef.current = chattableUsers;
-  }, [chattableUsers]);
+  // useEffect(() => {
+  //   if (chat.data.length) stateRef.current = chat.data;
+  // }, [chat.data]);
 
   useEffect(() => {
     dispatch(
