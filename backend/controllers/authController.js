@@ -250,6 +250,7 @@ module.exports.changePassword = async (req, res, next) => {
     let currentPassword = undefined;
 
     try {
+        console.log("I am here");
         const userDocument = await User.findById(user._id);
         currentPassword = userDocument.password;
 
@@ -266,8 +267,11 @@ module.exports.changePassword = async (req, res, next) => {
 
         userDocument.password = newPassword;
         await userDocument.save();
-        return res.send();
+        return res.send({
+            message: "Password updated successfully"
+        });
     } catch (err) {
+        console.log("I am here", err);
         return next(err);
     }
 };
