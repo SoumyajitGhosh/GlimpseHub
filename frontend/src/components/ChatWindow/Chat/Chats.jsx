@@ -1,108 +1,54 @@
-// import { useAuthContext } from "../../context/AuthContext";
-// import { extractTime } from "../../utils/extractTime";
-// import useConversation from "../../zustand/useConversation";
+import { extractTime } from "../../../utils/extractTime";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectCurrentUser,
+  selectToken,
+} from "../../../redux/user/userSelectors";
+import { fetchAllMessagesAction } from "../../../redux/chat/chatActions";
 
-const Chats = (/*{ message }*/) => {
-  // const { authUser } = useAuthContext();
-  // const { selectedConversation } = useConversation();
-  // const fromMe = message.senderId === authUser._id;
-  // const formattedTime = extractTime(message.createdAt);
-  const chatClassName = /*fromMe */ true ? "chat-end" : "chat-start";
-  // const profilePic = fromMe
-  //   ? authUser.profilePic
-  //   : selectedConversation?.profilePic;
-  // const bubbleBgColor = fromMe ? "bg-blue-500" : "";
+const Chats = ({ userToChatId } /*{ message }*/) => {
+  const dispatch = useDispatch();
+  const token = useSelector(selectToken);
+  const currentUser = useSelector(selectCurrentUser);
+  const { chatUser } = useSelector((state) => state.chat);
+  const { messages } = useSelector((state) => state.chat);
 
-  // const shakeClass = message.shouldShake ? "shake" : "";
+  useEffect(() => {
+    dispatch(fetchAllMessagesAction(userToChatId, token));
+  }, []);
+  console.log("messages:", messages);
 
   return (
     <div style={{ height: "100%" }}>
-      <div className="chat-header">
-        {/* <Avatar /> */}A
-        <div style={{ flex: 1, paddingLeft: "20px" }}>
-          <h5 style={{ fontWeight: 900 }}>{"receiver.name"}</h5>
-        </div>
-        <div>
-          {/* <IconButton>
-            <SearchOutlinedIcon />
-          </IconButton>
-          <IconButton>
-            <AttachFileIcon />
-          </IconButton>
-          <IconButton>
-            <MoreVertIcon />
-          </IconButton> */}
-        </div>
-      </div>
-
       <div className="chatbody-div">
-        {/* Received Message */}
-        <p className="chat-receiver">
-          <span>{"receiver.name"}</span>
-          This is a message
-          <span>{new Date().toUTCString()}</span>
-        </p>
-
-        {/* Sent Message */}
-        <p className="chat-sender">
-          <span>{"sender.Name"}</span>
-          This is a message
-          <span>{new Date().toUTCString()}</span>
-        </p>
+        {messages?.map((message, idx) => (
+          <>
+            {message.senderId === userToChatId ? (
+              <p className="chat-receiver">
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "-15px",
+                    fontWeight: 800,
+                    fontSize: "xx-small",
+                  }}
+                >
+                  {chatUser}
+                </span>
+                {message.message}
+                <span>{extractTime(message.createdAt)}</span>
+              </p>
+            ) : (
+              <p className="chat-sender">
+                <span>{currentUser.username}</span>
+                {message.message}
+                <span>{extractTime(message.createdAt)}</span>
+              </p>
+            )}
+          </>
+        ))}
       </div>
-
-      {/* WRITE A NEW MESSAGE */}
-      {/* <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          height: "60px",
-          borderTop: "1px solid lightgray",
-          background: "rgba(239, 239, 239, 0.9)",
-        }}
-      >
-        <InsertEmoticonIcon
-          style={{
-            color: "gray",
-            margin: "10px",
-          }}
-        />
-        <form
-          style={{
-            flex: 1,
-            display: "flex",
-          }}
-        >
-          <input
-            placeholder="Type a message"
-            type="text"
-            style={{
-              flex: 1,
-              display: "flex",
-              borderRadius: "30px",
-              padding: "10px",
-              border: "none",
-            }}
-            value={typedMessage}
-            onChange={(e) => setTypedMessage(e.target.value)}
-          />
-          <button
-            type="submit"
-            style={{ display: "none" }}
-            onClick={(e) => handleSendMsg}
-          >
-            Send a message
-          </button>
-        </form>
-        <MicIcon
-          onClick={(e) => handleSendMsg(typedMessage)}
-          style={{
-            color: "gray",
-            margin: "10px",
-          }}
-        />
-      </div> */}
     </div>
   );
 };

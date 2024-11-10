@@ -3,7 +3,8 @@
     display: grid;
     padding-top: 7rem;
     overflow-y: hidden;
-    grid-template-columns: 30% 70%; 
+    // grid-template-columns: 30% 70%; 
+    grid-template-columns: minmax(30rem, min-content) 65rem;
   
     .first-div {
       grid-column: 1 / 2;
@@ -75,7 +76,7 @@ input {
   background-color: #0095f6;
   color: white;
   margin-left: auto;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 
   span:nth-child(1){
     position: absolute;
@@ -97,7 +98,7 @@ input {
     background-repeat: repeat;
     background-position: center;
     padding: 30px;
-    height: 76%;
+    height: 76vh;
 }
 
 .chat-receiver {
@@ -107,7 +108,7 @@ input {
     width: fit-content;
     border-radius: 10px;
     background-color: rgba(239, 239, 239, 0.8);
-    margin-bottom: 30px;
+    margin-bottom: 15px;
 
     span:nth-child(1){
       position: absolute;
