@@ -116,8 +116,6 @@ const Modal = memo(({ component, ...additionalProps }) => {
   );
 });
 
-Modal.whyDidYouRender = true;
-
 Modal.propTypes = {
   component: PropTypes.string.isRequired,
   props: PropTypes.object,
