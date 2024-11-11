@@ -43,7 +43,7 @@ const ChatUsers = ({ chattableUsers }) => {
         onClick={() => {
           navigate(`/direct/${chattableUser?._id}`);
         }}
-        style={{ cursor: "pointer" }}
+        className="chat-user"
       >
         <ChatUser key={idx} userCardProps={userCardProps} />
         <Divider />

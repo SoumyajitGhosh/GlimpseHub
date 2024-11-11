@@ -322,6 +322,4 @@ PostDialog.propTypes = {
   profileDispatch: PropTypes.func,
 };
 
-PostDialog.whyDidYouRender = true;
-
 export default PostDialog;
