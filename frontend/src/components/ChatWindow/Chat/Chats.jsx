@@ -16,8 +16,7 @@ const Chats = ({ userToChatId } /*{ message }*/) => {
 
   useEffect(() => {
     dispatch(fetchAllMessagesAction(userToChatId, token));
-  }, []);
-  console.log("messages:", messages);
+  }, [userToChatId]);
 
   return (
     <div style={{ height: "100%" }}>

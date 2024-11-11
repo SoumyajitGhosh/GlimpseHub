@@ -41,9 +41,7 @@ const ChatUsers = ({ chattableUsers }) => {
     return (
       <div
         onClick={() => {
-          if (chatUser?._id) {
-            navigate(`/direct/${chattableUser?._id}`);
-          }
+          navigate(`/direct/${chattableUser?._id}`);
         }}
         style={{ cursor: "pointer" }}
       >
