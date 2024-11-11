@@ -48,23 +48,31 @@ const chatReducer = (state = INITIAL_STATE, action) => {
             };
         }
         case chatTypes.SET_CHAT_USER: {
-            const filteredUser = state.data?.filter((datum, idx) => datum._id === action.payload)
+            const filteredUser = state.data?.find((datum) => datum._id === action.payload);
             return {
                 ...state,
-                chatUser: filteredUser
-            }
-        }
+                chatUser: filteredUser, // `filteredUser` will be an object or undefined if not found
+            };
+        }        
         case chatTypes.FETCH_ALL_MESSAGES: {
             const newMessages = action.payload;
+
+            if (newMessages.length === 0) {
+                return {
+                    ...state,
+                    messages: []
+                };
+            }
 
             return {
                 ...state,
                 messages: [
                     ...state.messages,
                     ...newMessages.filter(
-                        (newMessage) => !state.messages.some(
-                            (existingMessage) => existingMessage._id === newMessage._id
-                        )
+                        (newMessage) =>
+                            !state.messages.some(
+                                (existingMessage) => existingMessage._id === newMessage._id
+                            )
                     ),
                 ],
             };
