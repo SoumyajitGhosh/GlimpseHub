@@ -123,3 +123,10 @@ input {
       font-size: xx-small;
     }
 }
+
+.chat-user {
+  cursor: pointer;
+  :hover {
+    background-color: #e8e1e131;
+  }
+}
