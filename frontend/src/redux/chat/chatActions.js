@@ -13,7 +13,6 @@ export const fetchChatUsersAction = (userId, stateRefLength, token) => async (di
             )
         dispatch({ type: chatTypes.FETCH_SUCCESS, payload: response });
     } catch (err) {
-        console.log("Here:", err)
         dispatch({ type: chatTypes.FETCH_FAILURE, payload: err });
     }
 };

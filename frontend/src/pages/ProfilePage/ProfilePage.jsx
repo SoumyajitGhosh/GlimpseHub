@@ -85,11 +85,6 @@ const ProfilePage = () => {
     dispatch(fetchProfileAction(username, token));
   }, [username, token]);
 
-  console.log(
-    "Fetch Profile:",
-    useSelector((state) => state)
-  );
-
   const handleClick = (postId) => {
     if (window.outerWidth <= 600) {
       navigate(`/post/${postId}`);
