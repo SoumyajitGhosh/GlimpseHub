@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
-import { register } from "./serviceWorker";
+// import { register } from "./serviceWorker";
 import store from "./redux/store";
 
 import "./sass/main.scss";
@@ -26,4 +26,4 @@ createRoot(document.getElementById("root")).render(
 
 // serviceWorker.unregister();
 // Register the service worker
-register();
+// register();
