@@ -146,3 +146,100 @@ Verification throughout: no test runner exists in this project, so verification 
 (baseline 357 problems → 379 after Phase 3, entirely from newer ESLint plugin versions surfacing
 pre-existing patterns via new rules, not from this work), plus `npm run build` and a `npm run dev`
 boot check after every phase.
+
+## 4. Frontend test runner + ESLint regression fix
+
+### 4.1 Vitest + React Testing Library
+
+Added the frontend's first test runner (there was none — `src/utils/test/testUtils.js` was dead
+Enzyme-era code; neither `enzyme` nor `check-prop-types` were installed, so it couldn't run).
+
+- devDependencies: `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`.
+- `vite.config.js` gained a `test: { environment: 'jsdom', globals: true, setupFiles: './src/utils/test/setupTests.js' }`
+  block — Vitest reads Vite's own config, no separate config file needed.
+- `package.json` scripts: `test` (`vitest run`), `test:watch` (`vitest`).
+- Replaced `testUtils.js` with `setupTests.js` (jest-dom matchers) and a working `storeFactory.js`
+  (same redux-store-for-tests helper, fixed to use `legacy_createStore` — plain `createStore` was
+  removed in Redux 5, so the old helper was already broken independent of the missing Enzyme deps).
+- Added two starter test files establishing the pattern for future tests: `Button.test.jsx`
+  (presentational, no dependencies) and `UserCard.test.jsx` (connected component wrapped in
+  `<Provider>`/`<MemoryRouter>`, using `storeFactory`).
+
+### 4.2 ESLint regression fix (the 357→379 delta from section 3, Phase 3)
+
+Fixed the ~22 problems newly surfaced by the `eslint-plugin-react-hooks` 5→7 and
+`eslint-plugin-react-refresh` bumps — deliberately left the pre-existing 357-problem baseline
+(mostly `react/prop-types` and `no-unused-vars`) alone; that's a separate, much larger cleanup.
+
+- **`react-refresh/only-export-components` (5 files)**: all false positives on `connect()`-wrapped
+  components. Fixed at the config level — added `extraHOCs: ['connect']` to the rule options in
+  `eslint.config.js` rather than touching each file.
+- **`react-hooks/refs` (12 occurrences)**: three different real patterns —
+  - `ChatSidebar.jsx` / `UsersList.jsx` had a "snapshot state into a ref once" idiom
+    (`useRef(state.data).current`) that dereferenced `.current` at render time and was declared
+    *after* its first use. Reordered the declarations and stopped dereferencing at render time —
+    `.current` is now only read where it's used (inside the effect).
+  - `ChatSidebar.jsx` / `UsersList.jsx` / `SearchSuggestion.jsx` passed `componentRef.current` (a
+    resolved DOM node, read during render) into `useScrollPositionThrottled`. Changed the hook
+    (`src/hooks/useScrollPositionThrottled.js`) to accept the ref object itself and resolve
+    `.current` inside its effect — a real correctness improvement, not just a lint fix, since it
+    removes a first-render race where the listener could bind to `window` before the ref attached.
+  - `PulsatingIcon.jsx` reads a *caller-owned* ref (`elementRef.current`) during render to decide
+    whether to skip the initial animation. Left as-is with a scoped
+    `eslint-disable-next-line react-hooks/refs` + comment — rewriting to avoid this would change
+    animation timing behavior with no test coverage to verify against.
+  - `useSearchUsersDebounced.js` returns a lazily-initialized ref's `.current` (a memoized debounced
+    function) from a custom hook — the documented React "instance value" pattern
+    (react.dev/reference/react/useRef). Still flagged by this rule version; suppressed with a scoped
+    disable + comment rather than restructuring a working, documented pattern.
+- **`react-hooks/set-state-in-effect` (4 occurrences)**:
+  - `NewPostButton.jsx` used `useState`+`useEffect` purely to relay a selected file into
+    `showModal`/`navigate`. Removed the state indirection entirely — the file is now handled
+    directly in the `<input onChange>` handler, which is a strict simplification (one fewer render
+    per file selection, no behavior change).
+  - `SearchSuggestion.jsx`'s "start fetching more once `result` reaches the page size" effect was a
+    textbook prop-change reaction; converted to the render-time "adjusting state when a prop
+    changes" pattern (tracking `prevResultLength`) instead of a `useEffect`.
+  - `NotificationButton.jsx`'s two effects (auto-show the unread-notification popup with a 10s
+    auto-hide timer, and dismiss it when the notification feed opens) are stateful timer
+    choreography for a live UI feature with no test coverage. Left as-is with scoped
+    `eslint-disable-next-line` comments rather than risk changing popup timing behavior.
+- **`react-hooks/immutability` (1 occurrence)**: same `ChatSidebar.jsx` ref-ordering issue as above,
+  resolved by the same reorder.
+
+Verification: `npm test` (6 tests, 2 files, all passing), `npm run lint` (351 errors + 6 warnings =
+357 — back to the pre-Phase-3 baseline, with the 4 previously-regressed rules at zero), `npm run
+build` (succeeds, output unchanged in shape). No backend or browser was available in this session to
+manually exercise the touched screens (chat sidebar infinite scroll, followers/following list,
+mention search, new-post file picker, notification popup) — that manual pass is still recommended
+before merging, given `useScrollPositionThrottled`'s signature change and the two
+`useEffect`→render-time-state rewrites touch real user-facing timing/scroll behavior.
+
+## 5. Planned: react-router-dom v7 migration (not yet started)
+
+Current version is `^6.30.6`; `App.jsx` uses the plain `<Routes>/<Route>` tree (not
+`createBrowserRouter`/`RouterProvider`), so a straight v7 bump is low-risk — v7 retains the v6
+`<Routes>` API for apps that don't opt into the data-router APIs, meaning no restructuring is needed
+for the bump itself. Migration surface: 16 files use `<Link>`/`<NavLink>`, 5 use `useParams`, 6 use
+`useLocation` (incl. `App.jsx`'s `matchPath`-driven chrome-visibility logic) — none of these APIs
+change in v7 for non-data-router usage.
+
+Adopting v7's *data-router* features (loaders/actions via `RouterProvider`) is a separate, larger
+follow-up: it would require converting `App.jsx`'s inline route tree into a `createBrowserRouter`
+config, reworking the `NO_CHROME_ROUTES`/`matchPath` visibility check, and moving
+`ProtectedRoute`'s `<Outlet>` pattern into route `children`. Not implied by the version bump alone.
+
+Recommended next step when this is picked up: bump the dependency, then do a manual pass through
+every route (no test suite covers routing yet) watching for v7 deprecation warnings before removing
+any legacy behavior flags.
+
+## 6. `/frontend-audit` slash command
+
+Sections 4 and 5 above were produced by asking Claude Code to "act as a senior frontend architect,
+review recent frontend changes, suggest follow-ups, then implement the ones I pick." That workflow is
+now a reusable project slash command: **`.claude/commands/frontend-audit.md`**. Running `/frontend-audit`
+in this repo repeats the same assess → recommend → (user picks) → implement → log-to-SETUP_NOTES.md →
+commit flow without having to restate it, including the guardrails established during this session:
+no new architectural patterns (no RTK/react-query/TS), lint/test regressions get scoped to what
+actually regressed rather than absorbing the whole pre-existing backlog, and risky-but-untested
+behavioral fixes get a commented `eslint-disable` instead of a silent rewrite.

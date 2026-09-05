@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 
 import useScrollPositionThrottled from '../../hooks/useScrollPositionThrottled';
 
@@ -14,9 +14,12 @@ const SearchSuggestion = ({ fetching, result, onClick, username }) => {
     const componentRef = useRef();
     const offset = 10;
 
-    useEffect(() => {
-        if (result.length === offset && !shouldFetch) setShouldFetch(true);
-    }, [result, shouldFetch]);
+    const resultLength = result.length;
+    const [prevResultLength, setPrevResultLength] = useState(resultLength);
+    if (resultLength !== prevResultLength) {
+        setPrevResultLength(resultLength);
+        if (resultLength === offset && !shouldFetch) setShouldFetch(true);
+    }
 
     useScrollPositionThrottled(
         async ({ atBottom }) => {
@@ -37,7 +40,7 @@ const SearchSuggestion = ({ fetching, result, onClick, username }) => {
                 }
             }
         },
-        componentRef.current,
+        componentRef,
         [shouldFetch, fetching, fetchingAdditionalUsers]
     );
 

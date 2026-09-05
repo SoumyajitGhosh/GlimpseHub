@@ -27,10 +27,15 @@ const useSearchUsersDebounced = () => {
             throw new Error(err);
         }
     };
-    const handleSearchDebounced = debounce(handleSearch, 500);
-    const handleSearchDebouncedRef = useRef((string, offset) =>
-        handleSearchDebounced(string, offset)
-    ).current;
+    const debouncedRef = useRef(null);
+    if (debouncedRef.current == null) {
+        debouncedRef.current = debounce(handleSearch, 500);
+    }
+    // Returning a ref's current value as a stable function identity is a
+    // deliberate "instance value" pattern (react.dev/reference/react/useRef),
+    // not a render-output read.
+    // eslint-disable-next-line react-hooks/refs -- lazy-initialized singleton, not a render-output read
+    const handleSearchDebouncedRef = debouncedRef.current;
     return {
         handleSearchDebouncedRef,
         result,

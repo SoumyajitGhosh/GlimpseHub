@@ -16,6 +16,7 @@ const ChatSidebar = () => {
   const token = useSelector(selectToken);
   const { following } = useSelector((state) => state?.profile?.data);
   const { chat } = useSelector((state) => state);
+  const stateRef = useRef(chat?.data);
 
   useEffect(() => {
     dispatch(fetchProfileAction(currentUser?.username, token));
@@ -32,14 +33,12 @@ const ChatSidebar = () => {
       dispatch(
         fetchChatUsersActionOnScroll(
           currentUser._id,
-          stateRef?.length ?? 0,
+          stateRef.current?.length ?? 0,
           token
         )
       );
     }
-  }, componentRef.current);
-
-  const stateRef = useRef(chat.data)?.current;
+  }, componentRef);
 
   // useEffect(() => {
   //   if (chat.data.length) stateRef.current = chat.data;
@@ -47,9 +46,9 @@ const ChatSidebar = () => {
 
   useEffect(() => {
     dispatch(
-      fetchChatUsersAction(currentUser._id, /*stateRef?.length ??*/ 0, token)
+      fetchChatUsersAction(currentUser._id, /*stateRef.current?.length ??*/ 0, token)
     );
-  }, [currentUser?._id, token, stateRef]);
+  }, [currentUser?._id, token]);
 
   return (
     <Fragment>

@@ -26,6 +26,7 @@ const NotificationButton = ({ mobile, icon }) => {
       clearTimeout(notificationPopupTimeout);
     }
     if (notificationState.unreadCount > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- auto-shows the popup in response to unreadCount changing, paired with the timer below
       !showNotificationPopup && setShowNotificationPopup(true);
       setShowNotificationPopupTimeout(
         setTimeout(() => setShowNotificationPopup(false), 10000)
@@ -36,6 +37,7 @@ const NotificationButton = ({ mobile, icon }) => {
   useEffect(() => {
     if (showNotifications) {
       clearTimeout(notificationPopupTimeout);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- dismisses the popup as soon as the notification feed is opened
       setShowNotificationPopup(false);
     }
   }, [showNotifications, notificationPopupTimeout]);

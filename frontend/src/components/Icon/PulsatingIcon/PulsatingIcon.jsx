@@ -19,7 +19,10 @@ const PulsatingIcon = ({
       tension: 500,
       friction: 20,
     },
-    // Prevent animating on initial render
+    // Prevent animating on initial render. elementRef is owned by the parent
+    // and its attachment state is intentionally re-read on every render so the
+    // very next transition after mount is no longer skipped.
+    // eslint-disable-next-line react-hooks/refs -- deliberate read of a foreign ref, not this component's own render output
     immediate: !elementRef.current,
   });
 

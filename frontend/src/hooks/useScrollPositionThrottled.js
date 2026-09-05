@@ -15,18 +15,21 @@ const getCurrentScrollPosition = (element) => {
  * A throttled hook to execute a function upon scroll
  * @function useScrollPositionThrottled
  * @param {function} callback Callback function to call when a user scrolls
- * @param {HTMLElement} element The element to calculate the scroll position, the default is document
+ * @param {{ current: HTMLElement }} [elementRef] Ref to the element to calculate the scroll position from, the default is document
  * @param {array} deps Dependency array
  */
-const useScrollPositionThrottled = (callback, element, deps = []) => {
-    const currentElement = element ? element : document.documentElement;
-    const scrollPosition = useRef(getCurrentScrollPosition(currentElement));
+const useScrollPositionThrottled = (callback, elementRef, deps = []) => {
+    const scrollPosition = useRef(0);
 
     /**
      * Handles determining positional values when scrolling
      * @function handleScroll
      */
     useEffect(() => {
+        const element = elementRef?.current;
+        const currentElement = element ? element : document.documentElement;
+        scrollPosition.current = getCurrentScrollPosition(currentElement);
+
         const handleScroll = () => {
             scrollPosition.current = getCurrentScrollPosition(currentElement);
             callback({
@@ -50,7 +53,7 @@ const useScrollPositionThrottled = (callback, element, deps = []) => {
                 : window.removeEventListener('scroll', handleScrollThrottled);
         };
         //eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [...deps, element, currentElement, callback]);
+    }, [...deps, elementRef, callback]);
 };
 
 export default useScrollPositionThrottled;

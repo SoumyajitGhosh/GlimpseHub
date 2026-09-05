@@ -23,6 +23,8 @@ const UsersList = ({
 }) => {
     const [state, dispatch] = useReducer(usersListReducer, INITIAL_STATE);
     const componentRef = useRef();
+    const stateRef = useRef(state.data);
+    const followingRef = useRef(following);
 
     useScrollPositionThrottled(async ({ atBottom }) => {
         const count = followingCount ? followingCount : followersCount;
@@ -42,24 +44,21 @@ const UsersList = ({
                 dispatch({ type: 'FETCH_FAILURE', payload: err });
             }
         }
-    }, componentRef.current);
-
-    const stateRef = useRef(state.data).current;
-    const followingRef = useRef(following).current;
+    }, componentRef);
 
     useEffect(() => {
         (async function () {
             try {
                 dispatch({ type: 'FETCH_START' });
-                const response = followingRef
+                const response = followingRef.current
                     ? await retrieveUserFollowing(
                         userId,
-                        stateRef ? stateRef.length : 0,
+                        stateRef.current ? stateRef.current.length : 0,
                         token
                     )
                     : await retrieveUserFollowers(
                         userId,
-                        stateRef ? stateRef.length : 0,
+                        stateRef.current ? stateRef.current.length : 0,
                         token
                     );
                 dispatch({ type: 'FETCH_SUCCESS', payload: response });
@@ -67,7 +66,7 @@ const UsersList = ({
                 dispatch({ type: 'FETCH_FAILURE', payload: err });
             }
         })();
-    }, [userId, token, stateRef, followingRef]);
+    }, [userId, token]);
 
     return (
         <section
