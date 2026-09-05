@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useTransition, animated } from 'react-spring';
+import { useTransition as useSpringTransition, animated } from 'react-spring';
 import classNames from 'classnames';
 
 import TextButton from '../Button/TextButton/TextButton';
@@ -12,7 +12,7 @@ const OptionsDialog = ({
     title,
     cancelButton = true,
 }) => {
-    const [transitions, api] = useTransition(true, () => ({
+    const [transitions, api] = useSpringTransition(true, () => ({
       from: { transform: "scale(1.2)", opacity: 0.5 },
       enter: { transform: "scale(1)", opacity: 1 },
       leave: { opacity: 0 },

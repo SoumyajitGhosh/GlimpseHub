@@ -1,14 +1,87 @@
-$color-white: #fff;
-$color-black: #262626;
-$color-red: #ed4956;
+@use 'sass:string';
 
-$color-grey-1: #999;
-$color-grey-2: #dbdbdb;
-$color-grey-3: #fafafa;
-$color-grey-4: #efefef;
+// ---- CSS custom properties (light defaults) ----
+:root {
+  --color-white: #fff;
+  --color-black: #262626;
+  --color-red: #ed4956;
 
-$color-secondary: #0095f6;
-$color-secondary-dark: #00376b;
+  --color-grey-1: #999;
+  --color-grey-2: #dbdbdb;
+  --color-grey-3: #fafafa;
+  --color-grey-4: #efefef;
+
+  --color-secondary: #0095f6;
+  --color-secondary-dark: #00376b;
+
+  // semantic aliases
+  --color-bg: var(--color-grey-3);
+  --color-surface: var(--color-white);
+  --color-text: var(--color-black);
+  --color-text-muted: var(--color-grey-1);
+  --color-accent: var(--color-secondary);
+  --color-accent-dark: var(--color-secondary-dark);
+  --color-danger: var(--color-red);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-white: #262626;
+    --color-black: #f5f5f5;
+    --color-red: #ff6b6b;
+
+    --color-grey-1: #a8a8a8;
+    --color-grey-2: #3a3a3a;
+    --color-grey-3: #121212;
+    --color-grey-4: #1e1e1e;
+
+    --color-secondary: #3ea6ff;
+    --color-secondary-dark: #79c0ff;
+
+    --color-bg: var(--color-grey-3);
+    --color-surface: var(--color-grey-4);
+    --color-text: var(--color-black);
+    --color-text-muted: var(--color-grey-1);
+    --color-accent: var(--color-secondary);
+    --color-accent-dark: var(--color-secondary-dark);
+    --color-danger: var(--color-red);
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-white: #262626;
+  --color-black: #f5f5f5;
+  --color-red: #ff6b6b;
+
+  --color-grey-1: #a8a8a8;
+  --color-grey-2: #3a3a3a;
+  --color-grey-3: #121212;
+  --color-grey-4: #1e1e1e;
+
+  --color-secondary: #3ea6ff;
+  --color-secondary-dark: #79c0ff;
+
+  --color-bg: var(--color-grey-3);
+  --color-surface: var(--color-grey-4);
+  --color-text: var(--color-black);
+  --color-text-muted: var(--color-grey-1);
+  --color-accent: var(--color-secondary);
+  --color-accent-dark: var(--color-secondary-dark);
+  --color-danger: var(--color-red);
+}
+
+// ---- SCSS variables (interop shim: keep $color-* usable, backed by CSS vars) ----
+$color-white: string.unquote('var(--color-white)');
+$color-black: string.unquote('var(--color-black)');
+$color-red: string.unquote('var(--color-red)');
+
+$color-grey-1: string.unquote('var(--color-grey-1)');
+$color-grey-2: string.unquote('var(--color-grey-2)');
+$color-grey-3: string.unquote('var(--color-grey-3)');
+$color-grey-4: string.unquote('var(--color-grey-4)');
+
+$color-secondary: string.unquote('var(--color-secondary)');
+$color-secondary-dark: string.unquote('var(--color-secondary-dark)');
 
 $icon-huge-size: 15rem;
 $icon-larger-size: 6rem;
@@ -16,6 +89,15 @@ $icon-large-size: 4rem;
 $icon-medium-size: 2.7rem;
 $icon-small-size: 2rem;
 $icon-tiny-size: 1.3rem;
+
+$spacing-1: 0.4rem;
+$spacing-2: 0.8rem;
+$spacing-3: 1.2rem;
+$spacing-4: 1.6rem;
+$spacing-5: 2.4rem;
+$spacing-6: 3.2rem;
+$spacing-7: 4.8rem;
+$spacing-8: 6.4rem;
 
 $footer-height: 10rem;
 $mobile-header-height: 5rem;

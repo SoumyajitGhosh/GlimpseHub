@@ -124,7 +124,11 @@ const PostDialog = ({
           ) : (
             <img
               src={state.data.image}
-              alt="Post"
+              alt={
+                state.data.caption
+                  ? state.data.caption
+                  : `Post by ${state.data.author.username}`
+              }
               style={{ filter: state.data.filter }}
             />
           )}
@@ -146,6 +150,7 @@ const PostDialog = ({
               <Avatar
                 className="avatar--small"
                 imageSrc={state.data.author.avatar}
+                alt={`${state.data.author.username}'s avatar`}
               />
             </Link>
           )}
@@ -167,7 +172,9 @@ const PostDialog = ({
             </Link>
           )}
           {!fetching && (
-            <div
+            <button
+              type="button"
+              aria-label="More options"
               onClick={() => {
                 const options = [
                   {
@@ -216,11 +223,10 @@ const PostDialog = ({
                   )
                 );
               }}
-              style={{ cursor: "pointer" }}
               className="post-dialog__more"
             >
               <Icon className="icon--small" icon="ellipsis-horizontal" />
-            </div>
+            </button>
           )}
         </header>
         <div

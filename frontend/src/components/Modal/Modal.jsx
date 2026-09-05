@@ -1,4 +1,4 @@
-import React, { useEffect, memo, lazy, Suspense } from "react";
+import React, { useEffect, useRef, memo, lazy, Suspense } from "react";
 import { useDispatch } from "react-redux";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
@@ -75,11 +75,19 @@ const componentMap = {
   "UsersList/UsersList": () => import("../../components/UsersList/UsersList"),
 };
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 const Modal = memo(({ component, ...additionalProps }) => {
   const dispatch = useDispatch();
   const modalRoot = document.querySelector("#modal-root");
   const el = document.createElement("div");
   el.className = "modal grid";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.tabIndex = -1;
+
+  const previouslyFocusedRef = useRef(null);
 
   // Get the LazyComponent based on the component prop
   const LazyComponent = componentMap[component]
@@ -87,17 +95,67 @@ const Modal = memo(({ component, ...additionalProps }) => {
     : null;
 
   useEffect(() => {
-    const hide = ({ target }) => {
+    // Reused by both outside-click and Escape-key dismissal so there's a
+    // single source of truth for "how does this modal get dismissed".
+    const dismiss = () => dispatch(hideModal(component));
+
+    const handleMouseDown = ({ target }) => {
       if (target === el || !el.contains(target)) {
-        dispatch(hideModal(component));
+        dismiss();
       }
     };
-    el.addEventListener("mousedown", hide, false);
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        dismiss();
+        return;
+      }
+
+      if (event.key === "Tab") {
+        const focusable = Array.from(
+          el.querySelectorAll(FOCUSABLE_SELECTOR)
+        );
+        if (focusable.length === 0) {
+          event.preventDefault();
+          return;
+        }
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    el.addEventListener("mousedown", handleMouseDown, false);
+    document.addEventListener("keydown", handleKeyDown);
     modalRoot.appendChild(el);
 
+    previouslyFocusedRef.current = document.activeElement;
+    // Move focus into the modal: first focusable element, falling back to
+    // the modal container itself (it has tabIndex={-1} via el.tabIndex above).
+    const focusable = el.querySelectorAll(FOCUSABLE_SELECTOR);
+    if (focusable.length > 0) {
+      focusable[0].focus();
+    } else {
+      el.focus();
+    }
+
     return () => {
-      el.removeEventListener("mousedown", hide, false);
+      el.removeEventListener("mousedown", handleMouseDown, false);
+      document.removeEventListener("keydown", handleKeyDown);
       modalRoot.removeChild(el);
+
+      const previouslyFocused = previouslyFocusedRef.current;
+      if (previouslyFocused && typeof previouslyFocused.focus === "function") {
+        previouslyFocused.focus();
+      }
     };
   }, [el, modalRoot, dispatch, component]);
 

@@ -87,28 +87,28 @@ const EditProfileForm = () => {
         </div>
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label className="heading-3 font-bold">Name</label>
+        <label htmlFor="fullName" className="heading-3 font-bold">Name</label>
         <FormInput
           name="fullName"
           fieldProps={formik.getFieldProps("fullName")}
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label className="heading-3 font-bold">Username</label>
+        <label htmlFor="username" className="heading-3 font-bold">Username</label>
         <FormInput
           name="username"
           fieldProps={formik.getFieldProps("username")}
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label className="heading-3 font-bold">Website</label>
+        <label htmlFor="website" className="heading-3 font-bold">Website</label>
         <FormInput
           name="website"
           fieldProps={formik.getFieldProps("website")}
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label className="heading-3 font-bold">Bio</label>
+        <label htmlFor="bio" className="heading-3 font-bold">Bio</label>
         <FormTextarea name="bio" fieldProps={formik.getFieldProps("bio")} />
       </SettingsFormGroup>
       <SettingsFormGroup>
@@ -128,7 +128,7 @@ const EditProfileForm = () => {
         </div>
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label className="heading-3 font-bold">Email</label>
+        <label htmlFor="email" className="heading-3 font-bold">Email</label>
         <FormInput name="email" fieldProps={formik.getFieldProps("email")} />
       </SettingsFormGroup>
       <SettingsFormGroup>

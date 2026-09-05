@@ -1,3 +1,5 @@
+@use '../abstracts' as *;
+
 .dash {
   height: 1px;
   background-color: $color-grey-1;

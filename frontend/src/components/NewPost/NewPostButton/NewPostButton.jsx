@@ -33,6 +33,7 @@ const NewPostButton = ({ showModal, hideModal, plusIcon, children, style }) => {
         style={{ cursor: "pointer", ...style }}
         className="icon"
         htmlFor="file-upload"
+        aria-label={children ? undefined : "Create new post"}
       >
         {children ? (
           children

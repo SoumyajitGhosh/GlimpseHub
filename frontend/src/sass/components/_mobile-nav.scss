@@ -1,3 +1,5 @@
+@use '../abstracts' as *;
+
 .mobile-nav {
   height: $mobile-header-height;
   background-color: $color-white;

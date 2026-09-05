@@ -1,3 +1,5 @@
+@use '../abstracts' as *;
+
 .suggested-users {
   grid-column: center-start / center-end;
   justify-self: center;

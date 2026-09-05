@@ -1,3 +1,5 @@
+@use '../abstracts' as *;
+
 .filter-selector {
   list-style-type: none;
   display: flex;

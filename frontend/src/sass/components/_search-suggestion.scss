@@ -1,3 +1,5 @@
+@use '../abstracts' as *;
+
 .search-suggestion {
   background-color: $color-white;
   position: absolute;

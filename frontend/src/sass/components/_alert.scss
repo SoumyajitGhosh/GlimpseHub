@@ -1,3 +1,5 @@
+@use '../abstracts' as *;
+
 .alert {
   background-color: $color-black;
   min-height: 4rem;

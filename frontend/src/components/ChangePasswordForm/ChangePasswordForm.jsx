@@ -57,22 +57,25 @@ const ChangePasswordForm = () => {
         </h1>
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label className="heading-3 font-bold">Old Password</label>
+        <label htmlFor="oldPassword" className="heading-3 font-bold">Old Password</label>
         <FormInput
+          id="oldPassword"
           onChange={(event) => setOldPassword(event.target.value)}
           type="password"
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label className="heading-3 font-bold">New Password</label>
+        <label htmlFor="newPassword" className="heading-3 font-bold">New Password</label>
         <FormInput
+          id="newPassword"
           onChange={(event) => setNewPassword(event.target.value)}
           type="password"
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label className="heading-3 font-bold">Confirm New Password</label>
+        <label htmlFor="confirmNewPassword" className="heading-3 font-bold">Confirm New Password</label>
         <FormInput
+          id="confirmNewPassword"
           onChange={(event) => setConfirmNewPassword(event.target.value)}
           type="password"
         />

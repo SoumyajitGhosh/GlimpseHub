@@ -9,12 +9,20 @@ const FormInput = ({
     valid,
     placeholder,
     fieldProps,
+    id,
     ...additionalProps
 }) => {
     const [inputType, setInputType] = useState('password');
     const handleClick = () => {
         inputType === 'password' ? setInputType('text') : setInputType('password');
     };
+
+    // Prefer an explicit id, then a name prop, and fall back to a slug of the
+    // placeholder so the <label htmlFor> below always has something to point at.
+    const inputId =
+        id ||
+        additionalProps.name ||
+        (placeholder && placeholder.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
 
     return (
         <div
@@ -23,6 +31,7 @@ const FormInput = ({
             className="form-group"
         >
             <input
+                id={inputId}
                 className="form-group__input"
                 type={type === 'password' ? inputType : type}
                 placeholder={placeholder}
@@ -30,7 +39,11 @@ const FormInput = ({
                 {...fieldProps}
                 {...additionalProps}
             />
-            <span className="form-group__placeholder">{placeholder}</span>
+            {placeholder && (
+                <label htmlFor={inputId} className="form-group__placeholder">
+                    {placeholder}
+                </label>
+            )}
             <div className="input-icons">
                 {typeof valid === 'boolean' ? (
                     valid ? (
@@ -40,9 +53,14 @@ const FormInput = ({
                     )
                 ) : null}
                 {type === 'password' && (
-                    <span onClick={() => handleClick()} className="form-group__toggle">
+                    <button
+                        type="button"
+                        onClick={() => handleClick()}
+                        className="form-group__toggle"
+                        aria-label={inputType === 'password' ? 'Show password' : 'Hide password'}
+                    >
                         {inputType === 'password' ? 'Show' : 'Hide'}
-                    </span>
+                    </button>
                 )}
             </div>
         </div>
@@ -53,6 +71,7 @@ FormInput.propTypes = {
     placeholder: PropTypes.string,
     type: PropTypes.string,
     onChange: PropTypes.func,
+    id: PropTypes.string,
 };
 
 export default FormInput;

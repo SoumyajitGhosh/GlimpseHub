@@ -47,13 +47,13 @@ const Header = memo(() => {
         <div className="header__icons">
           {currentUser ? (
             <Fragment>
-              <Link to="/explore">
+              <Link to="/explore" aria-label="Explore">
                 <Icon
                   icon={pathname === "/explore" ? "compass" : "compass-outline"}
                 />
               </Link>
               <NotificationButton />
-              <Link to={`/direct/inbox`}>
+              <Link to={`/direct/inbox`} aria-label="Direct messages">
                 <Icon
                   icon={
                     pathname.includes(`direct`)
@@ -62,7 +62,7 @@ const Header = memo(() => {
                   }
                 />
               </Link>
-              <Link to={`/${currentUser.username}`}>
+              <Link to={`/${currentUser.username}`} aria-label="Your profile">
                 <Icon
                   icon={
                     pathname === `/${currentUser.username}`

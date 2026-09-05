@@ -9,6 +9,11 @@ import store from "./redux/store";
 
 import "./sass/main.scss";
 
+const storedTheme = localStorage.getItem("theme");
+if (storedTheme === "light" || storedTheme === "dark") {
+  document.documentElement.setAttribute("data-theme", storedTheme);
+}
+
 // if (process.env.NODE_ENV === "development") {
 //   const whyDidYouRender = require("@welldone-software/why-did-you-render");
 //   whyDidYouRender(React);

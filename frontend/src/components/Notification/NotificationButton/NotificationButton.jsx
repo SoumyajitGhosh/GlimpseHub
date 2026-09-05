@@ -52,9 +52,17 @@ const NotificationButton = ({ mobile, icon }) => {
     }
   );
 
+  // On mobile this sits inside a <Link> that already handles navigation and
+  // accessible naming, so it must render as non-interactive markup — a
+  // nested <button> would be invalid HTML and confuse assistive tech.
+  const Wrapper = mobile ? "span" : "button";
+  const wrapperProps = mobile
+    ? { className: "notification-button" }
+    : { className: "notification-button", type: "button", "aria-label": "Notifications" };
+
   return (
     <div style={{ position: "relative", height: "100%" }}>
-      <button className="notification-button">
+      <Wrapper {...wrapperProps}>
         <Icon
           icon={icon || (showNotifications ? "heart" : "heart-outline")}
           className={notificationState.unreadCount > 0 ? "icon--unread" : ""}
@@ -69,7 +77,7 @@ const NotificationButton = ({ mobile, icon }) => {
             />
           ) : null
         )}
-      </button>
+      </Wrapper>
       {showNotifications && !mobile && (
         <PopupCard hide={() => setShowNotifications(false)} leftAlign>
           <NotificationFeed setShowNotifications={setShowNotifications} />

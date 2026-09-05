@@ -12,12 +12,12 @@ const MobileNav = ({ currentUser }) => {
     <nav className="mobile-nav">
       <ul className="mobile-nav__list">
         <li>
-          <Link to="/">
+          <Link to="/" aria-label="Home">
             <Icon icon={pathname === "/" ? "home" : "home-outline"} />
           </Link>
         </li>
         <li>
-          <Link to="/explore">
+          <Link to="/explore" aria-label="Search">
             <Icon
               icon={pathname === "/explore" ? "search" : "search-outline"}
             />
@@ -27,7 +27,7 @@ const MobileNav = ({ currentUser }) => {
           <NewPostButton plusIcon />
         </li>
         <li>
-          <Link to="/activity">
+          <Link to="/activity" aria-label="Activity">
             <NotificationButton
               mobile
               icon={pathname === "/activity" ? "heart" : "heart-outline"}
@@ -35,7 +35,7 @@ const MobileNav = ({ currentUser }) => {
           </Link>
         </li>
         <li>
-          <Link to={`/${currentUser.username}`}>
+          <Link to={`/${currentUser.username}`} aria-label="Your profile">
             <Icon
               icon={
                 pathname === `/${currentUser.username}`
