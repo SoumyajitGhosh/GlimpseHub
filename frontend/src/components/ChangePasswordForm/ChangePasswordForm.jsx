@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
-import { showAlert } from "../../redux/alert/alertActions";
+import { selectCurrentUser, selectToken } from "../../redux/user/userSlice";
+import { showAlert } from "../../redux/alert/alertSlice";
 import { validatePassword } from "../../utils/validation";
 import { changePassword } from "../../services/authenticationServices";
 import Avatar from "../Avatar/Avatar";
 import FormInput from "../FormInput/FormInput";
 import Button from "../Button/Button";
-import TextButton from "../Button/TextButton/TextButton";
 import SettingsForm from "../SettingsForm/SettingsForm";
 import SettingsFormGroup from "../SettingsForm/SettingsFormGroup/SettingsFormGroup";
 
@@ -57,7 +56,9 @@ const ChangePasswordForm = () => {
         </h1>
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label htmlFor="oldPassword" className="heading-3 font-bold">Old Password</label>
+        <label htmlFor="oldPassword" className="heading-3 font-bold">
+          Old Password
+        </label>
         <FormInput
           id="oldPassword"
           onChange={(event) => setOldPassword(event.target.value)}
@@ -65,7 +66,9 @@ const ChangePasswordForm = () => {
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label htmlFor="newPassword" className="heading-3 font-bold">New Password</label>
+        <label htmlFor="newPassword" className="heading-3 font-bold">
+          New Password
+        </label>
         <FormInput
           id="newPassword"
           onChange={(event) => setNewPassword(event.target.value)}
@@ -73,7 +76,9 @@ const ChangePasswordForm = () => {
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label htmlFor="confirmNewPassword" className="heading-3 font-bold">Confirm New Password</label>
+        <label htmlFor="confirmNewPassword" className="heading-3 font-bold">
+          Confirm New Password
+        </label>
         <FormInput
           id="confirmNewPassword"
           onChange={(event) => setConfirmNewPassword(event.target.value)}
@@ -81,7 +86,7 @@ const ChangePasswordForm = () => {
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label></label>
+        <span aria-hidden="true" />
         <Button
           style={{ width: "15rem" }}
           loading={fetching}
@@ -95,7 +100,7 @@ const ChangePasswordForm = () => {
         </Button>
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label></label>
+        <span aria-hidden="true" />
         {/* <TextButton style={{ width: "15rem", textAlign: "left" }} blue bold>
           Forgot Password?
         </TextButton> */}

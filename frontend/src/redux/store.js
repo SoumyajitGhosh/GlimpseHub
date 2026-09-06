@@ -1,14 +1,22 @@
-import { legacy_createStore as createStore, applyMiddleware } from 'redux';
-import logger from 'redux-logger';
-import { thunk } from 'redux-thunk';
+import { configureStore } from "@reduxjs/toolkit";
+import logger from "redux-logger";
 
-import rootReducer from './rootReducer';
+import rootReducer from "./rootReducer";
 
-export const middlewares = [thunk];
-if (process.env.NODE_ENV === 'development') {
-    middlewares.push(logger);
-}
-
-const store = createStore(rootReducer, applyMiddleware(...middlewares));
+const store = configureStore({
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => {
+    const middleware = getDefaultMiddleware({
+      serializableCheck: {
+        // `modal.modals[].props` carries React elements / render props and
+        // `alert.onClick` is a callback — non-serializable by design.
+        ignoredActions: ["modal/showModal", "alert/showAlertAction"],
+        ignoredPaths: ["modal.modals", "alert.onClick"],
+      },
+    });
+    return import.meta.env.DEV ? middleware.concat(logger) : middleware;
+  },
+  devTools: import.meta.env.DEV,
+});
 
 export default store;

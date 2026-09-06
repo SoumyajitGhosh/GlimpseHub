@@ -1,12 +1,10 @@
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import UserCard from "../../UserCard/UserCard";
 import Divider from "../../Divider/Divider";
-import { useSelector } from "react-redux";
 
 const ChatUsers = ({ chattableUsers }) => {
   const navigate = useNavigate();
-  const { chatUser } = useSelector((state) => state.chat);
 
   const ChatUserBody = ({ userCardProps }) => {
     return (
@@ -14,6 +12,7 @@ const ChatUsers = ({ chattableUsers }) => {
         <Link to={userCardProps.linkTo}>
           <img
             src={"S"}
+            alt=""
             style={{
               display: "flex",
             }}
@@ -25,7 +24,7 @@ const ChatUsers = ({ chattableUsers }) => {
       </Fragment>
     );
   };
-  const ChatUser = ({ id, userCardProps }) => {
+  const ChatUser = ({ userCardProps }) => {
     return <UserCard {...userCardProps}>{ChatUserBody}</UserCard>;
   };
   return chattableUsers?.map((chattableUser, idx) => {
@@ -40,12 +39,13 @@ const ChatUsers = ({ chattableUsers }) => {
     };
     return (
       <div
+        key={chattableUser?._id ?? idx}
         onClick={() => {
           navigate(`/direct/${chattableUser?._id}`);
         }}
         className="chat-user"
       >
-        <ChatUser key={idx} userCardProps={userCardProps} />
+        <ChatUser userCardProps={userCardProps} />
         <Divider />
       </div>
     );

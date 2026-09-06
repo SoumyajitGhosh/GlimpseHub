@@ -1,8 +1,8 @@
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { useTransition, animated } from "react-spring";
+import { Fragment } from "react";
+import PropTypes from "prop-types";
+import { useTransition, animated } from "@react-spring/web";
 
-import Icon from '../Icon';
+import Icon from "../Icon";
 
 const PulsatingIcon = ({
   toggle,

@@ -1,4 +1,4 @@
-@use '../abstracts' as *;
+@use "../abstracts" as *;
 
 .divider {
   width: 90%;
@@ -15,14 +15,14 @@
 
     &::before {
       grid-column: 1;
-      content: '';
+      content: "";
       background-color: currentColor;
       height: 1px;
       display: block;
     }
     &::after {
       grid-column: 3;
-      content: '';
+      content: "";
       background-color: currentColor;
       height: 1px;
       display: block;

@@ -1,13 +1,13 @@
-@use '../abstracts' as *;
+@use "../abstracts" as *;
 
 body {
-  font-family: 'Lato', sans-serif;
+  font-family: "Lato", sans-serif;
   font-weight: 400;
   line-height: 1.7;
 }
 
 .heading-logo {
-  font-family: 'Leckerli One', sans-serif;
+  font-family: "Leckerli One", sans-serif;
   font-size: 4.5rem;
   font-weight: 400;
   color: $color-black;

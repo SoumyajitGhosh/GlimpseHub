@@ -1,13 +1,10 @@
-import React, { useState, Fragment } from 'react';
+import { useState, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import {
-  selectToken,
-  selectCurrentUser,
-} from "../../../redux/user/userSelectors";
-import { showAlert } from "../../../redux/alert/alertActions";
-import { addPost } from "../../../redux/feed/feedActions";
+import { selectToken, selectCurrentUser } from "../../../redux/user/userSlice";
+import { showAlert } from "../../../redux/alert/alertSlice";
+import { addPost } from "../../../redux/feed/feedSlice";
 
 import { createPost } from "../../../services/postService";
 
@@ -90,6 +87,7 @@ const NewPostForm = ({ file, previewImage, hide, back }) => {
             </div>
             <textarea
               className="post-form__textarea"
+              aria-label="Caption"
               placeholder="Write a caption..."
               onChange={(event) => setCaption(event.target.value)}
             />

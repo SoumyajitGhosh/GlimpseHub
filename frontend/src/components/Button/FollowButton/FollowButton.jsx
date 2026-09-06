@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import {
-    selectCurrentUser,
-    selectToken,
-} from '../../../redux/user/userSelectors';
-import { showModal } from '../../../redux/modal/modalActions';
-import { showAlert } from '../../../redux/alert/alertActions';
+import { selectCurrentUser, selectToken } from "../../../redux/user/userSlice";
+import { showModal } from "../../../redux/modal/modalSlice";
+import { showAlert } from "../../../redux/alert/alertSlice";
 
-import { followUser } from '../../../services/profileService';
+import { followUser } from "../../../services/profileService";
 
-import Button from '../Button';
-import UnfollowPrompt from '../../UnfollowPrompt/UnfollowPrompt';
-import { fetchProfileAction } from "../../../redux/profilePage/profilePageActions";
+import Button from "../Button";
+import UnfollowPrompt from "../../UnfollowPrompt/UnfollowPrompt";
+import { fetchProfileAction } from "../../../redux/profilePage/profilePageSlice";
 
 const FollowButton = ({ userId, following, username, avatar, style }) => {
   const dispatch = useDispatch();
@@ -29,7 +26,7 @@ const FollowButton = ({ userId, following, username, avatar, style }) => {
       setIsFollowing(!isFollowing);
       setLoading(false);
       dispatch(fetchProfileAction(currentUser.username, token));
-    } catch (err) {
+    } catch {
       setLoading(false);
       dispatch(showAlert("Could not follow the user.", () => follow()));
     }

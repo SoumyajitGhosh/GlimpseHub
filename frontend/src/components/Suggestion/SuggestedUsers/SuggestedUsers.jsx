@@ -1,16 +1,16 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { showAlert } from '../../../redux/alert/alertActions';
-import { selectToken } from '../../../redux/user/userSelectors';
+import { showAlert } from "../../../redux/alert/alertSlice";
+import { selectToken } from "../../../redux/user/userSlice";
 
-import { getSuggestedUsers } from '../../../services/userService';
+import { getSuggestedUsers } from "../../../services/userService";
 
-import UserCard from '../../UserCard/UserCard';
-import UserListSkeleton from '../../UsersList/UsersListSkeleton/UsersListSkeleton';
-import Card from '../../Card/Card';
-import FollowButton from '../../Button/FollowButton/FollowButton';
-import SuggestionCard from '../SuggestionCard/SuggestionCard';
+import UserCard from "../../UserCard/UserCard";
+import UserListSkeleton from "../../UsersList/UsersListSkeleton/UsersListSkeleton";
+import Card from "../../Card/Card";
+import FollowButton from "../../Button/FollowButton/FollowButton";
+import SuggestionCard from "../SuggestionCard/SuggestionCard";
 
 const SuggestedUsers = ({ card, style, max }) => {
   const dispatch = useDispatch();
@@ -50,7 +50,7 @@ const SuggestedUsers = ({ card, style, max }) => {
         ))
       ) : (
         <h4 className="heading-4 color-grey font-medium">
-          We currently can't find any users to suggest.
+          We currently can&apos;t find any users to suggest.
         </h4>
       );
     }

@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, memo, lazy, Suspense } from "react";
+import { useEffect, useRef, memo, lazy, Suspense } from "react";
 import { useDispatch } from "react-redux";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 
-import { hideModal } from "../../redux/modal/modalActions";
+import { hideModal } from "../../redux/modal/modalSlice";
 
 // Mapping object for dynamically importing components with paths
 const componentMap = {
@@ -38,9 +38,7 @@ const componentMap = {
   "MobileNav/MobileNav": () => import("../../components/MobileNav/MobileNav"),
   "NewPost/NewPost": () => import("../../components/NewPost/NewPost"),
   "Notification/NotificationButton/NotificationButton": () =>
-    import(
-      "../../components/Notification/NotificationButton/NotificationButton"
-    ),
+    import("../../components/Notification/NotificationButton/NotificationButton"),
   "Notification/NotificationFeed/NotificationFeed": () =>
     import("../../components/Notification/NotificationFeed/NotificationFeed"),
   "PopupCard/PopupCard": () => import("../../components/PopupCard/PopupCard"),
@@ -57,8 +55,8 @@ const componentMap = {
     import("../../components/SearchSuggestion/SearchSuggestion"),
   "SettingsForm/SettingsForm": () =>
     import("../../components/SettingsForm/SettingsForm"),
-  "SetttingsButton/SettingsButton": () =>
-    import("../../components/SetttingsButton/SettingsButton"),
+  "SettingsButton/SettingsButton": () =>
+    import("../../components/SettingsButton/SettingsButton"),
   "SignUpCard/SignUpCard": () =>
     import("../../components/SignUpCard/SignUpCard"),
   "SkeletonLoader/SkeletonLoader": () =>
@@ -78,7 +76,7 @@ const componentMap = {
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-const Modal = memo(({ component, ...additionalProps }) => {
+const Modal = memo(function Modal({ component, ...additionalProps }) {
   const dispatch = useDispatch();
   const modalRoot = document.querySelector("#modal-root");
   const el = document.createElement("div");
@@ -112,9 +110,7 @@ const Modal = memo(({ component, ...additionalProps }) => {
       }
 
       if (event.key === "Tab") {
-        const focusable = Array.from(
-          el.querySelectorAll(FOCUSABLE_SELECTOR)
-        );
+        const focusable = Array.from(el.querySelectorAll(FOCUSABLE_SELECTOR));
         if (focusable.length === 0) {
           event.preventDefault();
           return;
@@ -167,7 +163,7 @@ const Modal = memo(({ component, ...additionalProps }) => {
           {...additionalProps}
         />
       ) : (
-        <div>Component "{component}" not found.</div>
+        <div>Component &quot;{component}&quot; not found.</div>
       )}
     </Suspense>,
     el

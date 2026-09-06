@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient, { authHeader } from "./apiClient";
 
 /**
  * Retrieves a users notifications
@@ -7,16 +7,8 @@ import axios from 'axios';
  * @returns {array} Array of notifications
  */
 export const retrieveNotifications = async (authToken) => {
-  try {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/notification`, {
-      headers: {
-        authorization: authToken,
-      },
-    });
-    return response.data;
-  } catch (err) {
-    throw new Error(err.response.data);
-  }
+  const { data } = await apiClient.get("/notification", authHeader(authToken));
+  return data;
 };
 
 /**
@@ -25,13 +17,5 @@ export const retrieveNotifications = async (authToken) => {
  * @param {string} authToken A user's auth token
  */
 export const readNotifications = async (authToken) => {
-  try {
-    await axios.put(`${import.meta.env.VITE_BACKEND_URI}/api/notification`, null, {
-      headers: {
-        authorization: authToken,
-      },
-    });
-  } catch (err) {
-    throw new Error(err.response.data);
-  }
+  await apiClient.put("/notification", null, authHeader(authToken));
 };

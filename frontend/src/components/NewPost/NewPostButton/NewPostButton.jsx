@@ -1,8 +1,8 @@
-import React, { Fragment, useRef } from "react";
+import { Fragment, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { connect } from "react-redux";
 
-import { showModal, hideModal } from "../../../redux/modal/modalActions";
+import { showModal, hideModal } from "../../../redux/modal/modalSlice";
 
 import Icon from "../../Icon/Icon";
 
@@ -43,6 +43,7 @@ const NewPostButton = ({ showModal, hideModal, plusIcon, children, style }) => {
       </label>
       <input
         id="file-upload"
+        aria-label="Choose a photo to post"
         type="file"
         style={{ display: "none" }}
         accept="image/*"

@@ -1,13 +1,14 @@
-import React, { useEffect, Fragment } from "react";
+import { useEffect, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
+import { selectCurrentUser, selectToken } from "../../redux/user/userSlice";
 import {
   selectFeedPosts,
   selectHasMore,
   selectFeedFetching,
-} from "../../redux/feed/feedSelectors";
-import { fetchFeedPostsStart, clearPosts } from "../../redux/feed/feedActions";
+  fetchFeedPostsStart,
+  clearPosts,
+} from "../../redux/feed/feedSlice";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 

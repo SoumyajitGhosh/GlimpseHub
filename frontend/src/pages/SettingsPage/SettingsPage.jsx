@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from "react";
 import { NavLink, Routes, Route } from "react-router-dom";
 
 import Card from "../../components/Card/Card";

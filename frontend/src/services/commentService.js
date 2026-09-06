@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient, { authHeader } from "./apiClient";
 
 /**
  * Creates a comment on a specific post
@@ -9,20 +9,12 @@ import axios from 'axios';
  * @returns {object} The created comment
  */
 export const createComment = async (message, postId, authToken) => {
-  try {
-    const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${postId}`,
-      { message },
-      {
-        headers: {
-          authorization: authToken,
-        },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err);
-  }
+  const { data } = await apiClient.post(
+    `/comment/${postId}`,
+    { message },
+    authHeader(authToken)
+  );
+  return data;
 };
 
 /**
@@ -32,15 +24,7 @@ export const createComment = async (message, postId, authToken) => {
  * @param {string} authToken A user's auth token
  */
 export const deleteComment = async (commentId, authToken) => {
-  try {
-    await axios.delete(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentId}`, {
-      headers: {
-        authorization: authToken,
-      },
-    });
-  } catch (err) {
-    throw new Error(err);
-  }
+  await apiClient.delete(`/comment/${commentId}`, authHeader(authToken));
 };
 
 /**
@@ -50,13 +34,11 @@ export const deleteComment = async (commentId, authToken) => {
  * @param {string} authToken A user's auth token
  */
 export const voteComment = async (commentId, authToken) => {
-  try {
-    await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentId}/vote`, null, {
-      headers: { authorization: authToken },
-    });
-  } catch (err) {
-    throw new Error(err);
-  }
+  await apiClient.post(
+    `/comment/${commentId}/vote`,
+    null,
+    authHeader(authToken)
+  );
 };
 
 /**
@@ -72,20 +54,12 @@ export const createCommentReply = async (
   parentCommentId,
   authToken
 ) => {
-  try {
-    const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${parentCommentId}/reply`,
-      { message },
-      {
-        headers: {
-          authorization: authToken,
-        },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err);
-  }
+  const { data } = await apiClient.post(
+    `/comment/${parentCommentId}/reply`,
+    { message },
+    authHeader(authToken)
+  );
+  return data;
 };
 
 /**
@@ -95,15 +69,10 @@ export const createCommentReply = async (
  * @param {string} authToken A user's auth token
  */
 export const deleteCommentReply = async (commentReplyId, authToken) => {
-  try {
-    await axios.delete(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentReplyId}/reply`, {
-      headers: {
-        authorization: authToken,
-      },
-    });
-  } catch (err) {
-    throw new Error(err);
-  }
+  await apiClient.delete(
+    `/comment/${commentReplyId}/reply`,
+    authHeader(authToken)
+  );
 };
 
 /**
@@ -113,13 +82,11 @@ export const deleteCommentReply = async (commentReplyId, authToken) => {
  * @param {string} authToken A user's auth token
  */
 export const voteCommentReply = async (commentReplyId, authToken) => {
-  try {
-    await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentReplyId}/replyVote`, null, {
-      headers: { authorization: authToken },
-    });
-  } catch (err) {
-    throw new Error(err);
-  }
+  await apiClient.post(
+    `/comment/${commentReplyId}/replyVote`,
+    null,
+    authHeader(authToken)
+  );
 };
 
 /**
@@ -130,14 +97,10 @@ export const voteCommentReply = async (commentReplyId, authToken) => {
  * @returns {array} Array of replies
  */
 export const getCommentReplies = async (parentCommentId, offset = 0) => {
-  try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${parentCommentId}/${offset}/replies`
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err);
-  }
+  const { data } = await apiClient.get(
+    `/comment/${parentCommentId}/${offset}/replies`
+  );
+  return data;
 };
 
 /**
@@ -145,16 +108,12 @@ export const getCommentReplies = async (parentCommentId, offset = 0) => {
  * @function getComments
  * @param {string} postId The id of a post to retrieve comments from
  * @param {number} offset The amount of comments to skip
- * @param {number} exclude The amount of comments to exlude (newest to oldest)
+ * @param {number} exclude The amount of comments to exclude (newest to oldest)
  * @returns {object} Object of comment details
  */
 export const getComments = async (postId, offset, exclude = 0) => {
-  try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${postId}/${offset}/${exclude}`
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err);
-  }
+  const { data } = await apiClient.get(
+    `/comment/${postId}/${offset}/${exclude}`
+  );
+  return data;
 };

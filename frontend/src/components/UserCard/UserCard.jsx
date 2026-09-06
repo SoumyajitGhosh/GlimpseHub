@@ -1,9 +1,8 @@
-import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import classNames from "classnames";
 
-import { hideModal } from "../../redux/modal/modalActions";
+import { hideModal } from "../../redux/modal/modalSlice";
 import { formatDateDistance } from "../../utils/timeUtils";
 
 import Avatar from "../Avatar/Avatar";

@@ -1,4 +1,4 @@
-@use 'sass:string';
+@use "sass:string";
 
 // ---- CSS custom properties (light defaults) ----
 :root {
@@ -48,7 +48,7 @@
   }
 }
 
-:root[data-theme='dark'] {
+:root[data-theme="dark"] {
   --color-white: #262626;
   --color-black: #f5f5f5;
   --color-red: #ff6b6b;
@@ -71,17 +71,17 @@
 }
 
 // ---- SCSS variables (interop shim: keep $color-* usable, backed by CSS vars) ----
-$color-white: string.unquote('var(--color-white)');
-$color-black: string.unquote('var(--color-black)');
-$color-red: string.unquote('var(--color-red)');
+$color-white: string.unquote("var(--color-white)");
+$color-black: string.unquote("var(--color-black)");
+$color-red: string.unquote("var(--color-red)");
 
-$color-grey-1: string.unquote('var(--color-grey-1)');
-$color-grey-2: string.unquote('var(--color-grey-2)');
-$color-grey-3: string.unquote('var(--color-grey-3)');
-$color-grey-4: string.unquote('var(--color-grey-4)');
+$color-grey-1: string.unquote("var(--color-grey-1)");
+$color-grey-2: string.unquote("var(--color-grey-2)");
+$color-grey-3: string.unquote("var(--color-grey-3)");
+$color-grey-4: string.unquote("var(--color-grey-4)");
 
-$color-secondary: string.unquote('var(--color-secondary)');
-$color-secondary-dark: string.unquote('var(--color-secondary-dark)');
+$color-secondary: string.unquote("var(--color-secondary)");
+$color-secondary-dark: string.unquote("var(--color-secondary-dark)");
 
 $icon-huge-size: 15rem;
 $icon-larger-size: 6rem;

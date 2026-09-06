@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-import { signInStart } from "../../redux/user/userActions";
 import {
+  signInStart,
   selectError,
   selectFetching,
   selectCurrentUser,
-} from "../../redux/user/userSelectors";
+} from "../../redux/user/userSlice";
 
 import Button from "../Button/Button";
 import FormInput from "../FormInput/FormInput";
@@ -87,7 +87,7 @@ const LoginCard = ({ onClick, modal }) => {
           }}
         >
           <h4 style={{ marginRight: "5px" }} className="heading-4 font-thin">
-            Don't have an account?
+            Don&apos;t have an account?
           </h4>
           <Link to="/signup" onClick={() => onClick && onClick()}>
             <TextButton medium blue bold>

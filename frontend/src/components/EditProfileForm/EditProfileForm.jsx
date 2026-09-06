@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 
@@ -6,9 +6,9 @@ import {
   selectCurrentUser,
   selectToken,
   selectUpdatingProfile,
-} from "../../redux/user/userSelectors";
-import { updateProfileStart } from "../../redux/user/userActions";
-import { showAlert } from "../../redux/alert/alertActions";
+  updateProfileStart,
+} from "../../redux/user/userSlice";
+import { showAlert } from "../../redux/alert/alertSlice";
 
 import {
   validateEmail,
@@ -87,32 +87,40 @@ const EditProfileForm = () => {
         </div>
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label htmlFor="fullName" className="heading-3 font-bold">Name</label>
+        <label htmlFor="fullName" className="heading-3 font-bold">
+          Name
+        </label>
         <FormInput
           name="fullName"
           fieldProps={formik.getFieldProps("fullName")}
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label htmlFor="username" className="heading-3 font-bold">Username</label>
+        <label htmlFor="username" className="heading-3 font-bold">
+          Username
+        </label>
         <FormInput
           name="username"
           fieldProps={formik.getFieldProps("username")}
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label htmlFor="website" className="heading-3 font-bold">Website</label>
+        <label htmlFor="website" className="heading-3 font-bold">
+          Website
+        </label>
         <FormInput
           name="website"
           fieldProps={formik.getFieldProps("website")}
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label htmlFor="bio" className="heading-3 font-bold">Bio</label>
+        <label htmlFor="bio" className="heading-3 font-bold">
+          Bio
+        </label>
         <FormTextarea name="bio" fieldProps={formik.getFieldProps("bio")} />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label></label>
+        <span aria-hidden="true" />
         <div>
           <h3 className="heading-3 color-grey font-bold">
             Personal Information
@@ -122,17 +130,19 @@ const EditProfileForm = () => {
             className="color-grey"
           >
             Provide your personal information, even if the account is used for a
-            business, a pet, or something else. This won't be a part of your
-            public profile.
+            business, a pet, or something else. This won&apos;t be a part of
+            your public profile.
           </p>
         </div>
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label htmlFor="email" className="heading-3 font-bold">Email</label>
+        <label htmlFor="email" className="heading-3 font-bold">
+          Email
+        </label>
         <FormInput name="email" fieldProps={formik.getFieldProps("email")} />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label></label>
+        <span aria-hidden="true" />
         <Button
           style={{ width: "10rem" }}
           disabled={Object.keys(formik.touched).length === 0}

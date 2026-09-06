@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useSearchUsersDebounced from "../../hooks/useSearchUsersDebounced";
@@ -39,6 +39,7 @@ const SearchBox = ({ style, setResult, onClick, type = undefined }) => {
           onClick={onClick}
           value={query}
           className="search-box__input"
+          aria-label="Search"
           placeholder="Search"
         />
         <span className="search-box__placeholder">

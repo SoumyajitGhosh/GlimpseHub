@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import MobileHeader from "../../components/Header/MobileHeader/MobileHeader";
 import NewPostButton from "../../components/NewPost/NewPostButton/NewPostButton";
 import Icon from "../../components/Icon/Icon";

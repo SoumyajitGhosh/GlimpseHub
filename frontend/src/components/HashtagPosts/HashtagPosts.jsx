@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useRef } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";

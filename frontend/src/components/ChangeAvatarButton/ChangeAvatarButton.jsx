@@ -1,18 +1,15 @@
-import React, { Fragment, useRef, useEffect } from 'react';
+import { Fragment, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
-    changeAvatarStart,
-    removeAvatarStart,
-} from '../../redux/user/userActions';
-import {
-    selectCurrentUser,
-    selectToken,
-    selectFetchingAvatar,
-    selectError,
-} from '../../redux/user/userSelectors';
-import { showModal } from '../../redux/modal/modalActions';
-import { showAlert } from '../../redux/alert/alertActions';
+  changeAvatarStart,
+  removeAvatarStart,
+  selectCurrentUser,
+  selectToken,
+  selectError,
+} from "../../redux/user/userSlice";
+import { showModal } from "../../redux/modal/modalSlice";
+import { showAlert } from "../../redux/alert/alertSlice";
 
 const ChangeAvatarButton = ({ children }) => {
   const dispatch = useDispatch();
@@ -80,6 +77,7 @@ const ChangeAvatarButton = ({ children }) => {
       </label>
       <input
         id="avatar-upload"
+        aria-label="Upload profile photo"
         type="file"
         accept="image/*"
         style={{ display: "none" }}

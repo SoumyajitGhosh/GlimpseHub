@@ -1,4 +1,4 @@
-@use '../abstracts' as *;
+@use "../abstracts" as *;
 
 .header {
   height: 7.5rem;
@@ -44,7 +44,7 @@
       }
 
       &::after {
-        content: '';
+        content: "";
         height: 3rem;
         transform: translateY(3px);
         width: 1px;

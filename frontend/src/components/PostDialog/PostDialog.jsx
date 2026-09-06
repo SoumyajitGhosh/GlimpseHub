@@ -1,12 +1,12 @@
-import React, { useEffect, useReducer, Fragment, useRef } from 'react';
-import PropTypes from 'prop-types';
+import { useEffect, useReducer, Fragment, useRef } from "react";
+import PropTypes from "prop-types";
 import { useSelector, useDispatch } from "react-redux";
 import classNames from "classnames";
 import { Link, useNavigate } from "react-router-dom";
 
-import { selectToken, selectCurrentUser } from "../../redux/user/userSelectors";
-import { showModal, hideModal } from "../../redux/modal/modalActions";
-import { showAlert } from "../../redux/alert/alertActions";
+import { selectToken, selectCurrentUser } from "../../redux/user/userSlice";
+import { showModal, hideModal } from "../../redux/modal/modalSlice";
+import { showAlert } from "../../redux/alert/alertSlice";
 
 import { getPost, deletePost } from "../../services/postService";
 import { getComments } from "../../services/commentService";
@@ -80,7 +80,7 @@ const PostDialog = ({
         state.localStateComments.size
       );
       localDispatch({ type: "ADD_COMMENT", payload: commentData.comments });
-    } catch (err) {
+    } catch {
       dispatch(
         showAlert(
           "Unable to fetch additional comments.",
@@ -99,7 +99,7 @@ const PostDialog = ({
           payload: postId,
         });
       dispatch(hideModal("PostDialog/PostDialog"));
-    } catch (err) {
+    } catch {
       dispatch(showAlert("Unable to delete post.", handleDeletePost));
     }
   };

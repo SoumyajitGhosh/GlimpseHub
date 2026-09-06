@@ -243,3 +243,380 @@ commit flow without having to restate it, including the guardrails established d
 no new architectural patterns (no RTK/react-query/TS), lint/test regressions get scoped to what
 actually regressed rather than absorbing the whole pre-existing backlog, and risky-but-untested
 behavioral fixes get a commented `eslint-disable` instead of a silent rewrite.
+
+## 7. MCP servers for frontend work (`.mcp.json`)
+
+Added the repo's first MCP server config — project-scoped and **committed** so any clone gets the
+same tooling. All three are stdio servers launched on demand via `npx` (nothing runs until a session
+uses them; the first launch of each downloads the package, ~30s).
+
+**`.mcp.json`** (repo root):
+
+| Server | Package | Use |
+|---|---|---|
+| `context7` | `@upstash/context7-mcp` | Version-accurate docs/snippets for React 18, Vite 6, `react-router` v6 **and** v7, `react-redux` 9, `reselect`, `react-spring`, Vitest + Testing Library — supports the section 5 router migration without API guesswork. Optional `CONTEXT7_API_KEY` env raises rate limits. |
+| `chrome-devtools` | `chrome-devtools-mcp` (Chrome team) | Real Chrome against `localhost:5173`: performance traces, network waterfall, console errors, DOM/CSS inspection. Covers the perf/network debugging `claude-in-chrome` doesn't. |
+| `playwright` | `@playwright/mcp` (Microsoft) | Accessibility-tree snapshot automation for repeatable E2E flows (login, post, comment, chat); pairs with `web-design-guidelines`. |
+
+**`.claude/settings.json`** (new, committed) — `enabledMcpjsonServers: ["context7", "chrome-devtools", "playwright"]`
+so the servers load without the per-project approval prompt.
+
+Requires Node's `npx` on PATH (already used by the frontend toolchain). No secrets stored. Verify
+with `/mcp` after restarting Claude Code in this repo.
+
+## 8. Planned: full frontend modernization roadmap
+
+Asked Claude Code (as a senior frontend architect) to survey the frontend and propose a
+modernization plan. Unlike sections 3–5, this pass explicitly puts the previously-deferred
+architectural changes on the table (**RTK, RTK Query, incremental TypeScript, forms**) and
+commits to **finishing the PWA** rather than removing it. The roadmap is a sequence of
+independently-shippable phases, one small PR each; nothing below is done yet except Phase 0.
+
+Full plan file: `~/.claude/plans/think-like-a-senior-humming-lark.md`.
+
+**Phases** (S ≈ <½ day, M ≈ 1–3 days, L ≈ multi-PR):
+
+| # | Phase | Notes |
+|---|---|---|
+| 0 | Doc + cleanup | dead-code removal, `prop-types` declared, ESLint Node/Vitest env blocks + `jsx-a11y` (warn) + Prettier, `import.meta.env.DEV` in `store.js`, Vitest coverage, `SetttingsButton`→`SettingsButton`. **Done — this section's commit.** |
+| 1 | Lint backlog burndown | 357 → ~0; unused-`React` imports, `exhaustive-deps`, small rules; `react/prop-types` decided with Phase 5 |
+| 2 | HTTP client foundation | one `apiClient.js` axios instance + interceptors; fixes the network-error crash (`err.response` deref) across all 9 service files; `AbortController` in `useSearchUsersDebounced` |
+| 3 | Redux Toolkit | `configureStore`, then `createSlice` one slice per PR, **`socket` last with the io instance moved out of state** |
+| 4 | RTK Query | axios `baseQuery`; convert the refetch-on-remount reads first (feed, suggested/hashtag posts, profile), then mutations with tag invalidation |
+| 5 | Incremental types | `jsconfig.json` + `checkJs` + typed JSDoc, leaf-inward (services → redux → hooks → validation); then disable `react/prop-types` |
+| 6 | React Router v7 | future-flags first, then straight bump — declarative `<Routes>` API, no data-router changes (that's a separate follow-up, see §5) |
+| 7 | Vite 6 → 7 | stay off Vite 8 (broke `npm install`, see §3) |
+| 8 | react-spring → `@react-spring/web` | umbrella package has no React 19 peer; pin `@9` on React 18 |
+| 9 | Forms → react-hook-form + zod | 7 of 9 forms are hand-rolled; zod schemas reuse `utils/validation.js` and double as the type source |
+| 10 | React 18 → 19 | optional, last, its own project; gated on Phases 8–9 |
+
+**Cross-cutting:** add CI (GitHub Actions: `lint` + `build` + `test` + later `tsc --noEmit`)
+right after Phase 0 — the repo has none today.
+
+**Split into their own follow-ups, not bundled:** the PWA build-out (real manifest + icons +
+offline strategy + update prompt), router data-router APIs, full `.tsx` conversion, full
+RTKQ migration of all ~40 service functions, React 19, and the a11y gap remediation
+(non-keyboard `onClick`s, missing `alt`s, `aria-live` on `Alert`, a real theme-toggle
+control — the `data-theme`/`localStorage` plumbing already exists from §3).
+
+### 8.1 Phase 0 — what changed
+
+- **Dead code removed:** `src/serviceWorker.js` (orphaned CRA helper pointing at a
+  non-existent `/service-worker.js`), `src/App.css` (unimported Vite-template leftover),
+  `src/assets/react.svg`, `src/index.css` (only held inert `@tailwind` directives — Tailwind
+  isn't installed; the real reset lives in `sass/base/_base.scss`), and the commented
+  `why-did-you-render` / `serviceWorker` blocks in `main.jsx`.
+- **`prop-types`** promoted to an explicit `dependency` — 16 files import it at runtime but
+  it was only resolving via a transitive hoist from `eslint-plugin-react` (breaks under pnpm
+  / stricter installs).
+- **ESLint config** (`eslint.config.js`): added a Node-globals block for `*.config.js`
+  (fixes the `process is not defined` error) and a Vitest-globals block for test files;
+  added `eslint-plugin-jsx-a11y` (recommended set, forced to **warn** — the a11y backlog is
+  a tracked follow-up); added `eslint-config-prettier` last to cede formatting to Prettier.
+- **Prettier** added (`.prettierrc.json` — 2-space, double-quote, es5 trailing commas to
+  match existing style; `.prettierignore`) with `format` / `format:check` scripts. Not yet
+  run across the tree — that's a Phase 1 mechanical pass so the diff stays reviewable.
+- **`redux/store.js`**: `process.env.NODE_ENV === 'development'` → `import.meta.env.DEV`
+  (the rest of the app already uses `import.meta.env`; this was the last `process.env` ref).
+- **Vitest coverage:** `@vitest/coverage-v8` + `test:coverage` script + a `coverage` block
+  in `vite.config.js` with a deliberately low 2% floor (current: ~3.3% lines). `coverage/`
+  gitignored.
+- **`SetttingsButton/` → `SettingsButton/`** (three t's → two), updating the three importers
+  (`Modal.jsx` componentMap, `ProfileHeader.jsx`, `ProfilePage.jsx`).
+
+Verification: `npm run lint` (424 problems = 350 errors + 74 warnings; errors down 1 from
+the 351 baseline via the `store.js` fix, +68 new warnings all from `jsx-a11y`), `npm run
+build` (clean, PWA `sw.js` still generated), `npm test` (6/6 pass), `npm run test:coverage`
+(passes the 2% floor). No backend/browser available this session — no manual smoke of the
+touched screens (Profile page, modals) was possible; that pass is still recommended before
+merge, though Phase 0 changes no component logic.
+
+### 8.2 Phase 1 — lint backlog: 357 problems → 0 errors
+
+Branch `frontend-modernization-phase-1`, five commits. The 357-problem ESLint baseline
+(carried since §3) is now **0 errors**; 68 `jsx-a11y` warnings remain and are deferred to
+the dedicated a11y follow-up.
+
+- **`react/prop-types` disabled** (was 225 of the 357). Runtime PropTypes is being replaced
+  by `checkJs` + typed JSDoc in Phase 5; ~225 components never declared `propTypes`, so
+  backfilling a pattern we're removing is wasted work. `coverage/` also added to the ESLint
+  `ignores` (flat config doesn't read `.gitignore`).
+- **Unused `React` imports dropped from 78 files** — the jsx-runtime transform (already
+  configured) means `React` needn't be in scope for JSX. Line deleted or reduced to its
+  named imports. Cleared ~78 of the 109 `no-unused-vars`.
+- **Remaining `no-unused-vars` (~31)**: dead imports/vars removed; unused `catch (err)` →
+  bare `catch`; the dead GitHub-OAuth locals in `LoginPage` folded into the existing
+  commented block; `no-unused-vars` given `{ ignoreRestSiblings: true }` for the deliberate
+  `const { x, ...rest }` key-omit idiom used in reducers.
+- **Small rules**: `no-unescaped-entities` (9) → `&apos;`/`&quot;`; `display-name` (3) →
+  named `memo()`/`forwardRef()` function expressions (`Header`, `Modal`, `Card`);
+  `jsx-key` (2) → keyed the mapped elements (`Chats`, `ChatUsers`, `SuggestedPosts`);
+  `no-prototype-builtins` (1) → `"onClick" in option`; `no-extra-boolean-cast` (1).
+- **`react-hooks/exhaustive-deps` (6 warnings)**: added the stable `dispatch` dep where
+  safe (`ChatWindow`, `Chats`, `ProfilePage`, `ChatSidebar` scroll effect); scoped
+  `eslint-disable` + rationale on the two genuinely intentional effects — `ChatSidebar`'s
+  one-time mount profile fetch and `NotificationButton`'s 10s auto-hide timer choreography
+  — per the §4.2 guardrail (no silent behavioural rewrites without test coverage).
+- **Tree-wide Prettier pass** (`.prettierrc.json` from Phase 0): pure formatting, 161 files,
+  mostly 4-space → 2-space reindent. Its own commit
+  (`fdc03fbe5cdadd4a7c7dd94ddd03564b7e802498`), recorded in the new repo-root
+  `.git-blame-ignore-revs` so `git blame` skips it (GitHub honours the file automatically;
+  locally `git config blame.ignoreRevsFile .git-blame-ignore-revs`). Vendored
+  `.claude/skills` and `README.md` are prettier-ignored.
+
+Verification per commit: `npm run lint` (0 errors), `npm test` (6/6), `npm run build`
+(clean, PWA `sw.js` still generated). Same caveat as Phase 0 — no backend/browser this
+session, so the manual smoke of the touched screens (chat sidebar/window, notification
+popup, profile, comment vote/delete, new-post crop) is still recommended before merge;
+Phase 1 is mechanical but the `exhaustive-deps` dep-array additions and the keyed-Fragment
+rewrite in `Chats.jsx` do touch render behaviour.
+
+### 8.3 Phase 2 — shared HTTP client
+
+Branch `frontend-modernization-phase-2`. Replaces the 9 hand-rolled service modules'
+per-call `axios(...)` + `try/catch` with one axios instance.
+
+- **New `src/services/apiClient.js`**: an `axios.create({ baseURL: '${VITE_BACKEND_URI}/api' })`
+  instance with two interceptors —
+  - *request*: attaches `localStorage.token` as the bare `authorization` header (the backend
+    reads the raw value, no `Bearer` prefix) unless the caller already set one. This means
+    the previously-unauthenticated reads (`getPost`, `getComments`, `getUserProfile`,
+    `searchUsers`, …) now send the token when one exists — harmless on the public routes and
+    a latent-bug fix on the `optionalAuth` ones (follow / vote state now populates).
+  - *response*: `normalizeError()` (exported, unit-tested) turns **every** failure into a
+    real `Error` with a readable `.message` plus `.status` / `.isNetworkError`. This fixes
+    the crash that every service shared — `throw new Error(err.response.data.error)` throws
+    a second `TypeError` on any network error, CORS failure, or timeout because
+    `err.response` is `undefined`. Aborted requests pass through untouched.
+  - `authHeader(token)` helper replaces the repeated `{ headers: { authorization } }` literal.
+- **All ~40 functions across the 8 axios services migrated** to `apiClient.<method>("/path", …)`;
+  the `try/catch` blocks are gone (the interceptor rejects with a clean error). JSDoc kept.
+  `socketService.js` (socket.io, not axios) is unchanged. Fixed in passing:
+  `userService.removeAvatar` was missing its `await` (its `catch` could never fire);
+  `searchUsers` still swallows non-abort errors (returns `[]` now, not `undefined`) but
+  re-throws `ERR_CANCELED` so the caller can ignore aborts.
+- **`useSearchUsersDebounced`** now creates an `AbortController` per keystroke and aborts the
+  previous in-flight search, so a slow earlier response can't overwrite a later query's
+  results. Also drops a stale-response write via `signal.aborted` guard.
+- **Error payloads normalised in the thunks**: `chatActions` / `profilePageActions` were
+  dispatching `payload: err` (the whole object into the store); now `payload: err.message`,
+  matching `feedActions` / `userActions` and shrinking the non-serializable-state surface
+  ahead of Phase 3.
+- **Tests**: `apiClient.test.js` (normalizeError + authHeader), `postService.test.js`,
+  `userService.test.js`, `authenticationServices.test.js` — mock `./apiClient`, assert
+  method/path/headers and error propagation. Suite 6 → **28 tests**; line coverage
+  3.4% → ~7%.
+
+Verification: `npm run lint` (0 errors, 68 jsx-a11y warnings), `npm test` (28/28),
+`npm run build` (clean), `npm run test:coverage` (passes floor). No backend this session —
+the manual pass matters more here than in Phases 0–1: every network call in the app now
+routes through the new client. Smoke login (credential + token-resume), feed, profile +
+follow, post/comment/vote, chat send, avatar upload/remove, notification read, and the
+user type-ahead before merge.
+
+### 8.4 Phase 3 — Redux Toolkit
+
+Branch `frontend-modernization-phase-3`, seven commits (3.1 + one per slice pair + socket).
+
+- **3.1 — `configureStore`**: `@reduxjs/toolkit` added; `legacy_createStore` +
+  `applyMiddleware` replaced. Thunk is bundled (direct `redux-thunk` dep removed);
+  `redux-logger` kept in dev via `getDefaultMiddleware().concat(logger)`; Redux DevTools on
+  in dev. `serializableCheck` / `immutableCheck` enabled. `storeFactory` moved to
+  `configureStore` (checks off).
+- **3.2 — all 8 slices → `createSlice`**, one `<slice>Slice.js` per slice replacing the
+  Types/Actions/Reducer(/Selectors) quartet; ~60 consumer files rewired (import specifiers
+  only — public thunk/selector names unchanged, so component call sites are untouched);
+  Immer removes every hand-spread update and all three `JSON.parse(JSON.stringify())` deep
+  clones. Order: `modal`+`alert` → `feed`+`notification` → `profilePage`+`chat` → `user` →
+  `socket`.
+- **Bugs fixed in passing** (each with a test):
+  - `feed`: `removePost` used `if (postIndex)` — deleting the post at index 0 silently did
+    nothing. Now `if (index !== -1)`.
+  - `user`: `signInStart`'s failed-token-resume did `dispatch(signOut)` (the thunk creator,
+    never invoked) so a bad stored token was never cleared. Now `dispatch(signOut())`.
+  - `socket`: `socketReducer`'s `DISCONNECT` case called `state.socket.disconnect()` — a
+    mutation inside a reducer. Gone (see below).
+  - `chat`: `pushMessageAction`'s `{ types: … }` typo is documented rather than "fixed" —
+    fixing it would double-append the sent message (it also arrives via the `newMessage`
+    socket echo). The thunk now deliberately only flips the sending flag.
+- **`socket` — the live io instance is out of Redux.** `services/socketService.js` is now
+  the socket module singleton (`openSocket` / `getSocket` / `closeSocket`); `openSocket`
+  tears down any existing connection first (fixes a leaked-socket-on-reconnect bug). The
+  slice holds only `{ connected, error }` and now tracks `connect` / `disconnect` /
+  `connect_error` (status was never tracked before). The `socket.socket` serializable /
+  immutable-check exemptions are gone; only `modal.modals` (render props) and
+  `alert.onClick` (callback) remain exempt.
+- **Deferred to Phase 5**: typed `RootState` / `AppDispatch` and typed
+  `useAppSelector` / `useAppDispatch` hooks — meaningless without the TS layer.
+- **Tests**: one `*Slice.test.js` per converted slice (reducers are pure — cheap, high
+  value). Suite 28 → **55 tests**.
+
+Verification per commit: `npm run lint` (0 errors), `npm test`, `npm run build` (clean, PWA
+`sw.js` still generated). No backend/browser this session — this is the phase most in need
+of a manual pass: every screen reads from the store. Before merge, smoke the full set —
+auth (login, signup, token-resume, logout), feed load + infinite scroll + new-post appears,
+profile + follow/unfollow counts, post vote / bookmark, comment + reply + vote + delete,
+avatar change/remove, edit profile, notifications (list, mark-read, live arrival), chat
+(sidebar list + scroll, open conversation, send, live receive), and modal/alert behaviour
+throughout.
+
+### 8.5 Phases 6–8 — dependency migrations
+
+Branch `frontend-modernization-phase-6-8`, three commits. These are independent of the RTK
+work and of each other; grouped only because each is small.
+
+- **6 — react-router-dom 6 → 7** (`^6.30.6` → `^7.18.3`). The app uses the declarative
+  `<BrowserRouter>` / `<Routes>` API with no data-router features, so this is a straight
+  bump: the v6 `future` flags are v7 defaults and `react-router-dom` remains a re-export
+  shim. Added `future={{ v7_startTransition, v7_relativeSplatPath }}` on v6 first, verified,
+  then bumped and removed the redundant prop. `matchPath` / `useParams` (5) / `useLocation`
+  (6) / `Link`+`NavLink` (16) / `Navigate` / `Outlet` are unchanged in v7. Data-router
+  adoption (`createBrowserRouter`, loaders/actions) remains a separate follow-up (§5 / §8).
+- **7 — Vite 6 → 7** (`^6.4.3` → `^7.3.6`). `@vitejs/plugin-react`, `vite-plugin-svgr`,
+  `vite-plugin-pwa`, `vitest` all resolve against Vite 7 with no peer conflict (unlike the
+  Vite 8 attempt in §3). `vite.config.js` unchanged. `npm run dev` boots and serves 200.
+- **8 — `react-spring` → `@react-spring/web`** (`^9.7.5`). Only `useTransition` + `animated`
+  are used (7 files); swapped the meta-package for the scoped web package — identical API,
+  import specifier only. Dropping the umbrella also removes its
+  `@react-spring/three` / `@react-three/fiber` transitive tree, which **cleared all 7
+  npm-audit high-severity advisories (now 0 vulnerabilities)** and removed a stray React 19
+  peer requirement, pre-clearing that Phase 10 blocker.
+
+Verification per commit: `npm run lint` (0 errors), `npm test` (55/55), `npm run build`
+(clean). Manual passes still outstanding: every route (Phase 6) and every animation —
+toast alert, pulsating unread icon, options dialog, notification popup (Phase 8).
+
+### Dependency state after Phases 0–8
+
+| Package | Was (at clone / §1) | Now |
+|---|---|---|
+| State | classic Redux + `redux-thunk` + `redux-logger` | `@reduxjs/toolkit` 2.12 (`createSlice` ×8) |
+| HTTP | per-call `axios(...)` | one `apiClient` axios instance + interceptors |
+| Router | `react-router-dom` 6.30 | `react-router-dom` 7.18 |
+| Build | Vite 5 → 6 (§2) | Vite 7.3 |
+| Animation | `react-spring` (umbrella) | `@react-spring/web` 9.7 |
+| Tests | none → Vitest, 6 tests (§4) | Vitest, 55 tests, coverage wired |
+| Lint | 357 problems | 0 errors, 68 `jsx-a11y` warnings (tracked) |
+| `npm audit` | 9 (2 mod, 7 high) | **0** |
+
+Still pending: Phase 4 (RTK Query), Phase 5 (incremental TS), Phase 9 (forms → RHF + zod),
+Phase 10 (React 19), the a11y follow-up, CI, and the PWA build-out.
+
+### 8.6 Phase 10 — React 18 → 19
+
+Branch `frontend-modernization-phase-6-8`.
+
+- `react` / `react-dom` `^18.3.1` → `^19.2.8`; `@types/react` / `@types/react-dom` → `^19`.
+- Pre-checked the known v19 removals against this codebase: no `defaultProps` on function
+  components (0 occurrences — `.propTypes` via `prop-types` is unaffected and stays), no
+  `ReactDOM.render` / `unmountComponentAtNode` / `findDOMNode` / `react-dom/test-utils` /
+  `createFactory` / `react-test-renderer`. `main.jsx` was already on `createRoot` +
+  `StrictMode`. So the bump needed no code changes.
+- **`@react-spring/web` `^9.7.5` → `^10.1.2`** as part of this phase: v9.7.5's peer range
+  caps at React 18, and 9.7.5 is its last v9 release. v10's only breaking change is
+  `SpringContext` → `SpringContextProvider` (0 uses here — the app only uses `useTransition`
+  + `animated`), and v10's peer range includes React 19. `npm audit` stays at 0.
+- `@vitejs/plugin-react` 4.7 and `react-router` 7 already support React 19; no config change.
+
+Verification: `npm run lint` (0 errors, 68 a11y warnings — unchanged), `npm test` (55/55),
+`npm run build` (clean). Manual pass still outstanding: every animation (react-spring v10)
+and a general click-through, since no backend/browser was available this session.
+
+### 8.7 CI — GitHub Actions
+
+Added `.github/workflows/ci.yml` (the repo's first CI). Runs on push to
+`main` / `development` / `messenger-development` and on every PR. Two independent jobs
+(there is no root `package.json`):
+
+- **frontend**: `npm ci` → `npm run lint` → `npm test` (Vitest, 55) → `npm run build`
+  (with a dummy `VITE_BACKEND_URI`). Node 22, npm cache keyed on `frontend/package-lock.json`.
+- **backend**: `npm ci` → parse-only smoke check (`node --check` over every non-`node_modules`
+  `.js` file). Not a real test run — `npm test` is deliberately `exit 1`, and most backend
+  modules connect to Mongo / start a server on `require`, so executing them in CI isn't
+  viable. Catches syntax errors only.
+
+Both jobs verified locally (lint/test/build green; backend parse check passes).
+
+### 8.8 PWA build-out
+
+`vite-plugin-pwa` was already wired but stub-configured (`registerType: 'autoUpdate'`,
+`devOptions.enabled: true`, a one-line `{ theme_color }` manifest, no icons). Finished it:
+
+- **Icons** — `public/pwa-icon.svg` (the camera glyph, white on a `#0a0a0a` rounded square)
+  is the source. Ran `@vite-pwa/assets-generator` (`--preset minimal-2023`) **once** to emit
+  `public/pwa-{64,192,512}x512.png`, `maskable-icon-512x512.png`,
+  `apple-touch-icon-180x180.png`, `favicon.ico`, then **uninstalled the generator** — it
+  pulls a `sharp` with 3 open high-severity libvips CVEs and would have regressed the
+  Phase-8 "0 vulnerabilities". `npm audit` stays at 0. To regenerate after changing the
+  source icon: `npx @vite-pwa/assets-generator --preset minimal-2023 public/pwa-icon.svg`,
+  then `npm uninstall @vite-pwa/assets-generator` again.
+- **Manifest** — full `name` / `short_name` / `description` / `display: standalone` /
+  `start_url` / `scope` / theme+background `#0a0a0a` / the four icon entries.
+- **Offline** — `workbox.globPatterns` precaches the built shell; one `runtimeCaching` rule
+  (`CacheFirst`, 200 entries / 30 days) for `res.cloudinary.com` images. **`/api/` is never
+  cached** (per-user, always-changing) — `navigateFallbackDenylist: [/^\/api\//]`.
+- **Update prompt** — `registerType` switched `autoUpdate` → `prompt`; new
+  `src/components/PWABadge/PWABadge.jsx` (+ `sass/components/_pwa-badge.scss`, `@use`d in
+  `main.scss`) uses `virtual:pwa-register/react`'s `useRegisterSW` to show an offline-ready
+  / update-available toast with Reload / Dismiss. Rendered once from `App.jsx`.
+- **`devOptions.enabled` removed** — no service worker in `npm run dev` anymore (it only
+  caused stale-asset confusion); `PWABadge` renders nothing when there's no SW.
+- `index.html` gained `apple-touch-icon` and `theme-color`.
+
+Verification: `npm run lint` (0 errors, 68 warnings — unchanged), `npm test` (55/55),
+`npm run build` (clean; `dist/manifest.webmanifest` + `sw.js` correct, 61 precache entries).
+Not exercised in a real install / offline session — no browser this session.
+
+CLAUDE.local.md's "PWA is half-removed" quirk note is now stale (also: `src/serviceWorker.js`
+was already deleted, and `main.jsx` no longer has a commented `register()` call).
+
+### 8.9 a11y — the safe subset
+
+The `jsx-a11y` warning count was 68. Cleared the 26 that carry no behavioural or visual
+risk, leaving 42 (all one kind — see below):
+
+- **`label-has-for` (15) — rule turned off in `eslint.config.js`.** The plugin deprecated
+  it in favour of `label-has-associated-control` (kept on); it still ships in `recommended`
+  and mis-fires on forms that pair `<label htmlFor>` with a control `id` correctly
+  (`FormInput` does exactly this and passes `id` through to its `<input>`).
+- **Empty spacer `<label></label>` (4, `label-has-associated-control`)** in
+  `ChangePasswordForm` / `EditProfileForm` — these are grid-column spacers in
+  `.settings-form__form-group` (which selects children positionally, not by tag), swapped to
+  `<span aria-hidden="true" />`. No layout change.
+- **`control-has-associated-label` (6)** — added `aria-label` to the hidden file inputs
+  (`ChangeAvatarButton`, `NewPostButton`), the chat / comment / caption / search inputs.
+  Purely additive.
+- **`alt-text` (1)** — `alt=""` on the placeholder `<img>` in `ChatUsers` (that component
+  has an unrelated `src={"S"}` bug left untouched — out of scope).
+
+**Still open (42 warnings / 21 sites), deferred as its own follow-up:**
+`click-events-have-key-events` + `no-noninteractive-element-interactions` +
+`no-static-element-interactions` — all `<div>` / `<img>` / `<li>` with an `onClick` and no
+keyboard path (`Comment`, `PostDialog`, `ProfileHeader` ×4, `NotificationFeed` ×2,
+`FilterSelector` ×2, `UserCard`, `Avatar`, …). Fixing these means converting to `<button>`
+or adding `role` + `tabIndex` + `onKeyDown`, which changes focus order and key handling on
+core interaction paths — needs a browser QA pass that wasn't available this session. §8's
+roadmap always split this ("non-keyboard `onClick`s … a real theme-toggle control") into a
+dedicated follow-up.
+
+Verification: `npm run lint` (0 errors, 42 warnings, down from 68), `npm test` (55/55),
+`npm run build` (clean).
+
+### Dependency / quality state after Phases 0–10
+
+| Package | At clone | Now |
+|---|---|---|
+| React | 18.3 | **19.2** |
+| Router | react-router-dom 6.30 | 7.18 |
+| Build | Vite 5 | Vite 7.3 |
+| Animation | `react-spring` umbrella | `@react-spring/web` **10.1** |
+| State | classic Redux + thunk | RTK 2.12 (`createSlice` ×8) |
+| HTTP | per-call `axios()` | one `apiClient` + interceptors |
+| Tests | none | Vitest, 55, coverage wired |
+| Lint | 357 problems | 0 errors, **42** `jsx-a11y` warnings |
+| `npm audit` | 9 (7 high) | **0** |
+| PWA | stub config, no icons | full manifest + icons + offline + update prompt |
+| CI | none | GitHub Actions (frontend lint/test/build + backend parse) |
+
+Still pending: Phase 4 (RTK Query), Phase 5 (incremental TS), Phase 9 (forms → RHF + zod),
+and the a11y interactive-element follow-up (42 warnings).

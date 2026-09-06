@@ -1,9 +1,9 @@
-import React, { useEffect, Fragment } from "react";
+import { useEffect, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 
-import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
-import { showModal, hideModal } from "../../redux/modal/modalActions";
+import { selectCurrentUser, selectToken } from "../../redux/user/userSlice";
+import { showModal, hideModal } from "../../redux/modal/modalSlice";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 
@@ -12,7 +12,7 @@ import PreviewImage from "../../components/PreviewImage/PreviewImage";
 import Loader from "../../components/Loader/Loader";
 import SkeletonLoader from "../../components/SkeletonLoader/SkeletonLoader";
 import MobileHeader from "../../components/Header/MobileHeader/MobileHeader";
-import SettingsButton from "../../components/SetttingsButton/SettingsButton";
+import SettingsButton from "../../components/SettingsButton/SettingsButton";
 import LoginCard from "../../components/LoginCard/LoginCard";
 import NotFoundPage from "../NotFoundPage/NotFoundPage";
 import ProfileHeader from "./ProfileHeader";
@@ -21,14 +21,11 @@ import {
   fetchProfileAction,
   fetchingAdditionalPostsAction,
   followUserAction,
-} from "../../redux/profilePage/profilePageActions";
-import {
   fetchingAdditionalPostsProfile,
   selectProfileData,
   selectProfileError,
   selectProfileFetching,
-  selectProfileFollowing,
-} from "../../redux/profilePage/profilePageSelectors";
+} from "../../redux/profilePage/profilePageSlice";
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -39,7 +36,6 @@ const ProfilePage = () => {
   const token = useSelector(selectToken);
 
   const fetching = useSelector(selectProfileFetching);
-  const following = useSelector(selectProfileFollowing);
   const fetchingAdditionalPosts = useSelector(fetchingAdditionalPostsProfile);
   const error = useSelector(selectProfileError);
   const data = useSelector(selectProfileData);
@@ -83,7 +79,7 @@ const ProfilePage = () => {
   useEffect(() => {
     document.title = `@${username} • GlimpseHub photos`;
     dispatch(fetchProfileAction(username, token));
-  }, [username, token]);
+  }, [dispatch, username, token]);
 
   const handleClick = (postId) => {
     if (window.outerWidth <= 600) {

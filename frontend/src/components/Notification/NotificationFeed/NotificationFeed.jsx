@@ -1,18 +1,15 @@
-import React, { useEffect, Fragment } from "react";
+import { useEffect, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 import {
   selectNotifications,
   selectNotificationState,
-} from "../../../redux/notification/notificationSelectors";
-import { selectToken } from "../../../redux/user/userSelectors";
-
-import {
   fetchNotificationsStart,
   readNotificationsStart,
   clearNotifications,
-} from "../../../redux/notification/notificationActions";
+} from "../../../redux/notification/notificationSlice";
+import { selectToken } from "../../../redux/user/userSlice";
 
 import UserCard from "../../UserCard/UserCard";
 import UsersListSkeleton from "../../UsersList/UsersListSkeleton/UsersListSkeleton";
@@ -127,7 +124,8 @@ const NotificationFeed = ({ setShowNotifications }) => {
           <Icon className="icon--larger" icon="heart-circle-outline" />
           <h2 className="heading-2 font-medium">Activity On Your Posts</h2>
           <h4 className="heading-4 font-medium">
-            When someone likes or comments on your posts, you'll see them here.
+            When someone likes or comments on your posts, you&apos;ll see them
+            here.
           </h4>
         </div>
       )}

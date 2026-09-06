@@ -1,43 +1,42 @@
-import axios from 'axios';
+import apiClient, { authHeader } from "./apiClient";
 
 /**
- * Searches for a username that is similar to the one supplied
+ * Searches for a username that is similar to the one supplied.
+ * Swallows non-abort errors (returns []) so the type-ahead never throws into
+ * the debounced search hook; aborted requests are re-thrown so the caller can
+ * ignore them.
  * @function searchUsers
  * @param {string} username The username to search for
  * @param {number} offset The number of documents to skip
+ * @param {object} [config] Extra axios config (e.g. `{ signal }` for aborting)
  * @returns {array} Array of users that match the criteria
  */
-export const searchUsers = async (username, offset = 0) => {
+export const searchUsers = async (username, offset = 0, config = {}) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/user/${username}/${offset}/search`);
-    return response.data;
+    const { data } = await apiClient.get(
+      `/user/${username}/${offset}/search`,
+      config
+    );
+    return data;
   } catch (err) {
+    if (err.code === "ERR_CANCELED") throw err;
     console.warn(err);
+    return [];
   }
 };
 
 /**
  * Verifies a user's email
- * @function verifyUser
+ * @function confirmUser
  * @param {string} authToken A user's auth token
- * @param {string} confirmationToken The token to verify an emailk
+ * @param {string} confirmationToken The token to verify an email
  */
 export const confirmUser = async (authToken, confirmationToken) => {
-  try {
-    await axios.put(
-      `${import.meta.env.VITE_BACKEND_URI}/api/user/confirm`,
-      {
-        token: confirmationToken,
-      },
-      {
-        headers: {
-          authorization: authToken,
-        },
-      }
-    );
-  } catch (err) {
-    throw new Error(err);
-  }
+  await apiClient.put(
+    "/user/confirm",
+    { token: confirmationToken },
+    authHeader(authToken)
+  );
 };
 
 /**
@@ -49,18 +48,14 @@ export const confirmUser = async (authToken, confirmationToken) => {
  */
 export const changeAvatar = async (image, authToken) => {
   const formData = new FormData();
-  formData.append('image', image);
-  try {
-    const response = await axios.put(`${import.meta.env.VITE_BACKEND_URI}/api/user/avatar`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        authorization: authToken,
-      },
-    });
-    return response.data;
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  formData.append("image", image);
+  const { data } = await apiClient.put("/user/avatar", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      authorization: authToken,
+    },
+  });
+  return data;
 };
 
 /**
@@ -69,15 +64,7 @@ export const changeAvatar = async (image, authToken) => {
  * @param {string} authToken A user's auth token
  */
 export const removeAvatar = async (authToken) => {
-  try {
-    axios.delete(`${import.meta.env.VITE_BACKEND_URI}/api/user/avatar`, {
-      headers: {
-        authorization: authToken,
-      },
-    });
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  await apiClient.delete("/user/avatar", authHeader(authToken));
 };
 
 /**
@@ -88,39 +75,25 @@ export const removeAvatar = async (authToken) => {
  * @returns {object} Updated user object
  */
 export const updateProfile = async (authToken, updates) => {
-  try {
-    const response = await axios.put(
-      `${import.meta.env.VITE_BACKEND_URI}/api/user`,
-      {
-        ...updates,
-      },
-      {
-        headers: {
-          authorization: authToken,
-        },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  const { data } = await apiClient.put(
+    "/user",
+    { ...updates },
+    authHeader(authToken)
+  );
+  return data;
 };
 
 /**
  * Gets random suggested users for the user to follow
  * @function getSuggestedUsers
  * @param {string} authToken A user's auth token
+ * @param {number} [max] Maximum number of users to return
  * @returns {array} Array of users
  */
 export const getSuggestedUsers = async (authToken, max) => {
-  try {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/user/suggested/${max || ''}`, {
-      headers: {
-        authorization: authToken,
-      },
-    });
-    return response.data;
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  const { data } = await apiClient.get(
+    `/user/suggested/${max || ""}`,
+    authHeader(authToken)
+  );
+  return data;
 };

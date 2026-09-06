@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 import { Link } from "react-router-dom";
 
 import ChangeAvatarButton from "../../components/ChangeAvatarButton/ChangeAvatarButton";
@@ -6,12 +6,12 @@ import Avatar from "../../components/Avatar/Avatar";
 import UsersList from "../../components/UsersList/UsersList";
 import UnfollowPrompt from "../../components/UnfollowPrompt/UnfollowPrompt";
 import Button from "../../components/Button/Button";
-import SettingsButton from "../../components/SetttingsButton/SettingsButton";
+import SettingsButton from "../../components/SettingsButton/SettingsButton";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProfileAction,
   followUserAction,
-} from "../../redux/profilePage/profilePageActions";
+} from "../../redux/profilePage/profilePageSlice";
 
 const ProfileHeader = ({ currentUser, showModal, token, follow }) => {
   const dispatch = useDispatch();

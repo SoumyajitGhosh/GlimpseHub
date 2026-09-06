@@ -1,12 +1,11 @@
-import React, { useEffect, Suspense, lazy } from "react";
+import { useEffect, Suspense, lazy } from "react";
 import { Routes, Route, useLocation, matchPath } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useTransition as useSpringTransition, animated } from "react-spring";
+import { useTransition as useSpringTransition } from "@react-spring/web";
 
-import { selectCurrentUser } from "./redux/user/userSelectors";
-import { signInStart } from "./redux/user/userActions";
-import { connectSocket } from "./redux/socket/socketActions";
-import { fetchNotificationsStart } from "./redux/notification/notificationActions";
+import { selectCurrentUser, signInStart } from "./redux/user/userSlice";
+import { connectSocket } from "./redux/socket/socketSlice";
+import { fetchNotificationsStart } from "./redux/notification/notificationSlice";
 
 import SkipLink from "./components/SkipLink/SkipLink";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
@@ -15,14 +14,15 @@ import Modal from "./components/Modal/Modal";
 import Alert from "./components/Alert/Alert";
 import Footer from "./components/Footer/Footer";
 import MobileNav from "./components/MobileNav/MobileNav";
+import PWABadge from "./components/PWABadge/PWABadge";
 
 import LoadingPage from "./pages/LoadingPage/LoadingPage";
 
 const ProfilePage = lazy(() => import("./pages/ProfilePage/ProfilePage"));
 const PostPage = lazy(() => import("./pages/PostPage/PostPage"));
 const ChatPage = lazy(() => import("./pages/ChatPage/ChatPage"));
-const ConfirmationPage = lazy(() =>
-  import("./pages/ConfirmationPage/ConfirmationPage")
+const ConfirmationPage = lazy(
+  () => import("./pages/ConfirmationPage/ConfirmationPage")
 );
 const SettingsPage = lazy(() => import("./pages/SettingsPage/SettingsPage"));
 const ActivityPage = lazy(() => import("./pages/ActivityPage/ActivityPage"));
@@ -32,17 +32,17 @@ const HomePage = lazy(() => import("./pages/HomePage/HomePage"));
 const NewPostPage = lazy(() => import("./pages/NewPostPage/NewPostPage"));
 const ExplorePage = lazy(() => import("./pages/ExplorePage/ExplorePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage/NotFoundPage"));
-const EditProfileForm = lazy(() =>
-  import("./components/EditProfileForm/EditProfileForm")
+const EditProfileForm = lazy(
+  () => import("./components/EditProfileForm/EditProfileForm")
 );
-const ChangePasswordForm = lazy(() =>
-  import("./components/ChangePasswordForm/ChangePasswordForm")
+const ChangePasswordForm = lazy(
+  () => import("./components/ChangePasswordForm/ChangePasswordForm")
 );
-const SuggestedPosts = lazy(() =>
-  import("./components/SuggestedPosts/SuggestedPosts")
+const SuggestedPosts = lazy(
+  () => import("./components/SuggestedPosts/SuggestedPosts")
 );
-const HashtagPosts = lazy(() =>
-  import("./components/HashtagPosts/HashtagPosts")
+const HashtagPosts = lazy(
+  () => import("./components/HashtagPosts/HashtagPosts")
 );
 
 // Route-metadata-driven chrome visibility: each entry names an exact path
@@ -163,6 +163,7 @@ const App = () => {
     <div className="app" data-test="component-app">
       <SkipLink />
       <Suspense fallback={<LoadingPage />}>{renderApp()}</Suspense>
+      <PWABadge />
     </div>
   );
 };
