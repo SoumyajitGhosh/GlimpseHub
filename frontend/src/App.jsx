@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useTransition as useSpringTransition } from "react-spring";
 
 import { selectCurrentUser, signInStart } from "./redux/user/userSlice";
-import { connectSocket } from "./redux/socket/socketActions";
+import { connectSocket } from "./redux/socket/socketSlice";
 import { fetchNotificationsStart } from "./redux/notification/notificationSlice";
 
 import SkipLink from "./components/SkipLink/SkipLink";

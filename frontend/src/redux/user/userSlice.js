@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createSelector } from "reselect";
 
-import { disconnectSocket } from "../socket/socketActions";
+import { disconnectSocket } from "../socket/socketSlice";
 import { bookmarkPost as bookmarkPostService } from "../../services/postService";
 import { registerUser, login } from "../../services/authenticationServices";
 import {

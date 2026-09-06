@@ -10,12 +10,9 @@ const store = configureStore({
       serializableCheck: {
         // `modal.modals[].props` carries React elements / render props and
         // `alert.onClick` is a callback — non-serializable by design.
-        // `socket.socket` still holds the live io instance (removed from state
-        // in a later Phase 3 commit, along with the CONNECT exemption).
-        ignoredActions: ["CONNECT", "modal/showModal", "alert/showAlertAction"],
-        ignoredPaths: ["socket.socket", "modal.modals", "alert.onClick"],
+        ignoredActions: ["modal/showModal", "alert/showAlertAction"],
+        ignoredPaths: ["modal.modals", "alert.onClick"],
       },
-      immutableCheck: { ignoredPaths: ["socket.socket"] },
     });
     return import.meta.env.DEV ? middleware.concat(logger) : middleware;
   },
