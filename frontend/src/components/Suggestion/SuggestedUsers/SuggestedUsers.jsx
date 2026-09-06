@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { showAlert } from "../../../redux/alert/alertActions";
+import { showAlert } from "../../../redux/alert/alertSlice";
 import { selectToken } from "../../../redux/user/userSelectors";
 
 import { getSuggestedUsers } from "../../../services/userService";

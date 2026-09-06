@@ -8,7 +8,7 @@ import {
   selectUpdatingProfile,
 } from "../../redux/user/userSelectors";
 import { updateProfileStart } from "../../redux/user/userActions";
-import { showAlert } from "../../redux/alert/alertActions";
+import { showAlert } from "../../redux/alert/alertSlice";
 
 import {
   validateEmail,

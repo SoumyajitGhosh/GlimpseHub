@@ -6,7 +6,7 @@ import {
   selectToken,
   selectCurrentUser,
 } from "../../../redux/user/userSelectors";
-import { showAlert } from "../../../redux/alert/alertActions";
+import { showAlert } from "../../../redux/alert/alertSlice";
 import { addPost } from "../../../redux/feed/feedActions";
 
 import { createPost } from "../../../services/postService";

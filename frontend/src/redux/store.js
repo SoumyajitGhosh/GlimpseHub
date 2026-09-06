@@ -7,12 +7,13 @@ const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) => {
     const middleware = getDefaultMiddleware({
-      // The socket slice still holds the live socket.io instance in state and
-      // dispatches it in the CONNECT action. That moves out of the store in a
-      // later Phase 3 commit; until then, exempt it from the dev checks.
       serializableCheck: {
-        ignoredActions: ["CONNECT"],
-        ignoredPaths: ["socket.socket"],
+        // `modal.modals[].props` carries React elements / render props and
+        // `alert.onClick` is a callback — non-serializable by design.
+        // `socket.socket` still holds the live io instance (removed from state
+        // in a later Phase 3 commit, along with the CONNECT exemption).
+        ignoredActions: ["CONNECT", "modal/showModal", "alert/showAlertAction"],
+        ignoredPaths: ["socket.socket", "modal.modals", "alert.onClick"],
       },
       immutableCheck: { ignoredPaths: ["socket.socket"] },
     });

@@ -1,7 +1,7 @@
 import { connect } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { showModal } from "../../redux/modal/modalActions";
+import { showModal } from "../../redux/modal/modalSlice";
 import { signOut } from "../../redux/user/userActions";
 
 import Icon from "../Icon/Icon";

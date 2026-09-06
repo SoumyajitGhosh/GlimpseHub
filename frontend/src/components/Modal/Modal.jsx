@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 
-import { hideModal } from "../../redux/modal/modalActions";
+import { hideModal } from "../../redux/modal/modalSlice";
 
 // Mapping object for dynamically importing components with paths
 const componentMap = {

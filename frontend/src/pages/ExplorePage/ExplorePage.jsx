@@ -2,8 +2,8 @@ import { Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { selectToken } from "../../redux/user/userSelectors";
-import { showAlert } from "../../redux/alert/alertActions";
-import { showModal } from "../../redux/modal/modalActions";
+import { showAlert } from "../../redux/alert/alertSlice";
+import { showModal } from "../../redux/modal/modalSlice";
 import SuggestedPosts from "../../components/SuggestedPosts/SuggestedPosts";
 import HashtagPosts from "../../components/HashtagPosts/HashtagPosts";
 import NotFoundPage from "../NotFoundPage/NotFoundPage";

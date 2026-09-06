@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { showModal } from "../../redux/modal/modalActions";
+import { showModal } from "../../redux/modal/modalSlice";
 import { selectToken } from "../../redux/user/userSelectors";
 
 import { confirmUser } from "../../services/userService";

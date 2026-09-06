@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
-import { showAlert } from "../../redux/alert/alertActions";
+import { showAlert } from "../../redux/alert/alertSlice";
 import { validatePassword } from "../../utils/validation";
 import { changePassword } from "../../services/authenticationServices";
 import Avatar from "../Avatar/Avatar";

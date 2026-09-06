@@ -5,8 +5,8 @@ import classNames from "classnames";
 import { Link, useNavigate } from "react-router-dom";
 
 import { selectToken, selectCurrentUser } from "../../redux/user/userSelectors";
-import { showModal, hideModal } from "../../redux/modal/modalActions";
-import { showAlert } from "../../redux/alert/alertActions";
+import { showModal, hideModal } from "../../redux/modal/modalSlice";
+import { showAlert } from "../../redux/alert/alertSlice";
 
 import { getPost, deletePost } from "../../services/postService";
 import { getComments } from "../../services/commentService";

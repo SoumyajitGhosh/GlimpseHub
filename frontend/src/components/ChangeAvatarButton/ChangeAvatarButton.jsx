@@ -10,8 +10,8 @@ import {
   selectToken,
   selectError,
 } from "../../redux/user/userSelectors";
-import { showModal } from "../../redux/modal/modalActions";
-import { showAlert } from "../../redux/alert/alertActions";
+import { showModal } from "../../redux/modal/modalSlice";
+import { showAlert } from "../../redux/alert/alertSlice";
 
 const ChangeAvatarButton = ({ children }) => {
   const dispatch = useDispatch();

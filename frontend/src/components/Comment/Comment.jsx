@@ -12,8 +12,8 @@ import { linkifyOptions } from "../../utils/linkifyUtils";
 
 import Icon from "../Icon/Icon";
 
-import { showModal, hideModal } from "../../redux/modal/modalActions";
-import { showAlert } from "../../redux/alert/alertActions";
+import { showModal, hideModal } from "../../redux/modal/modalSlice";
+import { showAlert } from "../../redux/alert/alertSlice";
 
 import {
   voteComment,

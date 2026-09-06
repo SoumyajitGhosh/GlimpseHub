@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 
 import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
-import { showModal, hideModal } from "../../redux/modal/modalActions";
+import { showModal, hideModal } from "../../redux/modal/modalSlice";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 

@@ -4,8 +4,8 @@ import { connect } from "react-redux";
 import classNames from "classnames";
 
 import { bookmarkPost } from "../../../redux/user/userActions";
-import { showAlert } from "../../../redux/alert/alertActions";
-import { showModal, hideModal } from "../../../redux/modal/modalActions";
+import { showAlert } from "../../../redux/alert/alertSlice";
+import { showModal, hideModal } from "../../../redux/modal/modalSlice";
 
 import { formatDate } from "../../../utils/timeUtils";
 import { votePost } from "../../../services/postService";
