@@ -12,7 +12,10 @@ const state = (overrides) => ({
 
 describe("feedSlice", () => {
   it("addPost prepends", () => {
-    const next = reducer(state({ posts: [{ _id: "b" }] }), addPost({ _id: "a" }));
+    const next = reducer(
+      state({ posts: [{ _id: "b" }] }),
+      addPost({ _id: "a" })
+    );
     expect(next.posts.map((p) => p._id)).toEqual(["a", "b"]);
   });
 

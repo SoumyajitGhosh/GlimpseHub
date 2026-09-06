@@ -12,7 +12,7 @@ import { followUser } from "../../../services/profileService";
 
 import Button from "../Button";
 import UnfollowPrompt from "../../UnfollowPrompt/UnfollowPrompt";
-import { fetchProfileAction } from "../../../redux/profilePage/profilePageActions";
+import { fetchProfileAction } from "../../../redux/profilePage/profilePageSlice";
 
 const FollowButton = ({ userId, following, username, avatar, style }) => {
   const dispatch = useDispatch();

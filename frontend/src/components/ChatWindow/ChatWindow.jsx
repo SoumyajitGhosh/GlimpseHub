@@ -3,7 +3,7 @@ import Icon from "../Icon/Icon";
 import { useParams } from "react-router-dom";
 import ChatContainer from "./Chat/ChatContainer";
 import { useDispatch } from "react-redux";
-import { setChatUserAction } from "../../redux/chat/chatActions";
+import { setChatUserAction } from "../../redux/chat/chatSlice";
 
 const ChatWindow = () => {
   const dispatch = useDispatch();

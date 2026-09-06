@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProfileAction,
   followUserAction,
-} from "../../redux/profilePage/profilePageActions";
+} from "../../redux/profilePage/profilePageSlice";
 
 const ProfileHeader = ({ currentUser, showModal, token, follow }) => {
   const dispatch = useDispatch();

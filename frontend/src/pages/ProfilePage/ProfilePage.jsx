@@ -21,13 +21,11 @@ import {
   fetchProfileAction,
   fetchingAdditionalPostsAction,
   followUserAction,
-} from "../../redux/profilePage/profilePageActions";
-import {
   fetchingAdditionalPostsProfile,
   selectProfileData,
   selectProfileError,
   selectProfileFetching,
-} from "../../redux/profilePage/profilePageSelectors";
+} from "../../redux/profilePage/profilePageSlice";
 
 const ProfilePage = () => {
   const dispatch = useDispatch();

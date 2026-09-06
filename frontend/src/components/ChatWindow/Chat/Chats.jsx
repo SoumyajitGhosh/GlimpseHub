@@ -5,7 +5,7 @@ import {
   selectCurrentUser,
   selectToken,
 } from "../../../redux/user/userSelectors";
-import { fetchAllMessagesAction } from "../../../redux/chat/chatActions";
+import { fetchAllMessagesAction } from "../../../redux/chat/chatSlice";
 
 const Chats = ({ userToChatId } /*{ message }*/) => {
   const dispatch = useDispatch();

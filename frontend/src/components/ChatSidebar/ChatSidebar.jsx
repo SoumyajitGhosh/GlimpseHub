@@ -3,11 +3,11 @@ import ChatUsers from "./ChatUsers/ChatUsers";
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 import { useDispatch, useSelector } from "react-redux";
 import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
-import { fetchProfileAction } from "../../redux/profilePage/profilePageActions";
+import { fetchProfileAction } from "../../redux/profilePage/profilePageSlice";
 import {
   fetchChatUsersAction,
   fetchChatUsersActionOnScroll,
-} from "../../redux/chat/chatActions";
+} from "../../redux/chat/chatSlice";
 
 const ChatSidebar = () => {
   const componentRef = useRef();
