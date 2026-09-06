@@ -1,4 +1,4 @@
-import axios from "axios";
+import apiClient, { authHeader } from "./apiClient";
 
 /**
  * Fetches a complete post with comments and the fully
@@ -8,50 +8,29 @@ import axios from "axios";
  * @returns {object} The post requested
  */
 export const getPost = async (postId) => {
-  try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URI}/api/post/${postId}`
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  const { data } = await apiClient.get(`/post/${postId}`);
+  return data;
 };
 
 /**
- *
+ * Retrieves a page of a user's posts
  * @param {string} username A users username
  * @param {number} offset The amount of posts to skip
+ * @returns {array} Array of posts
  */
 export const getPosts = async (username, offset = 0) => {
-  try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URI}/api/user/${username}/posts/${offset}`
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  const { data } = await apiClient.get(`/user/${username}/posts/${offset}`);
+  return data;
 };
 
 /**
  * Either likes or dislikes a post
  * @function votePost
  * @param {string} postId The id of the post to be voted on
- * @param {*} authToken The user's auth token
+ * @param {string} authToken The user's auth token
  */
 export const votePost = async (postId, authToken) => {
-  try {
-    await axios.post(
-      `${import.meta.env.VITE_BACKEND_URI}/api/post/${postId}/vote`,
-      null,
-      {
-        headers: { authorization: authToken },
-      }
-    );
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  await apiClient.post(`/post/${postId}/vote`, null, authHeader(authToken));
 };
 
 /**
@@ -62,21 +41,13 @@ export const votePost = async (postId, authToken) => {
  * @returns {object} The created post
  */
 export const createPost = async (formData, authToken) => {
-  try {
-    const post = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URI}/api/post`,
-      formData,
-      {
-        headers: {
-          authorization: authToken,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return post.data;
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  const { data } = await apiClient.post("/post", formData, {
+    headers: {
+      authorization: authToken,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return data;
 };
 
 /**
@@ -86,18 +57,7 @@ export const createPost = async (formData, authToken) => {
  * @param {string} authToken A user's auth token
  */
 export const deletePost = async (postId, authToken) => {
-  try {
-    await axios.delete(
-      `${import.meta.env.VITE_BACKEND_URI}/api/post/${postId}`,
-      {
-        headers: {
-          authorization: authToken,
-        },
-      }
-    );
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  await apiClient.delete(`/post/${postId}`, authHeader(authToken));
 };
 
 /**
@@ -107,18 +67,12 @@ export const deletePost = async (postId, authToken) => {
  * @return {object}
  */
 export const bookmarkPost = async (postId, authToken) => {
-  try {
-    const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URI}/api/user/${postId}/bookmark`,
-      null,
-      {
-        headers: { authorization: authToken },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  const { data } = await apiClient.post(
+    `/user/${postId}/bookmark`,
+    null,
+    authHeader(authToken)
+  );
+  return data;
 };
 
 /**
@@ -127,14 +81,8 @@ export const bookmarkPost = async (postId, authToken) => {
  * @returns {array} Array of filters
  */
 export const getPostFilters = async () => {
-  try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URI}/api/post/filters`
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  const { data } = await apiClient.get("/post/filters");
+  return data;
 };
 
 /**
@@ -145,19 +93,11 @@ export const getPostFilters = async () => {
  * @returns {array} Array of posts
  */
 export const getSuggestedPosts = async (authToken, offset = 0) => {
-  try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URI}/api/post/suggested/` + offset,
-      {
-        headers: {
-          authorization: authToken,
-        },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  const { data } = await apiClient.get(
+    `/post/suggested/${offset}`,
+    authHeader(authToken)
+  );
+  return data;
 };
 
 /**
@@ -169,17 +109,9 @@ export const getSuggestedPosts = async (authToken, offset = 0) => {
  * @returns {array} Array of posts
  */
 export const getHashtagPosts = async (authToken, hashtag, offset = 0) => {
-  try {
-    const response = await axios.get(
-      `${import.meta.env.VITE_BACKEND_URI}/api/post/hashtag/${hashtag}/${offset}`,
-      {
-        headers: {
-          authorization: authToken,
-        },
-      }
-    );
-    return response.data;
-  } catch (err) {
-    throw new Error(err.response.data.error);
-  }
+  const { data } = await apiClient.get(
+    `/post/hashtag/${hashtag}/${offset}`,
+    authHeader(authToken)
+  );
+  return data;
 };

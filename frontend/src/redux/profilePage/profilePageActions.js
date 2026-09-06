@@ -16,7 +16,10 @@ export const fetchProfileAction = (username, token) => async (dispatch) => {
       payload: profile,
     });
   } catch (err) {
-    dispatch({ type: profilePageTypes.FETCH_PROFILE_FAILURE, payload: err });
+    dispatch({
+      type: profilePageTypes.FETCH_PROFILE_FAILURE,
+      payload: err.message,
+    });
   }
 };
 
@@ -31,7 +34,7 @@ export const followUserAction = (userId, token) => async (dispatch) => {
   } catch (err) {
     dispatch({
       type: profilePageTypes.FOLLOW_USER_FAILURE,
-      payload: err,
+      payload: err.message,
     });
   }
 };
@@ -46,7 +49,7 @@ export const fetchingAdditionalPostsAction =
     } catch (err) {
       dispatch({
         type: profilePageTypes.FETCH_ADDITIONAL_POSTS_FAILURE,
-        payload: err,
+        payload: err.message,
       });
     }
   };
@@ -60,6 +63,6 @@ export const fetchAdditionalUsersAction =
         : await retrieveUserFollowers(userId, stateRefLength, token);
       dispatch({ type: profilePageTypes.FETCH_SUCCESS, payload: response });
     } catch (err) {
-      dispatch({ type: profilePageTypes.FETCH_FAILURE, payload: err });
+      dispatch({ type: profilePageTypes.FETCH_FAILURE, payload: err.message });
     }
   };

@@ -13,7 +13,7 @@ export const fetchChatUsersAction =
       );
       dispatch({ type: chatTypes.FETCH_SUCCESS, payload: response });
     } catch (err) {
-      dispatch({ type: chatTypes.FETCH_FAILURE, payload: err });
+      dispatch({ type: chatTypes.FETCH_FAILURE, payload: err.message });
     }
   };
 
@@ -28,7 +28,7 @@ export const fetchChatUsersActionOnScroll =
       );
       dispatch({ type: chatTypes.ADD_USERS, payload: response });
     } catch (err) {
-      dispatch({ type: chatTypes.FETCH_FAILURE, payload: err });
+      dispatch({ type: chatTypes.FETCH_FAILURE, payload: err.message });
     }
   };
 
@@ -42,7 +42,7 @@ export const fetchAllMessagesAction =
       const response = await getMessages(userToChatId, token);
       dispatch({ type: chatTypes.FETCH_ALL_MESSAGES, payload: response });
     } catch (err) {
-      dispatch({ type: chatTypes.FETCH_FAILURE, payload: err });
+      dispatch({ type: chatTypes.FETCH_FAILURE, payload: err.message });
     }
   };
 
@@ -53,7 +53,7 @@ export const pushMessageAction =
       const response = await sendMessage(id, authToken, message);
       dispatch({ types: chatTypes.PUSH_MESSAGE_SUCCESS, payload: response });
     } catch (err) {
-      dispatch({ type: chatTypes.PUSH_MESSAGE_FAILURE, payload: err });
+      dispatch({ type: chatTypes.PUSH_MESSAGE_FAILURE, payload: err.message });
     }
   };
 

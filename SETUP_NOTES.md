@@ -370,3 +370,46 @@ session, so the manual smoke of the touched screens (chat sidebar/window, notifi
 popup, profile, comment vote/delete, new-post crop) is still recommended before merge;
 Phase 1 is mechanical but the `exhaustive-deps` dep-array additions and the keyed-Fragment
 rewrite in `Chats.jsx` do touch render behaviour.
+
+### 8.3 Phase 2 — shared HTTP client
+
+Branch `frontend-modernization-phase-2`. Replaces the 9 hand-rolled service modules'
+per-call `axios(...)` + `try/catch` with one axios instance.
+
+- **New `src/services/apiClient.js`**: an `axios.create({ baseURL: '${VITE_BACKEND_URI}/api' })`
+  instance with two interceptors —
+  - *request*: attaches `localStorage.token` as the bare `authorization` header (the backend
+    reads the raw value, no `Bearer` prefix) unless the caller already set one. This means
+    the previously-unauthenticated reads (`getPost`, `getComments`, `getUserProfile`,
+    `searchUsers`, …) now send the token when one exists — harmless on the public routes and
+    a latent-bug fix on the `optionalAuth` ones (follow / vote state now populates).
+  - *response*: `normalizeError()` (exported, unit-tested) turns **every** failure into a
+    real `Error` with a readable `.message` plus `.status` / `.isNetworkError`. This fixes
+    the crash that every service shared — `throw new Error(err.response.data.error)` throws
+    a second `TypeError` on any network error, CORS failure, or timeout because
+    `err.response` is `undefined`. Aborted requests pass through untouched.
+  - `authHeader(token)` helper replaces the repeated `{ headers: { authorization } }` literal.
+- **All ~40 functions across the 8 axios services migrated** to `apiClient.<method>("/path", …)`;
+  the `try/catch` blocks are gone (the interceptor rejects with a clean error). JSDoc kept.
+  `socketService.js` (socket.io, not axios) is unchanged. Fixed in passing:
+  `userService.removeAvatar` was missing its `await` (its `catch` could never fire);
+  `searchUsers` still swallows non-abort errors (returns `[]` now, not `undefined`) but
+  re-throws `ERR_CANCELED` so the caller can ignore aborts.
+- **`useSearchUsersDebounced`** now creates an `AbortController` per keystroke and aborts the
+  previous in-flight search, so a slow earlier response can't overwrite a later query's
+  results. Also drops a stale-response write via `signal.aborted` guard.
+- **Error payloads normalised in the thunks**: `chatActions` / `profilePageActions` were
+  dispatching `payload: err` (the whole object into the store); now `payload: err.message`,
+  matching `feedActions` / `userActions` and shrinking the non-serializable-state surface
+  ahead of Phase 3.
+- **Tests**: `apiClient.test.js` (normalizeError + authHeader), `postService.test.js`,
+  `userService.test.js`, `authenticationServices.test.js` — mock `./apiClient`, assert
+  method/path/headers and error propagation. Suite 6 → **28 tests**; line coverage
+  3.4% → ~7%.
+
+Verification: `npm run lint` (0 errors, 68 jsx-a11y warnings), `npm test` (28/28),
+`npm run build` (clean), `npm run test:coverage` (passes floor). No backend this session —
+the manual pass matters more here than in Phases 0–1: every network call in the app now
+routes through the new client. Smoke login (credential + token-resume), feed, profile +
+follow, post/comment/vote, chat send, avatar upload/remove, notification read, and the
+user type-ahead before merge.
