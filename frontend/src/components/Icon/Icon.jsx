@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import PropTypes from "prop-types";
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
 
 const Icon = ({ onClick, className, icon, style }) => {
   const iconClassNames = classNames({

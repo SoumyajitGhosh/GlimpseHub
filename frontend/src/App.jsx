@@ -1,7 +1,7 @@
 import { useEffect, Suspense, lazy } from "react";
 import { Routes, Route, useLocation, matchPath } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useTransition as useSpringTransition } from "react-spring";
+import { useTransition as useSpringTransition } from "@react-spring/web";
 
 import { selectCurrentUser, signInStart } from "./redux/user/userSlice";
 import { connectSocket } from "./redux/socket/socketSlice";

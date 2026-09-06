@@ -1,4 +1,4 @@
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
 
 import TextButton from "../Button/TextButton/TextButton";
 

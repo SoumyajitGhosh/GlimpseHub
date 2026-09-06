@@ -1,5 +1,8 @@
 import PropTypes from "prop-types";
-import { useTransition as useSpringTransition, animated } from "react-spring";
+import {
+  useTransition as useSpringTransition,
+  animated,
+} from "@react-spring/web";
 import classNames from "classnames";
 
 import TextButton from "../Button/TextButton/TextButton";

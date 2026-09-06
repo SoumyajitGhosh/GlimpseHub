@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useTransition } from "react-spring";
+import { useTransition } from "@react-spring/web";
 
 import {
   selectNotifications,
