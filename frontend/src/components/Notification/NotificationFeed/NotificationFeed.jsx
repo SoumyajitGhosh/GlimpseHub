@@ -9,7 +9,7 @@ import {
   readNotificationsStart,
   clearNotifications,
 } from "../../../redux/notification/notificationSlice";
-import { selectToken } from "../../../redux/user/userSelectors";
+import { selectToken } from "../../../redux/user/userSlice";
 
 import UserCard from "../../UserCard/UserCard";
 import UsersListSkeleton from "../../UsersList/UsersListSkeleton/UsersListSkeleton";

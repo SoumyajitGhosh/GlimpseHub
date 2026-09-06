@@ -2,10 +2,7 @@ import { useState, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import {
-  selectToken,
-  selectCurrentUser,
-} from "../../../redux/user/userSelectors";
+import { selectToken, selectCurrentUser } from "../../../redux/user/userSlice";
 import { showAlert } from "../../../redux/alert/alertSlice";
 import { addPost } from "../../../redux/feed/feedSlice";
 

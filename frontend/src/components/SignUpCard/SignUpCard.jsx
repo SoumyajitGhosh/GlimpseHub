@@ -3,8 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { useFormik } from "formik";
 
-import { signUpStart } from "../../redux/user/userActions";
-import { selectError, selectFetching } from "../../redux/user/userSelectors";
+import {
+  signUpStart,
+  selectError,
+  selectFetching,
+} from "../../redux/user/userSlice";
 
 import {
   validateEmail,

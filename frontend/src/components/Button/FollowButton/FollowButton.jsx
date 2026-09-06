@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import {
-  selectCurrentUser,
-  selectToken,
-} from "../../../redux/user/userSelectors";
+import { selectCurrentUser, selectToken } from "../../../redux/user/userSlice";
 import { showModal } from "../../../redux/modal/modalSlice";
 import { showAlert } from "../../../redux/alert/alertSlice";
 

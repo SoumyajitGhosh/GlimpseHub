@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import classNames from "classnames";
 
-import { selectCurrentUser } from "../../redux/user/userSelectors";
+import { selectCurrentUser } from "../../redux/user/userSlice";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 

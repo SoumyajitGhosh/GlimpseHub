@@ -4,12 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   changeAvatarStart,
   removeAvatarStart,
-} from "../../redux/user/userActions";
-import {
   selectCurrentUser,
   selectToken,
   selectError,
-} from "../../redux/user/userSelectors";
+} from "../../redux/user/userSlice";
 import { showModal } from "../../redux/modal/modalSlice";
 import { showAlert } from "../../redux/alert/alertSlice";
 

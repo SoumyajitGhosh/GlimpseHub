@@ -3,8 +3,7 @@ import { Routes, Route, useLocation, matchPath } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTransition as useSpringTransition } from "react-spring";
 
-import { selectCurrentUser } from "./redux/user/userSelectors";
-import { signInStart } from "./redux/user/userActions";
+import { selectCurrentUser, signInStart } from "./redux/user/userSlice";
 import { connectSocket } from "./redux/socket/socketActions";
 import { fetchNotificationsStart } from "./redux/notification/notificationSlice";
 

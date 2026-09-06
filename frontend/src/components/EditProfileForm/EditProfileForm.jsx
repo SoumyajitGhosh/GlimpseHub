@@ -6,8 +6,8 @@ import {
   selectCurrentUser,
   selectToken,
   selectUpdatingProfile,
-} from "../../redux/user/userSelectors";
-import { updateProfileStart } from "../../redux/user/userActions";
+  updateProfileStart,
+} from "../../redux/user/userSlice";
 import { showAlert } from "../../redux/alert/alertSlice";
 
 import {

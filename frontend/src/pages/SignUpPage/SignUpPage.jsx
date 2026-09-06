@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { selectCurrentUser } from "../../redux/user/userSelectors";
+import { selectCurrentUser } from "../../redux/user/userSlice";
 
 import SignUpCard from "../../components/SignUpCard/SignUpCard";
 

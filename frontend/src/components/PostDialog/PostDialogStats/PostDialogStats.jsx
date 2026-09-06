@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import classNames from "classnames";
 
-import { bookmarkPost } from "../../../redux/user/userActions";
+import { bookmarkPost } from "../../../redux/user/userSlice";
 import { showAlert } from "../../../redux/alert/alertSlice";
 import { showModal, hideModal } from "../../../redux/modal/modalSlice";
 

@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import classNames from "classnames";
 import { Link, useNavigate } from "react-router-dom";
 
-import { selectToken, selectCurrentUser } from "../../redux/user/userSelectors";
+import { selectToken, selectCurrentUser } from "../../redux/user/userSlice";
 import { showModal, hideModal } from "../../redux/modal/modalSlice";
 import { showAlert } from "../../redux/alert/alertSlice";
 

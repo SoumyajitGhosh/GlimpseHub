@@ -2,7 +2,7 @@ import { useEffect, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 
-import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
+import { selectCurrentUser, selectToken } from "../../redux/user/userSlice";
 import { showModal, hideModal } from "../../redux/modal/modalSlice";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";

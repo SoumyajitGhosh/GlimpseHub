@@ -2,8 +2,8 @@ import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-// import { githubSignInStart } from "../../redux/user/userActions";
-import { selectCurrentUser } from "../../redux/user/userSelectors";
+// import { githubSignInStart } from "../../redux/user/userSlice";
+import { selectCurrentUser } from "../../redux/user/userSlice";
 
 import LoginCard from "../../components/LoginCard/LoginCard";
 

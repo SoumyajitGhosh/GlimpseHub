@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
-import { selectToken } from "../../redux/user/userSelectors";
+import { selectToken } from "../../redux/user/userSlice";
 import { showAlert } from "../../redux/alert/alertSlice";
 import { showModal } from "../../redux/modal/modalSlice";
 import SuggestedPosts from "../../components/SuggestedPosts/SuggestedPosts";

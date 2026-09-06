@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { showModal } from "../../redux/modal/modalSlice";
-import { selectToken } from "../../redux/user/userSelectors";
+import { selectToken } from "../../redux/user/userSlice";
 
 import { confirmUser } from "../../services/userService";
 

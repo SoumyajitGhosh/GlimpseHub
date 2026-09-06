@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { selectCurrentUser } from "../../../redux/user/userSelectors";
+import { selectCurrentUser } from "../../../redux/user/userSlice";
 
 import Icon from "../../Icon/Icon";
 import Button from "../../Button/Button";

@@ -43,7 +43,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Icon from "../../Icon/Icon";
 import { pushMessageAction } from "../../../redux/chat/chatSlice";
-import { selectToken } from "../../../redux/user/userSelectors.js";
+import { selectToken } from "../../../redux/user/userSlice.js";
 
 const ChatInput = ({ userToChatId }) => {
   const dispatch = useDispatch();

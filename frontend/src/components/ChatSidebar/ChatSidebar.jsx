@@ -2,7 +2,7 @@ import { Fragment, useEffect, useRef } from "react";
 import ChatUsers from "./ChatUsers/ChatUsers";
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";
+import { selectCurrentUser, selectToken } from "../../redux/user/userSlice";
 import { fetchProfileAction } from "../../redux/profilePage/profilePageSlice";
 import {
   fetchChatUsersAction,

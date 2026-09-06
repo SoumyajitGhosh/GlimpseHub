@@ -1,10 +1,7 @@
 import { extractTime } from "../../../utils/extractTime";
 import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  selectCurrentUser,
-  selectToken,
-} from "../../../redux/user/userSelectors";
+import { selectCurrentUser, selectToken } from "../../../redux/user/userSlice";
 import { fetchAllMessagesAction } from "../../../redux/chat/chatSlice";
 
 const Chats = ({ userToChatId } /*{ message }*/) => {

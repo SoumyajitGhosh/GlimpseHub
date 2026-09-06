@@ -3,12 +3,12 @@ import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-import { signInStart } from "../../redux/user/userActions";
 import {
+  signInStart,
   selectError,
   selectFetching,
   selectCurrentUser,
-} from "../../redux/user/userSelectors";
+} from "../../redux/user/userSlice";
 
 import Button from "../Button/Button";
 import FormInput from "../FormInput/FormInput";

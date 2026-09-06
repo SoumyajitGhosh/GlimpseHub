@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
 
-import userReducer from "./user/userReducer.js";
+import userReducer from "./user/userSlice";
 import modalReducer from "./modal/modalSlice";
 import alertReducer from "./alert/alertSlice";
 import socketReducer from "./socket/socketReducer";
