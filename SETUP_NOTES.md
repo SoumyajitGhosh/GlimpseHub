@@ -459,3 +459,45 @@ profile + follow/unfollow counts, post vote / bookmark, comment + reply + vote +
 avatar change/remove, edit profile, notifications (list, mark-read, live arrival), chat
 (sidebar list + scroll, open conversation, send, live receive), and modal/alert behaviour
 throughout.
+
+### 8.5 Phases 6–8 — dependency migrations
+
+Branch `frontend-modernization-phase-6-8`, three commits. These are independent of the RTK
+work and of each other; grouped only because each is small.
+
+- **6 — react-router-dom 6 → 7** (`^6.30.6` → `^7.18.3`). The app uses the declarative
+  `<BrowserRouter>` / `<Routes>` API with no data-router features, so this is a straight
+  bump: the v6 `future` flags are v7 defaults and `react-router-dom` remains a re-export
+  shim. Added `future={{ v7_startTransition, v7_relativeSplatPath }}` on v6 first, verified,
+  then bumped and removed the redundant prop. `matchPath` / `useParams` (5) / `useLocation`
+  (6) / `Link`+`NavLink` (16) / `Navigate` / `Outlet` are unchanged in v7. Data-router
+  adoption (`createBrowserRouter`, loaders/actions) remains a separate follow-up (§5 / §8).
+- **7 — Vite 6 → 7** (`^6.4.3` → `^7.3.6`). `@vitejs/plugin-react`, `vite-plugin-svgr`,
+  `vite-plugin-pwa`, `vitest` all resolve against Vite 7 with no peer conflict (unlike the
+  Vite 8 attempt in §3). `vite.config.js` unchanged. `npm run dev` boots and serves 200.
+- **8 — `react-spring` → `@react-spring/web`** (`^9.7.5`). Only `useTransition` + `animated`
+  are used (7 files); swapped the meta-package for the scoped web package — identical API,
+  import specifier only. Dropping the umbrella also removes its
+  `@react-spring/three` / `@react-three/fiber` transitive tree, which **cleared all 7
+  npm-audit high-severity advisories (now 0 vulnerabilities)** and removed a stray React 19
+  peer requirement, pre-clearing that Phase 10 blocker.
+
+Verification per commit: `npm run lint` (0 errors), `npm test` (55/55), `npm run build`
+(clean). Manual passes still outstanding: every route (Phase 6) and every animation —
+toast alert, pulsating unread icon, options dialog, notification popup (Phase 8).
+
+### Dependency state after Phases 0–8
+
+| Package | Was (at clone / §1) | Now |
+|---|---|---|
+| State | classic Redux + `redux-thunk` + `redux-logger` | `@reduxjs/toolkit` 2.12 (`createSlice` ×8) |
+| HTTP | per-call `axios(...)` | one `apiClient` axios instance + interceptors |
+| Router | `react-router-dom` 6.30 | `react-router-dom` 7.18 |
+| Build | Vite 5 → 6 (§2) | Vite 7.3 |
+| Animation | `react-spring` (umbrella) | `@react-spring/web` 9.7 |
+| Tests | none → Vitest, 6 tests (§4) | Vitest, 55 tests, coverage wired |
+| Lint | 357 problems | 0 errors, 68 `jsx-a11y` warnings (tracked) |
+| `npm audit` | 9 (2 mod, 7 high) | **0** |
+
+Still pending: Phase 4 (RTK Query), Phase 5 (incremental TS), Phase 9 (forms → RHF + zod),
+Phase 10 (React 19), the a11y follow-up, CI, and the PWA build-out.
