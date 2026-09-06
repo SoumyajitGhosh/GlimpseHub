@@ -5,7 +5,7 @@ import { useTransition } from "react-spring";
 import {
   selectNotifications,
   selectNotificationState,
-} from "../../../redux/notification/notificationSelectors";
+} from "../../../redux/notification/notificationSlice";
 
 import Icon from "../../Icon/Icon";
 import NotificationPopup from "./NotificationPopup/NotificationPopup";

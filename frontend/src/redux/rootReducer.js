@@ -4,8 +4,8 @@ import userReducer from "./user/userReducer.js";
 import modalReducer from "./modal/modalSlice";
 import alertReducer from "./alert/alertSlice";
 import socketReducer from "./socket/socketReducer";
-import notificationReducer from "./notification/notificationReducer";
-import feedReducer from "./feed/feedReducer";
+import notificationReducer from "./notification/notificationSlice";
+import feedReducer from "./feed/feedSlice";
 import profilePageReducer from "./profilePage/profilePageReducer.js";
 import chatReducer from "./chat/chatReducer.js";
 

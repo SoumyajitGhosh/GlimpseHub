@@ -1,7 +1,7 @@
 import socketTypes from "./socketTypes";
 import { connect } from "../../services/socketService";
-import { addNotification } from "../notification/notificationActions";
-import { addPost, removePost } from "../feed/feedActions";
+import { addNotification } from "../notification/notificationSlice";
+import { addPost, removePost } from "../feed/feedSlice";
 import { addSocketMessagesAction } from "../chat/chatActions";
 
 export const connectSocket = () => (dispatch) => {

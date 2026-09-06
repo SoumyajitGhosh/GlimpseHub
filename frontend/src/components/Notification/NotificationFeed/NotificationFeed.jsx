@@ -5,14 +5,11 @@ import { Link } from "react-router-dom";
 import {
   selectNotifications,
   selectNotificationState,
-} from "../../../redux/notification/notificationSelectors";
-import { selectToken } from "../../../redux/user/userSelectors";
-
-import {
   fetchNotificationsStart,
   readNotificationsStart,
   clearNotifications,
-} from "../../../redux/notification/notificationActions";
+} from "../../../redux/notification/notificationSlice";
+import { selectToken } from "../../../redux/user/userSelectors";
 
 import UserCard from "../../UserCard/UserCard";
 import UsersListSkeleton from "../../UsersList/UsersListSkeleton/UsersListSkeleton";

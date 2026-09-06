@@ -7,7 +7,7 @@ import {
   selectCurrentUser,
 } from "../../../redux/user/userSelectors";
 import { showAlert } from "../../../redux/alert/alertSlice";
-import { addPost } from "../../../redux/feed/feedActions";
+import { addPost } from "../../../redux/feed/feedSlice";
 
 import { createPost } from "../../../services/postService";
 

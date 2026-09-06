@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import {
   selectFeedPosts,
   selectFeedFetching,
-} from "../../redux/feed/feedSelectors";
+} from "../../redux/feed/feedSlice";
 
 import PostDialog from "../PostDialog/PostDialog";
 import FeedBottom from "./FeedBottom/FeedBottom";

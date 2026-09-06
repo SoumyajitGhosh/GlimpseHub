@@ -6,7 +6,7 @@ import { useTransition as useSpringTransition } from "react-spring";
 import { selectCurrentUser } from "./redux/user/userSelectors";
 import { signInStart } from "./redux/user/userActions";
 import { connectSocket } from "./redux/socket/socketActions";
-import { fetchNotificationsStart } from "./redux/notification/notificationActions";
+import { fetchNotificationsStart } from "./redux/notification/notificationSlice";
 
 import SkipLink from "./components/SkipLink/SkipLink";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";

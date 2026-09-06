@@ -6,8 +6,9 @@ import {
   selectFeedPosts,
   selectHasMore,
   selectFeedFetching,
-} from "../../redux/feed/feedSelectors";
-import { fetchFeedPostsStart, clearPosts } from "../../redux/feed/feedActions";
+  fetchFeedPostsStart,
+  clearPosts,
+} from "../../redux/feed/feedSlice";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 
