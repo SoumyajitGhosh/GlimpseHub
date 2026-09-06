@@ -32,6 +32,9 @@ const NotificationButton = ({ mobile, icon }) => {
         setTimeout(() => setShowNotificationPopup(false), 10000)
       );
     }
+    // Stateful timer choreography — re-running on `notificationPopupTimeout` /
+    // `showNotificationPopup` would reset the 10s auto-hide on every tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notificationState.unreadCount]);
 
   useEffect(() => {

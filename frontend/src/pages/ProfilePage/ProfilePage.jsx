@@ -27,7 +27,6 @@ import {
   selectProfileData,
   selectProfileError,
   selectProfileFetching,
-  selectProfileFollowing,
 } from "../../redux/profilePage/profilePageSelectors";
 
 const ProfilePage = () => {
@@ -39,7 +38,6 @@ const ProfilePage = () => {
   const token = useSelector(selectToken);
 
   const fetching = useSelector(selectProfileFetching);
-  const following = useSelector(selectProfileFollowing);
   const fetchingAdditionalPosts = useSelector(fetchingAdditionalPostsProfile);
   const error = useSelector(selectProfileError);
   const data = useSelector(selectProfileData);
@@ -83,7 +81,7 @@ const ProfilePage = () => {
   useEffect(() => {
     document.title = `@${username} • GlimpseHub photos`;
     dispatch(fetchProfileAction(username, token));
-  }, [username, token]);
+  }, [dispatch, username, token]);
 
   const handleClick = (postId) => {
     if (window.outerWidth <= 600) {

@@ -1,6 +1,6 @@
 import { useState, memo, Fragment } from "react";
 import { useSelector } from "react-redux";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import classNames from "classnames";
 
 import { selectCurrentUser } from "../../redux/user/userSelectors";
@@ -14,9 +14,8 @@ import NotificationButton from "../Notification/NotificationButton/NotificationB
 import Button from "../Button/Button";
 import Icon from "../Icon/Icon";
 
-const Header = memo(() => {
+const Header = memo(function Header() {
   const [shouldMinimizeHeader, setShouldMinimizeHeader] = useState(false);
-  const navigate = useNavigate();
   const { pathname } = useLocation();
   const currentUser = useSelector(selectCurrentUser);
 

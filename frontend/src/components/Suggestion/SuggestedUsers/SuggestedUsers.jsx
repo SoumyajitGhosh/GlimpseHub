@@ -50,7 +50,7 @@ const SuggestedUsers = ({ card, style, max }) => {
         ))
       ) : (
         <h4 className="heading-4 color-grey font-medium">
-          We currently can't find any users to suggest.
+          We currently can&apos;t find any users to suggest.
         </h4>
       );
     }

@@ -78,7 +78,7 @@ const componentMap = {
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-const Modal = memo(({ component, ...additionalProps }) => {
+const Modal = memo(function Modal({ component, ...additionalProps }) {
   const dispatch = useDispatch();
   const modalRoot = document.querySelector("#modal-root");
   const el = document.createElement("div");
@@ -167,7 +167,7 @@ const Modal = memo(({ component, ...additionalProps }) => {
           {...additionalProps}
         />
       ) : (
-        <div>Component "{component}" not found.</div>
+        <div>Component &quot;{component}&quot; not found.</div>
       )}
     </Suspense>,
     el

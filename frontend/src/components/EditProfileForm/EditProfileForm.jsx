@@ -122,7 +122,7 @@ const EditProfileForm = () => {
             className="color-grey"
           >
             Provide your personal information, even if the account is used for a
-            business, a pet, or something else. This won't be a part of your
+            business, a pet, or something else. This won&apos;t be a part of your
             public profile.
           </p>
         </div>

@@ -32,6 +32,9 @@ export default [
       ...react.configs['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
       ...jsxA11y.flatConfigs.recommended.rules,
+      // The `const { x, ...rest } = obj` idiom for omitting a key is used
+      // deliberately in a few reducers.
+      'no-unused-vars': ['error', { ignoreRestSiblings: true }],
       // a11y gaps are tracked as a dedicated follow-up (see SETUP_NOTES);
       // surface them as warnings for now rather than failing the build.
       ...Object.fromEntries(

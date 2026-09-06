@@ -49,7 +49,7 @@ const PostDialogStats = ({
         });
         try {
             await votePost(post._id, token);
-        } catch (err) {
+        } catch {
             showAlert('Could not vote on the post.', () => handleClick());
         }
     };
@@ -106,7 +106,7 @@ const PostDialogStats = ({
                     onClick={() => bookmarkPost(post._id, token)}
                     icon={
                         currentUser && currentUser.bookmarks
-                            ? !!currentUser.bookmarks.find(
+                            ? currentUser.bookmarks.find(
                                 (bookmark) => bookmark.post === post._id
                             )
                                 ? 'bookmark'

@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, Fragment } from 'react';
 import { formatDateDistance } from '../../../utils/timeUtils';
 import { Link } from 'react-router-dom';
 import Linkify from "linkify-react";
-import * as linkify from "linkifyjs";
 import "linkify-plugin-mention";
 import "linkify-plugin-hashtag";
 
@@ -49,7 +48,7 @@ const CommentReply = ({
                 payload: { commentReplyId: comment._id, currentUser },
             });
             await voteCommentReply(comment._id, token);
-        } catch (err) {
+        } catch {
             showAlert('Could not vote on the comment.', () =>
                 handleCommentReplyVote()
             );
@@ -71,7 +70,7 @@ const CommentReply = ({
                     payload: { decrementCount: 1, postId: post._id },
                 });
             await deleteCommentReply(comment._id, token);
-        } catch (err) {
+        } catch {
             showAlert("Could not get the comment's replies.", () =>
                 handleCommentReplyDelete()
             );

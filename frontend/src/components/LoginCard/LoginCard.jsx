@@ -87,7 +87,7 @@ const LoginCard = ({ onClick, modal }) => {
           }}
         >
           <h4 style={{ marginRight: "5px" }} className="heading-4 font-thin">
-            Don't have an account?
+            Don&apos;t have an account?
           </h4>
           <Link to="/signup" onClick={() => onClick && onClick()}>
             <TextButton medium blue bold>

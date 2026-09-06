@@ -29,7 +29,7 @@ const VerificationPage = () => {
             Successfully confirmed your email.
           </h3>
         );
-      } catch (err) {
+      } catch {
         children = (
           <h3 style={{ padding: "2rem" }} className="heading-3">
             Invalid or expired confirmation link.

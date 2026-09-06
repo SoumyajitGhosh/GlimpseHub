@@ -29,7 +29,7 @@ const FollowButton = ({ userId, following, username, avatar, style }) => {
       setIsFollowing(!isFollowing);
       setLoading(false);
       dispatch(fetchProfileAction(currentUser.username, token));
-    } catch (err) {
+    } catch {
       setLoading(false);
       dispatch(showAlert("Could not follow the user.", () => follow()));
     }

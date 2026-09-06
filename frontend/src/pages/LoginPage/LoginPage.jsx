@@ -1,7 +1,6 @@
-import { useEffect } from "react";
 import PropTypes from "prop-types";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 // import { githubSignInStart } from "../../redux/user/userActions";
 import { selectCurrentUser } from "../../redux/user/userSelectors";
@@ -11,12 +10,12 @@ import LoginCard from "../../components/LoginCard/LoginCard";
 const LoginPage = () => {
   // const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { search } = useLocation();
   const currentUser = useSelector(selectCurrentUser);
 
   if (currentUser) navigate("/");
 
-  const params = new URLSearchParams(search);
+  // const { search } = useLocation();
+  // const params = new URLSearchParams(search);
   // const code = params.get("code");
   // const authState = params.get("state");
 

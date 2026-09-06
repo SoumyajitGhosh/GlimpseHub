@@ -23,7 +23,7 @@ const EmptyProfile = ({ currentUserProfile, username }) => (
             <Fragment>
                 <h1 className="heading-1 font-thin">No Posts Yet</h1>
                 <h3 className="heading-3 font-medium">
-                    When {username} posts, you'll see their photos here.
+                    When {username} posts, you&apos;ll see their photos here.
                 </h3>
             </Fragment>
         )}

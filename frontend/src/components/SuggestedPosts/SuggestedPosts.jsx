@@ -110,6 +110,7 @@ const SuggestedPosts = ({ token, showModal, showAlert }) => {
         <div className="explore-users">
           {result.map((user) => (
             <UserCard
+              key={user._id ?? user.username}
               avatar={user.avatar}
               username={user.username}
               subText={user.fullName}

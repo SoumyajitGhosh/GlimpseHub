@@ -7,7 +7,6 @@ import { changePassword } from "../../services/authenticationServices";
 import Avatar from "../Avatar/Avatar";
 import FormInput from "../FormInput/FormInput";
 import Button from "../Button/Button";
-import TextButton from "../Button/TextButton/TextButton";
 import SettingsForm from "../SettingsForm/SettingsForm";
 import SettingsFormGroup from "../SettingsForm/SettingsFormGroup/SettingsFormGroup";
 

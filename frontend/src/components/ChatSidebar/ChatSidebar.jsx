@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import ChatUsers from "./ChatUsers/ChatUsers";
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,7 +19,11 @@ const ChatSidebar = () => {
   const stateRef = useRef(chat?.data);
 
   useEffect(() => {
+    // Intentional one-time fetch of the viewer's own profile on mount;
+    // re-running on currentUser/token changes would refetch on every render
+    // where the selector returns a new reference.
     dispatch(fetchProfileAction(currentUser?.username, token));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useScrollPositionThrottled(async ({ atBottom }) => {
@@ -48,7 +52,7 @@ const ChatSidebar = () => {
     dispatch(
       fetchChatUsersAction(currentUser._id, /*stateRef.current?.length ??*/ 0, token)
     );
-  }, [currentUser?._id, token]);
+  }, [dispatch, currentUser?._id, token]);
 
   return (
     <Fragment>

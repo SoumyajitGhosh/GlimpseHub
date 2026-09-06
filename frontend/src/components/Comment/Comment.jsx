@@ -5,7 +5,6 @@ import { formatDateDistance } from '../../utils/timeUtils';
 import { Link } from 'react-router-dom';
 import classNames from 'classnames';
 import Linkify from "linkify-react";
-import * as linkify from "linkifyjs";
 import "linkify-plugin-mention";
 import "linkify-plugin-hashtag";
 
@@ -70,7 +69,7 @@ const Comment = ({
                     payload: { commentId: comment._id, currentUser },
                 });
             await voteComment(comment._id, token);
-        } catch (err) {
+        } catch {
             showAlert('Could not vote on the comment.', () => handleVote());
         }
     };
@@ -89,7 +88,7 @@ const Comment = ({
                     payload: { comment: replies, parentCommentId: comment._id },
                 });
                 !toggleCommentReplies && setToggleCommentReplies(true);
-            } catch (err) {
+            } catch {
                 showAlert("Could not get the comment's replies.", () =>
                     handleGetCommentReplies()
                 );
@@ -111,7 +110,7 @@ const Comment = ({
                     },
                 });
             await deleteComment(comment._id, token);
-        } catch (err) {
+        } catch {
             showAlert('Could not delete comment.', () => handleDeleteComment());
         }
     };

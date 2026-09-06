@@ -10,7 +10,7 @@ const ChatWindow = () => {
   const { id } = useParams();
   useEffect(() => {
     dispatch(setChatUserAction(id));
-  }, [id]);
+  }, [dispatch, id]);
   return (
     <Fragment>
       {id === "inbox" ? (

@@ -1,5 +1,5 @@
 import { extractTime } from "../../../utils/extractTime";
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectCurrentUser,
@@ -16,13 +16,13 @@ const Chats = ({ userToChatId } /*{ message }*/) => {
 
   useEffect(() => {
     dispatch(fetchAllMessagesAction(userToChatId, token));
-  }, [userToChatId]);
+  }, [dispatch, userToChatId, token]);
 
   return (
     <div style={{ height: "100%" }}>
       <div className="chatbody-div">
         {messages?.map((message, idx) => (
-          <>
+          <Fragment key={message._id ?? idx}>
             {message.senderId === userToChatId ? (
               <p className="chat-receiver">
                 <span
@@ -45,7 +45,7 @@ const Chats = ({ userToChatId } /*{ message }*/) => {
                 <span>{extractTime(message.createdAt)}</span>
               </p>
             )}
-          </>
+          </Fragment>
         ))}
       </div>
     </div>

@@ -34,7 +34,7 @@ const SearchSuggestion = ({ fetching, result, onClick, username }) => {
                     if (users.length !== offset) setShouldFetch(false);
                     setAdditionalUsers((previous) => [...previous, ...users]);
                     setFetchingAdditionalUsers(false);
-                } catch (err) {
+                } catch {
                     setFetchingAdditionalUsers(false);
                     setShouldFetch(false);
                 }

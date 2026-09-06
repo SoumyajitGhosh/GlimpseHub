@@ -80,7 +80,7 @@ const PostDialog = ({
         state.localStateComments.size
       );
       localDispatch({ type: "ADD_COMMENT", payload: commentData.comments });
-    } catch (err) {
+    } catch {
       dispatch(
         showAlert(
           "Unable to fetch additional comments.",
@@ -99,7 +99,7 @@ const PostDialog = ({
           payload: postId,
         });
       dispatch(hideModal("PostDialog/PostDialog"));
-    } catch (err) {
+    } catch {
       dispatch(showAlert("Unable to delete post.", handleDeletePost));
     }
   };

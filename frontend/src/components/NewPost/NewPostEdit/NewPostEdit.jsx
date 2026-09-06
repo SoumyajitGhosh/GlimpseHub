@@ -4,7 +4,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 
 import Icon from '../../Icon/Icon';
 
-const NewPostEdit = ({ previewImage, setPreviewImage, file }) => {
+const NewPostEdit = ({ previewImage, setPreviewImage }) => {
     const [imageState, setImageState] = useState({
         crop: { unit: '%', aspect: 16 / 9 },
         isCropping: false,
@@ -31,10 +31,9 @@ const NewPostEdit = ({ previewImage, setPreviewImage, file }) => {
             crop.height
         );
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             canvas.toBlob((blob) => {
                 if (!blob) {
-                    //reject(new Error('Canvas is empty'));
                     console.error('Canvas is empty');
                     return;
                 }
@@ -58,7 +57,7 @@ const NewPostEdit = ({ previewImage, setPreviewImage, file }) => {
         }
     };
 
-    const onCropChange = (crop, percentCrop) => {
+    const onCropChange = (crop) => {
         setImageState((previous) => ({
             ...previous,
             crop,

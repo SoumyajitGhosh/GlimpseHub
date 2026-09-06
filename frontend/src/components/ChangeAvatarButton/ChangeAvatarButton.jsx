@@ -8,7 +8,6 @@ import {
 import {
     selectCurrentUser,
     selectToken,
-    selectFetchingAvatar,
     selectError,
 } from '../../redux/user/userSelectors';
 import { showModal } from '../../redux/modal/modalActions';
