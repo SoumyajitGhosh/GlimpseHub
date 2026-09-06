@@ -6,7 +6,7 @@ import Avatar from "../../components/Avatar/Avatar";
 import UsersList from "../../components/UsersList/UsersList";
 import UnfollowPrompt from "../../components/UnfollowPrompt/UnfollowPrompt";
 import Button from "../../components/Button/Button";
-import SettingsButton from "../../components/SetttingsButton/SettingsButton";
+import SettingsButton from "../../components/SettingsButton/SettingsButton";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProfileAction,

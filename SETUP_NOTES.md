@@ -243,3 +243,90 @@ commit flow without having to restate it, including the guardrails established d
 no new architectural patterns (no RTK/react-query/TS), lint/test regressions get scoped to what
 actually regressed rather than absorbing the whole pre-existing backlog, and risky-but-untested
 behavioral fixes get a commented `eslint-disable` instead of a silent rewrite.
+
+## 7. MCP servers for frontend work (`.mcp.json`)
+
+Added the repo's first MCP server config — project-scoped and **committed** so any clone gets the
+same tooling. All three are stdio servers launched on demand via `npx` (nothing runs until a session
+uses them; the first launch of each downloads the package, ~30s).
+
+**`.mcp.json`** (repo root):
+
+| Server | Package | Use |
+|---|---|---|
+| `context7` | `@upstash/context7-mcp` | Version-accurate docs/snippets for React 18, Vite 6, `react-router` v6 **and** v7, `react-redux` 9, `reselect`, `react-spring`, Vitest + Testing Library — supports the section 5 router migration without API guesswork. Optional `CONTEXT7_API_KEY` env raises rate limits. |
+| `chrome-devtools` | `chrome-devtools-mcp` (Chrome team) | Real Chrome against `localhost:5173`: performance traces, network waterfall, console errors, DOM/CSS inspection. Covers the perf/network debugging `claude-in-chrome` doesn't. |
+| `playwright` | `@playwright/mcp` (Microsoft) | Accessibility-tree snapshot automation for repeatable E2E flows (login, post, comment, chat); pairs with `web-design-guidelines`. |
+
+**`.claude/settings.json`** (new, committed) — `enabledMcpjsonServers: ["context7", "chrome-devtools", "playwright"]`
+so the servers load without the per-project approval prompt.
+
+Requires Node's `npx` on PATH (already used by the frontend toolchain). No secrets stored. Verify
+with `/mcp` after restarting Claude Code in this repo.
+
+## 8. Planned: full frontend modernization roadmap
+
+Asked Claude Code (as a senior frontend architect) to survey the frontend and propose a
+modernization plan. Unlike sections 3–5, this pass explicitly puts the previously-deferred
+architectural changes on the table (**RTK, RTK Query, incremental TypeScript, forms**) and
+commits to **finishing the PWA** rather than removing it. The roadmap is a sequence of
+independently-shippable phases, one small PR each; nothing below is done yet except Phase 0.
+
+Full plan file: `~/.claude/plans/think-like-a-senior-humming-lark.md`.
+
+**Phases** (S ≈ <½ day, M ≈ 1–3 days, L ≈ multi-PR):
+
+| # | Phase | Notes |
+|---|---|---|
+| 0 | Doc + cleanup | dead-code removal, `prop-types` declared, ESLint Node/Vitest env blocks + `jsx-a11y` (warn) + Prettier, `import.meta.env.DEV` in `store.js`, Vitest coverage, `SetttingsButton`→`SettingsButton`. **Done — this section's commit.** |
+| 1 | Lint backlog burndown | 357 → ~0; unused-`React` imports, `exhaustive-deps`, small rules; `react/prop-types` decided with Phase 5 |
+| 2 | HTTP client foundation | one `apiClient.js` axios instance + interceptors; fixes the network-error crash (`err.response` deref) across all 9 service files; `AbortController` in `useSearchUsersDebounced` |
+| 3 | Redux Toolkit | `configureStore`, then `createSlice` one slice per PR, **`socket` last with the io instance moved out of state** |
+| 4 | RTK Query | axios `baseQuery`; convert the refetch-on-remount reads first (feed, suggested/hashtag posts, profile), then mutations with tag invalidation |
+| 5 | Incremental types | `jsconfig.json` + `checkJs` + typed JSDoc, leaf-inward (services → redux → hooks → validation); then disable `react/prop-types` |
+| 6 | React Router v7 | future-flags first, then straight bump — declarative `<Routes>` API, no data-router changes (that's a separate follow-up, see §5) |
+| 7 | Vite 6 → 7 | stay off Vite 8 (broke `npm install`, see §3) |
+| 8 | react-spring → `@react-spring/web` | umbrella package has no React 19 peer; pin `@9` on React 18 |
+| 9 | Forms → react-hook-form + zod | 7 of 9 forms are hand-rolled; zod schemas reuse `utils/validation.js` and double as the type source |
+| 10 | React 18 → 19 | optional, last, its own project; gated on Phases 8–9 |
+
+**Cross-cutting:** add CI (GitHub Actions: `lint` + `build` + `test` + later `tsc --noEmit`)
+right after Phase 0 — the repo has none today.
+
+**Split into their own follow-ups, not bundled:** the PWA build-out (real manifest + icons +
+offline strategy + update prompt), router data-router APIs, full `.tsx` conversion, full
+RTKQ migration of all ~40 service functions, React 19, and the a11y gap remediation
+(non-keyboard `onClick`s, missing `alt`s, `aria-live` on `Alert`, a real theme-toggle
+control — the `data-theme`/`localStorage` plumbing already exists from §3).
+
+### 8.1 Phase 0 — what changed
+
+- **Dead code removed:** `src/serviceWorker.js` (orphaned CRA helper pointing at a
+  non-existent `/service-worker.js`), `src/App.css` (unimported Vite-template leftover),
+  `src/assets/react.svg`, `src/index.css` (only held inert `@tailwind` directives — Tailwind
+  isn't installed; the real reset lives in `sass/base/_base.scss`), and the commented
+  `why-did-you-render` / `serviceWorker` blocks in `main.jsx`.
+- **`prop-types`** promoted to an explicit `dependency` — 16 files import it at runtime but
+  it was only resolving via a transitive hoist from `eslint-plugin-react` (breaks under pnpm
+  / stricter installs).
+- **ESLint config** (`eslint.config.js`): added a Node-globals block for `*.config.js`
+  (fixes the `process is not defined` error) and a Vitest-globals block for test files;
+  added `eslint-plugin-jsx-a11y` (recommended set, forced to **warn** — the a11y backlog is
+  a tracked follow-up); added `eslint-config-prettier` last to cede formatting to Prettier.
+- **Prettier** added (`.prettierrc.json` — 2-space, double-quote, es5 trailing commas to
+  match existing style; `.prettierignore`) with `format` / `format:check` scripts. Not yet
+  run across the tree — that's a Phase 1 mechanical pass so the diff stays reviewable.
+- **`redux/store.js`**: `process.env.NODE_ENV === 'development'` → `import.meta.env.DEV`
+  (the rest of the app already uses `import.meta.env`; this was the last `process.env` ref).
+- **Vitest coverage:** `@vitest/coverage-v8` + `test:coverage` script + a `coverage` block
+  in `vite.config.js` with a deliberately low 2% floor (current: ~3.3% lines). `coverage/`
+  gitignored.
+- **`SetttingsButton/` → `SettingsButton/`** (three t's → two), updating the three importers
+  (`Modal.jsx` componentMap, `ProfileHeader.jsx`, `ProfilePage.jsx`).
+
+Verification: `npm run lint` (424 problems = 350 errors + 74 warnings; errors down 1 from
+the 351 baseline via the `store.js` fix, +68 new warnings all from `jsx-a11y`), `npm run
+build` (clean, PWA `sw.js` still generated), `npm test` (6/6 pass), `npm run test:coverage`
+(passes the 2% floor). No backend/browser available this session — no manual smoke of the
+touched screens (Profile page, modals) was possible; that pass is still recommended before
+merge, though Phase 0 changes no component logic.

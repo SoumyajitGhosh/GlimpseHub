@@ -57,8 +57,8 @@ const componentMap = {
     import("../../components/SearchSuggestion/SearchSuggestion"),
   "SettingsForm/SettingsForm": () =>
     import("../../components/SettingsForm/SettingsForm"),
-  "SetttingsButton/SettingsButton": () =>
-    import("../../components/SetttingsButton/SettingsButton"),
+  "SettingsButton/SettingsButton": () =>
+    import("../../components/SettingsButton/SettingsButton"),
   "SignUpCard/SignUpCard": () =>
     import("../../components/SignUpCard/SignUpCard"),
   "SkeletonLoader/SkeletonLoader": () =>

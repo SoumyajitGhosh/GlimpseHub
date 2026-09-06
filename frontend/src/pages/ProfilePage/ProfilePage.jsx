@@ -12,7 +12,7 @@ import PreviewImage from "../../components/PreviewImage/PreviewImage";
 import Loader from "../../components/Loader/Loader";
 import SkeletonLoader from "../../components/SkeletonLoader/SkeletonLoader";
 import MobileHeader from "../../components/Header/MobileHeader/MobileHeader";
-import SettingsButton from "../../components/SetttingsButton/SettingsButton";
+import SettingsButton from "../../components/SettingsButton/SettingsButton";
 import LoginCard from "../../components/LoginCard/LoginCard";
 import NotFoundPage from "../NotFoundPage/NotFoundPage";
 import ProfileHeader from "./ProfileHeader";
