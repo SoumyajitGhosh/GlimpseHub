@@ -7,7 +7,7 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import prettier from 'eslint-config-prettier'
 
 export default [
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'coverage'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
@@ -41,6 +41,11 @@ export default [
         ]),
       ),
       'react/jsx-no-target-blank': 'off',
+      // Runtime PropTypes validation is being retired in favour of
+      // `checkJs` + typed JSDoc (modernization roadmap Phase 5). ~225 of the
+      // components never declared propTypes; rather than backfill a pattern
+      // we're removing, the rule is off until the type layer replaces it.
+      'react/prop-types': 'off',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true, extraHOCs: ['connect'] },
