@@ -1,0 +1,6 @@
+# Revisions to skip in `git blame` (bulk reformat / mechanical rewrites).
+# GitHub honours this file automatically. Locally, run:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# frontend: tree-wide Prettier pass (Phase 1, SETUP_NOTES §8.2)
+fdc03fbe5cdadd4a7c7dd94ddd03564b7e802498

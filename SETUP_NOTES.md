@@ -330,3 +330,43 @@ build` (clean, PWA `sw.js` still generated), `npm test` (6/6 pass), `npm run tes
 (passes the 2% floor). No backend/browser available this session — no manual smoke of the
 touched screens (Profile page, modals) was possible; that pass is still recommended before
 merge, though Phase 0 changes no component logic.
+
+### 8.2 Phase 1 — lint backlog: 357 problems → 0 errors
+
+Branch `frontend-modernization-phase-1`, five commits. The 357-problem ESLint baseline
+(carried since §3) is now **0 errors**; 68 `jsx-a11y` warnings remain and are deferred to
+the dedicated a11y follow-up.
+
+- **`react/prop-types` disabled** (was 225 of the 357). Runtime PropTypes is being replaced
+  by `checkJs` + typed JSDoc in Phase 5; ~225 components never declared `propTypes`, so
+  backfilling a pattern we're removing is wasted work. `coverage/` also added to the ESLint
+  `ignores` (flat config doesn't read `.gitignore`).
+- **Unused `React` imports dropped from 78 files** — the jsx-runtime transform (already
+  configured) means `React` needn't be in scope for JSX. Line deleted or reduced to its
+  named imports. Cleared ~78 of the 109 `no-unused-vars`.
+- **Remaining `no-unused-vars` (~31)**: dead imports/vars removed; unused `catch (err)` →
+  bare `catch`; the dead GitHub-OAuth locals in `LoginPage` folded into the existing
+  commented block; `no-unused-vars` given `{ ignoreRestSiblings: true }` for the deliberate
+  `const { x, ...rest }` key-omit idiom used in reducers.
+- **Small rules**: `no-unescaped-entities` (9) → `&apos;`/`&quot;`; `display-name` (3) →
+  named `memo()`/`forwardRef()` function expressions (`Header`, `Modal`, `Card`);
+  `jsx-key` (2) → keyed the mapped elements (`Chats`, `ChatUsers`, `SuggestedPosts`);
+  `no-prototype-builtins` (1) → `"onClick" in option`; `no-extra-boolean-cast` (1).
+- **`react-hooks/exhaustive-deps` (6 warnings)**: added the stable `dispatch` dep where
+  safe (`ChatWindow`, `Chats`, `ProfilePage`, `ChatSidebar` scroll effect); scoped
+  `eslint-disable` + rationale on the two genuinely intentional effects — `ChatSidebar`'s
+  one-time mount profile fetch and `NotificationButton`'s 10s auto-hide timer choreography
+  — per the §4.2 guardrail (no silent behavioural rewrites without test coverage).
+- **Tree-wide Prettier pass** (`.prettierrc.json` from Phase 0): pure formatting, 161 files,
+  mostly 4-space → 2-space reindent. Its own commit
+  (`fdc03fbe5cdadd4a7c7dd94ddd03564b7e802498`), recorded in the new repo-root
+  `.git-blame-ignore-revs` so `git blame` skips it (GitHub honours the file automatically;
+  locally `git config blame.ignoreRevsFile .git-blame-ignore-revs`). Vendored
+  `.claude/skills` and `README.md` are prettier-ignored.
+
+Verification per commit: `npm run lint` (0 errors), `npm test` (6/6), `npm run build`
+(clean, PWA `sw.js` still generated). Same caveat as Phase 0 — no backend/browser this
+session, so the manual smoke of the touched screens (chat sidebar/window, notification
+popup, profile, comment vote/delete, new-post crop) is still recommended before merge;
+Phase 1 is mechanical but the `exhaustive-deps` dep-array additions and the keyed-Fragment
+rewrite in `Chats.jsx` do touch render behaviour.
