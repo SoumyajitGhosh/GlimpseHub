@@ -501,3 +501,23 @@ toast alert, pulsating unread icon, options dialog, notification popup (Phase 8)
 
 Still pending: Phase 4 (RTK Query), Phase 5 (incremental TS), Phase 9 (forms → RHF + zod),
 Phase 10 (React 19), the a11y follow-up, CI, and the PWA build-out.
+
+### 8.6 Phase 10 — React 18 → 19
+
+Branch `frontend-modernization-phase-6-8`.
+
+- `react` / `react-dom` `^18.3.1` → `^19.2.8`; `@types/react` / `@types/react-dom` → `^19`.
+- Pre-checked the known v19 removals against this codebase: no `defaultProps` on function
+  components (0 occurrences — `.propTypes` via `prop-types` is unaffected and stays), no
+  `ReactDOM.render` / `unmountComponentAtNode` / `findDOMNode` / `react-dom/test-utils` /
+  `createFactory` / `react-test-renderer`. `main.jsx` was already on `createRoot` +
+  `StrictMode`. So the bump needed no code changes.
+- **`@react-spring/web` `^9.7.5` → `^10.1.2`** as part of this phase: v9.7.5's peer range
+  caps at React 18, and 9.7.5 is its last v9 release. v10's only breaking change is
+  `SpringContext` → `SpringContextProvider` (0 uses here — the app only uses `useTransition`
+  + `animated`), and v10's peer range includes React 19. `npm audit` stays at 0.
+- `@vitejs/plugin-react` 4.7 and `react-router` 7 already support React 19; no config change.
+
+Verification: `npm run lint` (0 errors, 68 a11y warnings — unchanged), `npm test` (55/55),
+`npm run build` (clean). Manual pass still outstanding: every animation (react-spring v10)
+and a general click-through, since no backend/browser was available this session.
