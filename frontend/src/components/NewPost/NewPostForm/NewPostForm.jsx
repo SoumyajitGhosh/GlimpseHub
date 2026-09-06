@@ -87,6 +87,7 @@ const NewPostForm = ({ file, previewImage, hide, back }) => {
             </div>
             <textarea
               className="post-form__textarea"
+              aria-label="Caption"
               placeholder="Write a caption..."
               onChange={(event) => setCaption(event.target.value)}
             />

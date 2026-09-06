@@ -77,6 +77,7 @@ const ChangeAvatarButton = ({ children }) => {
       </label>
       <input
         id="avatar-upload"
+        aria-label="Upload profile photo"
         type="file"
         accept="image/*"
         style={{ display: "none" }}

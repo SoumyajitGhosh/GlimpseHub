@@ -569,3 +569,54 @@ Not exercised in a real install / offline session — no browser this session.
 
 CLAUDE.local.md's "PWA is half-removed" quirk note is now stale (also: `src/serviceWorker.js`
 was already deleted, and `main.jsx` no longer has a commented `register()` call).
+
+### 8.9 a11y — the safe subset
+
+The `jsx-a11y` warning count was 68. Cleared the 26 that carry no behavioural or visual
+risk, leaving 42 (all one kind — see below):
+
+- **`label-has-for` (15) — rule turned off in `eslint.config.js`.** The plugin deprecated
+  it in favour of `label-has-associated-control` (kept on); it still ships in `recommended`
+  and mis-fires on forms that pair `<label htmlFor>` with a control `id` correctly
+  (`FormInput` does exactly this and passes `id` through to its `<input>`).
+- **Empty spacer `<label></label>` (4, `label-has-associated-control`)** in
+  `ChangePasswordForm` / `EditProfileForm` — these are grid-column spacers in
+  `.settings-form__form-group` (which selects children positionally, not by tag), swapped to
+  `<span aria-hidden="true" />`. No layout change.
+- **`control-has-associated-label` (6)** — added `aria-label` to the hidden file inputs
+  (`ChangeAvatarButton`, `NewPostButton`), the chat / comment / caption / search inputs.
+  Purely additive.
+- **`alt-text` (1)** — `alt=""` on the placeholder `<img>` in `ChatUsers` (that component
+  has an unrelated `src={"S"}` bug left untouched — out of scope).
+
+**Still open (42 warnings / 21 sites), deferred as its own follow-up:**
+`click-events-have-key-events` + `no-noninteractive-element-interactions` +
+`no-static-element-interactions` — all `<div>` / `<img>` / `<li>` with an `onClick` and no
+keyboard path (`Comment`, `PostDialog`, `ProfileHeader` ×4, `NotificationFeed` ×2,
+`FilterSelector` ×2, `UserCard`, `Avatar`, …). Fixing these means converting to `<button>`
+or adding `role` + `tabIndex` + `onKeyDown`, which changes focus order and key handling on
+core interaction paths — needs a browser QA pass that wasn't available this session. §8's
+roadmap always split this ("non-keyboard `onClick`s … a real theme-toggle control") into a
+dedicated follow-up.
+
+Verification: `npm run lint` (0 errors, 42 warnings, down from 68), `npm test` (55/55),
+`npm run build` (clean).
+
+### Dependency / quality state after Phases 0–10
+
+| Package | At clone | Now |
+|---|---|---|
+| React | 18.3 | **19.2** |
+| Router | react-router-dom 6.30 | 7.18 |
+| Build | Vite 5 | Vite 7.3 |
+| Animation | `react-spring` umbrella | `@react-spring/web` **10.1** |
+| State | classic Redux + thunk | RTK 2.12 (`createSlice` ×8) |
+| HTTP | per-call `axios()` | one `apiClient` + interceptors |
+| Tests | none | Vitest, 55, coverage wired |
+| Lint | 357 problems | 0 errors, **42** `jsx-a11y` warnings |
+| `npm audit` | 9 (7 high) | **0** |
+| PWA | stub config, no icons | full manifest + icons + offline + update prompt |
+| CI | none | GitHub Actions (frontend lint/test/build + backend parse) |
+
+Still pending: Phase 4 (RTK Query), Phase 5 (incremental TS), Phase 9 (forms → RHF + zod),
+and the a11y interactive-element follow-up (42 warnings).

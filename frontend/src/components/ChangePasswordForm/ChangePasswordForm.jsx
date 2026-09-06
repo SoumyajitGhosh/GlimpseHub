@@ -86,7 +86,7 @@ const ChangePasswordForm = () => {
         />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label></label>
+        <span aria-hidden="true" />
         <Button
           style={{ width: "15rem" }}
           loading={fetching}
@@ -100,7 +100,7 @@ const ChangePasswordForm = () => {
         </Button>
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label></label>
+        <span aria-hidden="true" />
         {/* <TextButton style={{ width: "15rem", textAlign: "left" }} blue bold>
           Forgot Password?
         </TextButton> */}

@@ -120,7 +120,7 @@ const EditProfileForm = () => {
         <FormTextarea name="bio" fieldProps={formik.getFieldProps("bio")} />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label></label>
+        <span aria-hidden="true" />
         <div>
           <h3 className="heading-3 color-grey font-bold">
             Personal Information
@@ -142,7 +142,7 @@ const EditProfileForm = () => {
         <FormInput name="email" fieldProps={formik.getFieldProps("email")} />
       </SettingsFormGroup>
       <SettingsFormGroup>
-        <label></label>
+        <span aria-hidden="true" />
         <Button
           style={{ width: "10rem" }}
           disabled={Object.keys(formik.touched).length === 0}

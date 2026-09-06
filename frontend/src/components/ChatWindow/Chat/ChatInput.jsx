@@ -60,6 +60,7 @@ const ChatInput = ({ userToChatId }) => {
     <form className="message-input">
       <input
         type="text"
+        aria-label="Message"
         style={{
           flex: 1, // Makes input take all available space
         }}

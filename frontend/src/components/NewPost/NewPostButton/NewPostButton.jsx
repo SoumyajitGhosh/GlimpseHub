@@ -43,6 +43,7 @@ const NewPostButton = ({ showModal, hideModal, plusIcon, children, style }) => {
       </label>
       <input
         id="file-upload"
+        aria-label="Choose a photo to post"
         type="file"
         style={{ display: "none" }}
         accept="image/*"

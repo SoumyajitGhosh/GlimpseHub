@@ -106,6 +106,7 @@ const PostDialogCommentForm = ({
             <input
               className="add-comment__input"
               type="text"
+              aria-label="Add a comment"
               placeholder="Add a comment..."
               onChange={(event) => {
                 // Removed the `@username` from the input so the user is no longer looking to reply

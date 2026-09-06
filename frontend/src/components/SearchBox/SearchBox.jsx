@@ -39,6 +39,7 @@ const SearchBox = ({ style, setResult, onClick, type = undefined }) => {
           onClick={onClick}
           value={query}
           className="search-box__input"
+          aria-label="Search"
           placeholder="Search"
         />
         <span className="search-box__placeholder">

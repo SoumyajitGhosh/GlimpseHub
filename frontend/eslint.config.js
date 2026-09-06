@@ -44,6 +44,11 @@ export default [
         ])
       ),
       "react/jsx-no-target-blank": "off",
+      // `label-has-for` is deprecated by eslint-plugin-jsx-a11y itself
+      // (superseded by `label-has-associated-control`, which stays on). It
+      // still ships in `recommended` and mis-fires on our forms, which pair
+      // `<label htmlFor>` with a control `id` correctly (see FormInput).
+      "jsx-a11y/label-has-for": "off",
       // Runtime PropTypes validation is being retired in favour of
       // `checkJs` + typed JSDoc (modernization roadmap Phase 5). ~225 of the
       // components never declared propTypes; rather than backfill a pattern

@@ -12,6 +12,7 @@ const ChatUsers = ({ chattableUsers }) => {
         <Link to={userCardProps.linkTo}>
           <img
             src={"S"}
+            alt=""
             style={{
               display: "flex",
             }}
