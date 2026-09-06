@@ -1,4 +1,3 @@
-import React from "react";
 
 import LogoCamera from "../../assets/svg/logo-camera.svg?react";
 

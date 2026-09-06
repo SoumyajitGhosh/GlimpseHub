@@ -1,4 +1,4 @@
-import React, { useEffect, Fragment } from "react";
+import { useEffect, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { selectCurrentUser, selectToken } from "../../redux/user/userSelectors";

@@ -1,4 +1,3 @@
-import React from 'react';
 import { animated } from 'react-spring';
 
 import TextButton from '../Button/TextButton/TextButton';

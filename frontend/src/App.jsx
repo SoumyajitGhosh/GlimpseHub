@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense, lazy } from "react";
+import { useEffect, Suspense, lazy } from "react";
 import { Routes, Route, useLocation, matchPath } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTransition as useSpringTransition, animated } from "react-spring";

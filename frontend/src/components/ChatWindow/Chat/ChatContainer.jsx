@@ -1,4 +1,3 @@
-import React from "react";
 import ChatInput from "./ChatInput";
 import Chats from "./Chats";
 import { useSelector } from "react-redux";

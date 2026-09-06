@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, memo, lazy, Suspense } from "react";
+import { useEffect, useRef, memo, lazy, Suspense } from "react";
 import { useDispatch } from "react-redux";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";

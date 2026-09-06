@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 
 import MobileHeader from "../../components/Header/MobileHeader/MobileHeader";
 import NotificationFeed from "../../components/Notification/NotificationFeed/NotificationFeed";

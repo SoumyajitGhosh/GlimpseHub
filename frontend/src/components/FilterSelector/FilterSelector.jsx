@@ -1,4 +1,4 @@
-import React, { useRef, useState, Fragment } from 'react';
+import { useRef, useState, Fragment } from 'react';
 import classNames from 'classnames';
 
 import Loader from '../Loader/Loader';

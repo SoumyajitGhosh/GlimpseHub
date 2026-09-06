@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import UserCard from "../../UserCard/UserCard";
 import Divider from "../../Divider/Divider";

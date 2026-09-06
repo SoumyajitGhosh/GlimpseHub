@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import Icon from "../Icon/Icon";
 import { useParams } from "react-router-dom";
 import ChatContainer from "./Chat/ChatContainer";

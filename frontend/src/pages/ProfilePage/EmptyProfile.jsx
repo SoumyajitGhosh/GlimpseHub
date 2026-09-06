@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 
 import Icon from '../../components/Icon/Icon';
 import NewPostButton from '../../components/NewPost/NewPostButton/NewPostButton';

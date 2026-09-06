@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate, Navigate, useLocation } from "react-router-dom";
 
 import NewPost from "../../components/NewPost/NewPost";

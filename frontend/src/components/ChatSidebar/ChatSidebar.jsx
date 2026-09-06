@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import ChatUsers from "./ChatUsers/ChatUsers";
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 import { useDispatch, useSelector } from "react-redux";

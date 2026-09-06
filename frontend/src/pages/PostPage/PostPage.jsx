@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 import { useParams } from "react-router-dom";
 
 import PostDialog from "../../components/PostDialog/PostDialog";

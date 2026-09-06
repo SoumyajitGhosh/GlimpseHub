@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState, useEffect } from 'react';
+import { Fragment, useRef, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { formatDateDistance } from '../../utils/timeUtils';

@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 
 import FilterSelector from '../../FilterSelector/FilterSelector';
 import SkeletonLoader from '../../SkeletonLoader/SkeletonLoader';
