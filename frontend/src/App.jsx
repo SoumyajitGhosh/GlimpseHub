@@ -14,6 +14,7 @@ import Modal from "./components/Modal/Modal";
 import Alert from "./components/Alert/Alert";
 import Footer from "./components/Footer/Footer";
 import MobileNav from "./components/MobileNav/MobileNav";
+import PWABadge from "./components/PWABadge/PWABadge";
 
 import LoadingPage from "./pages/LoadingPage/LoadingPage";
 
@@ -162,6 +163,7 @@ const App = () => {
     <div className="app" data-test="component-app">
       <SkipLink />
       <Suspense fallback={<LoadingPage />}>{renderApp()}</Suspense>
+      <PWABadge />
     </div>
   );
 };

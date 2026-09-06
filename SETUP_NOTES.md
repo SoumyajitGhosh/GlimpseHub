@@ -536,3 +536,36 @@ Added `.github/workflows/ci.yml` (the repo's first CI). Runs on push to
   viable. Catches syntax errors only.
 
 Both jobs verified locally (lint/test/build green; backend parse check passes).
+
+### 8.8 PWA build-out
+
+`vite-plugin-pwa` was already wired but stub-configured (`registerType: 'autoUpdate'`,
+`devOptions.enabled: true`, a one-line `{ theme_color }` manifest, no icons). Finished it:
+
+- **Icons** — `public/pwa-icon.svg` (the camera glyph, white on a `#0a0a0a` rounded square)
+  is the source. Ran `@vite-pwa/assets-generator` (`--preset minimal-2023`) **once** to emit
+  `public/pwa-{64,192,512}x512.png`, `maskable-icon-512x512.png`,
+  `apple-touch-icon-180x180.png`, `favicon.ico`, then **uninstalled the generator** — it
+  pulls a `sharp` with 3 open high-severity libvips CVEs and would have regressed the
+  Phase-8 "0 vulnerabilities". `npm audit` stays at 0. To regenerate after changing the
+  source icon: `npx @vite-pwa/assets-generator --preset minimal-2023 public/pwa-icon.svg`,
+  then `npm uninstall @vite-pwa/assets-generator` again.
+- **Manifest** — full `name` / `short_name` / `description` / `display: standalone` /
+  `start_url` / `scope` / theme+background `#0a0a0a` / the four icon entries.
+- **Offline** — `workbox.globPatterns` precaches the built shell; one `runtimeCaching` rule
+  (`CacheFirst`, 200 entries / 30 days) for `res.cloudinary.com` images. **`/api/` is never
+  cached** (per-user, always-changing) — `navigateFallbackDenylist: [/^\/api\//]`.
+- **Update prompt** — `registerType` switched `autoUpdate` → `prompt`; new
+  `src/components/PWABadge/PWABadge.jsx` (+ `sass/components/_pwa-badge.scss`, `@use`d in
+  `main.scss`) uses `virtual:pwa-register/react`'s `useRegisterSW` to show an offline-ready
+  / update-available toast with Reload / Dismiss. Rendered once from `App.jsx`.
+- **`devOptions.enabled` removed** — no service worker in `npm run dev` anymore (it only
+  caused stale-asset confusion); `PWABadge` renders nothing when there's no SW.
+- `index.html` gained `apple-touch-icon` and `theme-color`.
+
+Verification: `npm run lint` (0 errors, 68 warnings — unchanged), `npm test` (55/55),
+`npm run build` (clean; `dist/manifest.webmanifest` + `sw.js` correct, 61 precache entries).
+Not exercised in a real install / offline session — no browser this session.
+
+CLAUDE.local.md's "PWA is half-removed" quirk note is now stale (also: `src/serviceWorker.js`
+was already deleted, and `main.jsx` no longer has a commented `register()` call).

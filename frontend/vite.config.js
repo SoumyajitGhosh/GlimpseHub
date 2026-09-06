@@ -9,12 +9,47 @@ export default defineConfig({
     react(),
     svgr(),
     VitePWA({
-      registerType: "autoUpdate",
-      devOptions: {
-        enabled: true,
-      },
+      // 'prompt' (not 'autoUpdate') so <PWABadge> can ask before reloading.
+      registerType: "prompt",
+      includeAssets: ["favicon.ico", "apple-touch-icon-180x180.png", "logo-camera.svg"],
       manifest: {
-        theme_color: "#ffffff",
+        name: "GlimpseHub",
+        short_name: "GlimpseHub",
+        description:
+          "Share moments — posts with filters, comments, chat and real-time notifications.",
+        theme_color: "#0a0a0a",
+        background_color: "#0a0a0a",
+        display: "standalone",
+        start_url: "/",
+        scope: "/",
+        icons: [
+          { src: "pwa-64x64.png", sizes: "64x64", type: "image/png" },
+          { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },
+          { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
+          {
+            src: "maskable-icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
+        // Never cache API responses — they're per-user and change constantly.
+        navigateFallbackDenylist: [/^\/api\//],
+        runtimeCaching: [
+          {
+            // Cloudinary-hosted post images / avatars.
+            urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "cloudinary-images",
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
     }),
   ],
