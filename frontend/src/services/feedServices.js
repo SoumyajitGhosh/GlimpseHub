@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 /**
  * Retrieves posts from user's feed
@@ -9,11 +9,14 @@ import axios from 'axios';
  */
 export const retrieveFeedPosts = async (authToken, offset = 0) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/post/feed/${offset}`, {
-      headers: {
-        authorization: authToken,
-      },
-    });
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URI}/api/post/feed/${offset}`,
+      {
+        headers: {
+          authorization: authToken,
+        },
+      }
+    );
     return response.data;
   } catch (err) {
     throw new Error(err.response.data);

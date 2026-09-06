@@ -50,7 +50,11 @@ const ChatSidebar = () => {
 
   useEffect(() => {
     dispatch(
-      fetchChatUsersAction(currentUser._id, /*stateRef.current?.length ??*/ 0, token)
+      fetchChatUsersAction(
+        currentUser._id,
+        /*stateRef.current?.length ??*/ 0,
+        token
+      )
     );
   }, [dispatch, currentUser?._id, token]);
 

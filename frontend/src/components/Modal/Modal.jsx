@@ -38,9 +38,7 @@ const componentMap = {
   "MobileNav/MobileNav": () => import("../../components/MobileNav/MobileNav"),
   "NewPost/NewPost": () => import("../../components/NewPost/NewPost"),
   "Notification/NotificationButton/NotificationButton": () =>
-    import(
-      "../../components/Notification/NotificationButton/NotificationButton"
-    ),
+    import("../../components/Notification/NotificationButton/NotificationButton"),
   "Notification/NotificationFeed/NotificationFeed": () =>
     import("../../components/Notification/NotificationFeed/NotificationFeed"),
   "PopupCard/PopupCard": () => import("../../components/PopupCard/PopupCard"),
@@ -112,9 +110,7 @@ const Modal = memo(function Modal({ component, ...additionalProps }) {
       }
 
       if (event.key === "Tab") {
-        const focusable = Array.from(
-          el.querySelectorAll(FOCUSABLE_SELECTOR)
-        );
+        const focusable = Array.from(el.querySelectorAll(FOCUSABLE_SELECTOR));
         if (focusable.length === 0) {
           event.preventDefault();
           return;

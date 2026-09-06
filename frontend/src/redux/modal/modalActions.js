@@ -1,12 +1,12 @@
-import modalTypes from './modalTypes';
+import modalTypes from "./modalTypes";
 
 /**
  * Hides a shown Modal
  * @function hideModal
  */
-export const hideModal = componentName => ({
-    type: modalTypes.HIDE_MODAL,
-    payload: componentName
+export const hideModal = (componentName) => ({
+  type: modalTypes.HIDE_MODAL,
+  payload: componentName,
 });
 
 /**
@@ -16,6 +16,6 @@ export const hideModal = componentName => ({
  * @param {string} component The directory of a component in the Components directory
  */
 export const showModal = (props, component) => ({
-    type: modalTypes.SHOW_MODAL,
-    payload: { props, component }
+  type: modalTypes.SHOW_MODAL,
+  payload: { props, component },
 });

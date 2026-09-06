@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 /**
  * Retrieves a users notifications
@@ -8,11 +8,14 @@ import axios from 'axios';
  */
 export const retrieveNotifications = async (authToken) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/notification`, {
-      headers: {
-        authorization: authToken,
-      },
-    });
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URI}/api/notification`,
+      {
+        headers: {
+          authorization: authToken,
+        },
+      }
+    );
     return response.data;
   } catch (err) {
     throw new Error(err.response.data);
@@ -26,11 +29,15 @@ export const retrieveNotifications = async (authToken) => {
  */
 export const readNotifications = async (authToken) => {
   try {
-    await axios.put(`${import.meta.env.VITE_BACKEND_URI}/api/notification`, null, {
-      headers: {
-        authorization: authToken,
-      },
-    });
+    await axios.put(
+      `${import.meta.env.VITE_BACKEND_URI}/api/notification`,
+      null,
+      {
+        headers: {
+          authorization: authToken,
+        },
+      }
+    );
   } catch (err) {
     throw new Error(err.response.data);
   }

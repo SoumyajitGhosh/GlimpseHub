@@ -1,4 +1,3 @@
-
 import LogoCamera from "../../assets/svg/logo-camera.svg?react";
 
 const LoadingPage = () => (

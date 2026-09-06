@@ -1,13 +1,13 @@
-import { Fragment } from 'react';
+import { Fragment } from "react";
 import { useSelector } from "react-redux";
 
 import {
-    selectFeedPosts,
-    selectFeedFetching,
-} from '../../redux/feed/feedSelectors';
+  selectFeedPosts,
+  selectFeedFetching,
+} from "../../redux/feed/feedSelectors";
 
-import PostDialog from '../PostDialog/PostDialog';
-import FeedBottom from './FeedBottom/FeedBottom';
+import PostDialog from "../PostDialog/PostDialog";
+import FeedBottom from "./FeedBottom/FeedBottom";
 
 const Feed = () => {
   const feedPosts = useSelector(selectFeedPosts);

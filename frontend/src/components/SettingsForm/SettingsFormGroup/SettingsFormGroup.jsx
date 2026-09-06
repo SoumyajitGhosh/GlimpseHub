@@ -1,6 +1,5 @@
-
 const SettingsFormGroup = ({ children }) => (
-    <div className="settings-form__form-group">{children}</div>
+  <div className="settings-form__form-group">{children}</div>
 );
 
 export default SettingsFormGroup;

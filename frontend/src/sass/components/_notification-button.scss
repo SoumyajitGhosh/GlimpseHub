@@ -1,4 +1,4 @@
-@use '../abstracts' as *;
+@use "../abstracts" as *;
 
 .notification-button {
   border: none;
@@ -39,7 +39,7 @@
 
     &:before {
       @include horizontalAbsoluteCenter;
-      content: '';
+      content: "";
       background-color: $color-red;
       width: 2.5rem;
       height: 1rem;
@@ -63,7 +63,7 @@
         position: absolute;
         left: 50%;
         transform: translateX(-50%) rotate(180deg);
-        content: '';
+        content: "";
         background-color: $color-red;
         width: 2.5rem;
         height: 1rem;

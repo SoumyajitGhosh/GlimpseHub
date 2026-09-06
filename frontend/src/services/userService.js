@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 /**
  * Searches for a username that is similar to the one supplied
@@ -9,7 +9,9 @@ import axios from 'axios';
  */
 export const searchUsers = async (username, offset = 0) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/user/${username}/${offset}/search`);
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URI}/api/user/${username}/${offset}/search`
+    );
     return response.data;
   } catch (err) {
     console.warn(err);
@@ -49,14 +51,18 @@ export const confirmUser = async (authToken, confirmationToken) => {
  */
 export const changeAvatar = async (image, authToken) => {
   const formData = new FormData();
-  formData.append('image', image);
+  formData.append("image", image);
   try {
-    const response = await axios.put(`${import.meta.env.VITE_BACKEND_URI}/api/user/avatar`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        authorization: authToken,
-      },
-    });
+    const response = await axios.put(
+      `${import.meta.env.VITE_BACKEND_URI}/api/user/avatar`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          authorization: authToken,
+        },
+      }
+    );
     return response.data;
   } catch (err) {
     throw new Error(err.response.data.error);
@@ -114,11 +120,14 @@ export const updateProfile = async (authToken, updates) => {
  */
 export const getSuggestedUsers = async (authToken, max) => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/user/suggested/${max || ''}`, {
-      headers: {
-        authorization: authToken,
-      },
-    });
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URI}/api/user/suggested/${max || ""}`,
+      {
+        headers: {
+          authorization: authToken,
+        },
+      }
+    );
     return response.data;
   } catch (err) {
     throw new Error(err.response.data.error);

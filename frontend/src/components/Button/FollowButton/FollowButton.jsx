@@ -1,17 +1,17 @@
-import { useState } from 'react';
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
-    selectCurrentUser,
-    selectToken,
-} from '../../../redux/user/userSelectors';
-import { showModal } from '../../../redux/modal/modalActions';
-import { showAlert } from '../../../redux/alert/alertActions';
+  selectCurrentUser,
+  selectToken,
+} from "../../../redux/user/userSelectors";
+import { showModal } from "../../../redux/modal/modalActions";
+import { showAlert } from "../../../redux/alert/alertActions";
 
-import { followUser } from '../../../services/profileService';
+import { followUser } from "../../../services/profileService";
 
-import Button from '../Button';
-import UnfollowPrompt from '../../UnfollowPrompt/UnfollowPrompt';
+import Button from "../Button";
+import UnfollowPrompt from "../../UnfollowPrompt/UnfollowPrompt";
 import { fetchProfileAction } from "../../../redux/profilePage/profilePageActions";
 
 const FollowButton = ({ userId, following, username, avatar, style }) => {

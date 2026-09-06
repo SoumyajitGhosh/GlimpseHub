@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import throttle from 'lodash/throttle';
+import { useEffect, useRef } from "react";
+import throttle from "lodash/throttle";
 
 /**
  * Gets the current scroll position
@@ -7,8 +7,8 @@ import throttle from 'lodash/throttle';
  * @param {HTMLElement} element The element to retrieve a scroll position from
  */
 const getCurrentScrollPosition = (element) => {
-    const { scrollTop } = element;
-    return scrollTop;
+  const { scrollTop } = element;
+  return scrollTop;
 };
 
 /**
@@ -19,41 +19,41 @@ const getCurrentScrollPosition = (element) => {
  * @param {array} deps Dependency array
  */
 const useScrollPositionThrottled = (callback, elementRef, deps = []) => {
-    const scrollPosition = useRef(0);
+  const scrollPosition = useRef(0);
 
-    /**
-     * Handles determining positional values when scrolling
-     * @function handleScroll
-     */
-    useEffect(() => {
-        const element = elementRef?.current;
-        const currentElement = element ? element : document.documentElement;
-        scrollPosition.current = getCurrentScrollPosition(currentElement);
+  /**
+   * Handles determining positional values when scrolling
+   * @function handleScroll
+   */
+  useEffect(() => {
+    const element = elementRef?.current;
+    const currentElement = element ? element : document.documentElement;
+    scrollPosition.current = getCurrentScrollPosition(currentElement);
 
-        const handleScroll = () => {
-            scrollPosition.current = getCurrentScrollPosition(currentElement);
-            callback({
-                currentScrollPosition: scrollPosition.current,
-                atBottom:
-                    currentElement.scrollHeight -
-                    currentElement.scrollTop -
-                    currentElement.clientHeight <
-                    1000,
-            });
-        };
-        // Throttle the function to improve performance
-        const handleScrollThrottled = throttle(handleScroll, 200);
-        element
-            ? element.addEventListener('scroll', handleScrollThrottled)
-            : window.addEventListener('scroll', handleScrollThrottled);
+    const handleScroll = () => {
+      scrollPosition.current = getCurrentScrollPosition(currentElement);
+      callback({
+        currentScrollPosition: scrollPosition.current,
+        atBottom:
+          currentElement.scrollHeight -
+            currentElement.scrollTop -
+            currentElement.clientHeight <
+          1000,
+      });
+    };
+    // Throttle the function to improve performance
+    const handleScrollThrottled = throttle(handleScroll, 200);
+    element
+      ? element.addEventListener("scroll", handleScrollThrottled)
+      : window.addEventListener("scroll", handleScrollThrottled);
 
-        return () => {
-            element
-                ? element.removeEventListener('scroll', handleScrollThrottled)
-                : window.removeEventListener('scroll', handleScrollThrottled);
-        };
-        //eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [...deps, elementRef, callback]);
+    return () => {
+      element
+        ? element.removeEventListener("scroll", handleScrollThrottled)
+        : window.removeEventListener("scroll", handleScrollThrottled);
+    };
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...deps, elementRef, callback]);
 };
 
 export default useScrollPositionThrottled;

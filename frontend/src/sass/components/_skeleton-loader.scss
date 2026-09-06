@@ -1,4 +1,4 @@
-@use '../abstracts' as *;
+@use "../abstracts" as *;
 
 .skeleton-loader {
   width: 100%;
@@ -28,7 +28,7 @@
         rgba(219, 219, 219, 1) 100%
       );
       animation: shimmer 2s linear infinite;
-      content: '';
+      content: "";
     }
   }
 }

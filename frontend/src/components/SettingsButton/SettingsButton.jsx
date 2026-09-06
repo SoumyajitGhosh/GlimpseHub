@@ -1,4 +1,4 @@
-import { connect } from 'react-redux';
+import { connect } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { showModal } from "../../redux/modal/modalActions";
@@ -37,8 +37,8 @@ const SettingsButton = ({ showModal, signOut }) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-    showModal: (props, component) => dispatch(showModal(props, component)),
-    signOut: () => dispatch(signOut()),
+  showModal: (props, component) => dispatch(showModal(props, component)),
+  signOut: () => dispatch(signOut()),
 });
 
 export default connect(null, mapDispatchToProps)(SettingsButton);

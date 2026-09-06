@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 /**
  * Retrieves a users notifications
@@ -8,18 +8,22 @@ import axios from 'axios';
  * @returns {object} Object containing message and message details
  */
 export const sendMessage = async (id, authToken, message) => {
-    try {
-        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/message/send/${id}`, {
-            message
-        }, {
-            headers: {
-                authorization: authToken,
-            },
-        });
-        return response.data;
-    } catch (err) {
-        throw new Error(err.response.data);
-    }
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URI}/api/message/send/${id}`,
+      {
+        message,
+      },
+      {
+        headers: {
+          authorization: authToken,
+        },
+      }
+    );
+    return response.data;
+  } catch (err) {
+    throw new Error(err.response.data);
+  }
 };
 
 /**
@@ -29,14 +33,17 @@ export const sendMessage = async (id, authToken, message) => {
  * @returns {array} Array of objects(each object is a message)
  */
 export const getMessages = async (id, authToken) => {
-    try {
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URI}/api/message/${id}`, {
-            headers: {
-                authorization: authToken,
-            },
-        });
-        return response.data;
-    } catch (err) {
-        throw new Error(err.response.data.error);
-    }
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URI}/api/message/${id}`,
+      {
+        headers: {
+          authorization: authToken,
+        },
+      }
+    );
+    return response.data;
+  } catch (err) {
+    throw new Error(err.response.data.error);
+  }
 };

@@ -1,4 +1,3 @@
-
 import LoaderSvg from "../../assets/svg/loader.svg?react";
 
 const Loader = () => (

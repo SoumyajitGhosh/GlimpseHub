@@ -1,6 +1,5 @@
-
-import TextButton from '../Button/TextButton/TextButton';
-import Icon from '../Icon/Icon';
+import TextButton from "../Button/TextButton/TextButton";
+import Icon from "../Icon/Icon";
 
 const Footer = () => (
   <footer className="footer">

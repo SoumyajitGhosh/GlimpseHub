@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 /**
  * Creates a comment on a specific post
@@ -33,11 +33,14 @@ export const createComment = async (message, postId, authToken) => {
  */
 export const deleteComment = async (commentId, authToken) => {
   try {
-    await axios.delete(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentId}`, {
-      headers: {
-        authorization: authToken,
-      },
-    });
+    await axios.delete(
+      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentId}`,
+      {
+        headers: {
+          authorization: authToken,
+        },
+      }
+    );
   } catch (err) {
     throw new Error(err);
   }
@@ -51,9 +54,13 @@ export const deleteComment = async (commentId, authToken) => {
  */
 export const voteComment = async (commentId, authToken) => {
   try {
-    await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentId}/vote`, null, {
-      headers: { authorization: authToken },
-    });
+    await axios.post(
+      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentId}/vote`,
+      null,
+      {
+        headers: { authorization: authToken },
+      }
+    );
   } catch (err) {
     throw new Error(err);
   }
@@ -96,11 +103,14 @@ export const createCommentReply = async (
  */
 export const deleteCommentReply = async (commentReplyId, authToken) => {
   try {
-    await axios.delete(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentReplyId}/reply`, {
-      headers: {
-        authorization: authToken,
-      },
-    });
+    await axios.delete(
+      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentReplyId}/reply`,
+      {
+        headers: {
+          authorization: authToken,
+        },
+      }
+    );
   } catch (err) {
     throw new Error(err);
   }
@@ -114,9 +124,13 @@ export const deleteCommentReply = async (commentReplyId, authToken) => {
  */
 export const voteCommentReply = async (commentReplyId, authToken) => {
   try {
-    await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentReplyId}/replyVote`, null, {
-      headers: { authorization: authToken },
-    });
+    await axios.post(
+      `${import.meta.env.VITE_BACKEND_URI}/api/comment/${commentReplyId}/replyVote`,
+      null,
+      {
+        headers: { authorization: authToken },
+      }
+    );
   } catch (err) {
     throw new Error(err);
   }

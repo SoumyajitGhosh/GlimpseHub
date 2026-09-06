@@ -21,8 +21,8 @@ import LoadingPage from "./pages/LoadingPage/LoadingPage";
 const ProfilePage = lazy(() => import("./pages/ProfilePage/ProfilePage"));
 const PostPage = lazy(() => import("./pages/PostPage/PostPage"));
 const ChatPage = lazy(() => import("./pages/ChatPage/ChatPage"));
-const ConfirmationPage = lazy(() =>
-  import("./pages/ConfirmationPage/ConfirmationPage")
+const ConfirmationPage = lazy(
+  () => import("./pages/ConfirmationPage/ConfirmationPage")
 );
 const SettingsPage = lazy(() => import("./pages/SettingsPage/SettingsPage"));
 const ActivityPage = lazy(() => import("./pages/ActivityPage/ActivityPage"));
@@ -32,17 +32,17 @@ const HomePage = lazy(() => import("./pages/HomePage/HomePage"));
 const NewPostPage = lazy(() => import("./pages/NewPostPage/NewPostPage"));
 const ExplorePage = lazy(() => import("./pages/ExplorePage/ExplorePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage/NotFoundPage"));
-const EditProfileForm = lazy(() =>
-  import("./components/EditProfileForm/EditProfileForm")
+const EditProfileForm = lazy(
+  () => import("./components/EditProfileForm/EditProfileForm")
 );
-const ChangePasswordForm = lazy(() =>
-  import("./components/ChangePasswordForm/ChangePasswordForm")
+const ChangePasswordForm = lazy(
+  () => import("./components/ChangePasswordForm/ChangePasswordForm")
 );
-const SuggestedPosts = lazy(() =>
-  import("./components/SuggestedPosts/SuggestedPosts")
+const SuggestedPosts = lazy(
+  () => import("./components/SuggestedPosts/SuggestedPosts")
 );
-const HashtagPosts = lazy(() =>
-  import("./components/HashtagPosts/HashtagPosts")
+const HashtagPosts = lazy(
+  () => import("./components/HashtagPosts/HashtagPosts")
 );
 
 // Route-metadata-driven chrome visibility: each entry names an exact path

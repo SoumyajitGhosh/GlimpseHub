@@ -1,6 +1,6 @@
-import { animated } from 'react-spring';
+import { animated } from "react-spring";
 
-import TextButton from '../Button/TextButton/TextButton';
+import TextButton from "../Button/TextButton/TextButton";
 
 const Alert = ({ children, onClick, style }) => {
   return (

@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useTransition } from 'react-spring';
+import { useTransition } from "react-spring";
 
 import {
-    selectNotifications,
-    selectNotificationState,
-} from '../../../redux/notification/notificationSelectors';
+  selectNotifications,
+  selectNotificationState,
+} from "../../../redux/notification/notificationSelectors";
 
-import Icon from '../../Icon/Icon';
-import NotificationPopup from './NotificationPopup/NotificationPopup';
-import PopupCard from '../../PopupCard/PopupCard';
-import NotificationFeed from '../NotificationFeed/NotificationFeed';
+import Icon from "../../Icon/Icon";
+import NotificationPopup from "./NotificationPopup/NotificationPopup";
+import PopupCard from "../../PopupCard/PopupCard";
+import NotificationFeed from "../NotificationFeed/NotificationFeed";
 
 const NotificationButton = ({ mobile, icon }) => {
   const notifications = useSelector(selectNotifications);
@@ -63,7 +63,11 @@ const NotificationButton = ({ mobile, icon }) => {
   const Wrapper = mobile ? "span" : "button";
   const wrapperProps = mobile
     ? { className: "notification-button" }
-    : { className: "notification-button", type: "button", "aria-label": "Notifications" };
+    : {
+        className: "notification-button",
+        type: "button",
+        "aria-label": "Notifications",
+      };
 
   return (
     <div style={{ position: "relative", height: "100%" }}>

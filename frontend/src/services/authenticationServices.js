@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 /**
  * Logs a user in with the provided credentials
@@ -14,10 +14,13 @@ export const login = async (usernameOrEmail, password, authToken) => {
       usernameOrEmail && password
         ? { data: { usernameOrEmail, password } }
         : { headers: { authorization: authToken } };
-    const response = await axios(`${import.meta.env.VITE_BACKEND_URI}/api/auth/login`, {
-      method: 'POST',
-      ...request,
-    });
+    const response = await axios(
+      `${import.meta.env.VITE_BACKEND_URI}/api/auth/login`,
+      {
+        method: "POST",
+        ...request,
+      }
+    );
     return response.data;
   } catch (err) {
     throw new Error(err.response.data.error);
@@ -32,10 +35,13 @@ export const login = async (usernameOrEmail, password, authToken) => {
  */
 export const githubAuthentication = async (code) => {
   try {
-    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/auth/login/github`, {
-      code,
-      state: sessionStorage.getItem('authState'),
-    });
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URI}/api/auth/login/github`,
+      {
+        code,
+        state: sessionStorage.getItem("authState"),
+      }
+    );
     return response.data;
   } catch (err) {
     throw new Error(err.response.data.error);
@@ -52,12 +58,15 @@ export const githubAuthentication = async (code) => {
  */
 export const registerUser = async (email, fullName, username, password) => {
   try {
-    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/auth/register`, {
-      email,
-      fullName,
-      username,
-      password,
-    });
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URI}/api/auth/register`,
+      {
+        email,
+        fullName,
+        username,
+        password,
+      }
+    );
     return response.data;
   } catch (err) {
     throw new Error(err.response.data.error);

@@ -1,7 +1,10 @@
-import React from 'react';
-import classNames from 'classnames';
+import React from "react";
+import classNames from "classnames";
 
-const Card = React.forwardRef(function Card({ className, style, children }, ref) {
+const Card = React.forwardRef(function Card(
+  { className, style, children },
+  ref
+) {
   const cardClassNames = classNames({
     card: true,
     [className]: className,

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 /**
  * Fetches the profile information of a specific user
@@ -26,9 +26,13 @@ export const getUserProfile = async (username, authToken) => {
  */
 export const followUser = async (userId, authToken) => {
   try {
-    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URI}/api/user/${userId}/follow`, null, {
-      headers: { authorization: authToken },
-    });
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URI}/api/user/${userId}/follow`,
+      null,
+      {
+        headers: { authorization: authToken },
+      }
+    );
     return response.data;
   } catch (err) {
     throw new Error(err);

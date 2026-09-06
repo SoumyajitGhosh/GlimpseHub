@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
+import PropTypes from "prop-types";
+import classNames from "classnames";
 import defaultAvatar from "../../assets/img/default-avatar.png";
 
 const Avatar = ({ imageSrc = defaultAvatar, className, onClick, style }) => {
@@ -20,9 +20,9 @@ const Avatar = ({ imageSrc = defaultAvatar, className, onClick, style }) => {
 };
 
 Avatar.propTypes = {
-    imageSrc: PropTypes.string,
-    size: PropTypes.string,
-    className: PropTypes.string,
+  imageSrc: PropTypes.string,
+  size: PropTypes.string,
+  className: PropTypes.string,
 };
 
 export default Avatar;

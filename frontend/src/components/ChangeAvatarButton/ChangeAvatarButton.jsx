@@ -1,17 +1,17 @@
-import { Fragment, useRef, useEffect } from 'react';
+import { Fragment, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
-    changeAvatarStart,
-    removeAvatarStart,
-} from '../../redux/user/userActions';
+  changeAvatarStart,
+  removeAvatarStart,
+} from "../../redux/user/userActions";
 import {
-    selectCurrentUser,
-    selectToken,
-    selectError,
-} from '../../redux/user/userSelectors';
-import { showModal } from '../../redux/modal/modalActions';
-import { showAlert } from '../../redux/alert/alertActions';
+  selectCurrentUser,
+  selectToken,
+  selectError,
+} from "../../redux/user/userSelectors";
+import { showModal } from "../../redux/modal/modalActions";
+import { showAlert } from "../../redux/alert/alertActions";
 
 const ChangeAvatarButton = ({ children }) => {
   const dispatch = useDispatch();
