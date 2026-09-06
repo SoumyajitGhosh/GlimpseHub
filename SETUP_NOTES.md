@@ -521,3 +521,18 @@ Branch `frontend-modernization-phase-6-8`.
 Verification: `npm run lint` (0 errors, 68 a11y warnings — unchanged), `npm test` (55/55),
 `npm run build` (clean). Manual pass still outstanding: every animation (react-spring v10)
 and a general click-through, since no backend/browser was available this session.
+
+### 8.7 CI — GitHub Actions
+
+Added `.github/workflows/ci.yml` (the repo's first CI). Runs on push to
+`main` / `development` / `messenger-development` and on every PR. Two independent jobs
+(there is no root `package.json`):
+
+- **frontend**: `npm ci` → `npm run lint` → `npm test` (Vitest, 55) → `npm run build`
+  (with a dummy `VITE_BACKEND_URI`). Node 22, npm cache keyed on `frontend/package-lock.json`.
+- **backend**: `npm ci` → parse-only smoke check (`node --check` over every non-`node_modules`
+  `.js` file). Not a real test run — `npm test` is deliberately `exit 1`, and most backend
+  modules connect to Mongo / start a server on `require`, so executing them in CI isn't
+  viable. Catches syntax errors only.
+
+Both jobs verified locally (lint/test/build green; backend parse check passes).
