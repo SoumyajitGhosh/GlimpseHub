@@ -413,3 +413,49 @@ the manual pass matters more here than in Phases 0–1: every network call in th
 routes through the new client. Smoke login (credential + token-resume), feed, profile +
 follow, post/comment/vote, chat send, avatar upload/remove, notification read, and the
 user type-ahead before merge.
+
+### 8.4 Phase 3 — Redux Toolkit
+
+Branch `frontend-modernization-phase-3`, seven commits (3.1 + one per slice pair + socket).
+
+- **3.1 — `configureStore`**: `@reduxjs/toolkit` added; `legacy_createStore` +
+  `applyMiddleware` replaced. Thunk is bundled (direct `redux-thunk` dep removed);
+  `redux-logger` kept in dev via `getDefaultMiddleware().concat(logger)`; Redux DevTools on
+  in dev. `serializableCheck` / `immutableCheck` enabled. `storeFactory` moved to
+  `configureStore` (checks off).
+- **3.2 — all 8 slices → `createSlice`**, one `<slice>Slice.js` per slice replacing the
+  Types/Actions/Reducer(/Selectors) quartet; ~60 consumer files rewired (import specifiers
+  only — public thunk/selector names unchanged, so component call sites are untouched);
+  Immer removes every hand-spread update and all three `JSON.parse(JSON.stringify())` deep
+  clones. Order: `modal`+`alert` → `feed`+`notification` → `profilePage`+`chat` → `user` →
+  `socket`.
+- **Bugs fixed in passing** (each with a test):
+  - `feed`: `removePost` used `if (postIndex)` — deleting the post at index 0 silently did
+    nothing. Now `if (index !== -1)`.
+  - `user`: `signInStart`'s failed-token-resume did `dispatch(signOut)` (the thunk creator,
+    never invoked) so a bad stored token was never cleared. Now `dispatch(signOut())`.
+  - `socket`: `socketReducer`'s `DISCONNECT` case called `state.socket.disconnect()` — a
+    mutation inside a reducer. Gone (see below).
+  - `chat`: `pushMessageAction`'s `{ types: … }` typo is documented rather than "fixed" —
+    fixing it would double-append the sent message (it also arrives via the `newMessage`
+    socket echo). The thunk now deliberately only flips the sending flag.
+- **`socket` — the live io instance is out of Redux.** `services/socketService.js` is now
+  the socket module singleton (`openSocket` / `getSocket` / `closeSocket`); `openSocket`
+  tears down any existing connection first (fixes a leaked-socket-on-reconnect bug). The
+  slice holds only `{ connected, error }` and now tracks `connect` / `disconnect` /
+  `connect_error` (status was never tracked before). The `socket.socket` serializable /
+  immutable-check exemptions are gone; only `modal.modals` (render props) and
+  `alert.onClick` (callback) remain exempt.
+- **Deferred to Phase 5**: typed `RootState` / `AppDispatch` and typed
+  `useAppSelector` / `useAppDispatch` hooks — meaningless without the TS layer.
+- **Tests**: one `*Slice.test.js` per converted slice (reducers are pure — cheap, high
+  value). Suite 28 → **55 tests**.
+
+Verification per commit: `npm run lint` (0 errors), `npm test`, `npm run build` (clean, PWA
+`sw.js` still generated). No backend/browser this session — this is the phase most in need
+of a manual pass: every screen reads from the store. Before merge, smoke the full set —
+auth (login, signup, token-resume, logout), feed load + infinite scroll + new-post appears,
+profile + follow/unfollow counts, post vote / bookmark, comment + reply + vote + delete,
+avatar change/remove, edit profile, notifications (list, mark-read, live arrival), chat
+(sidebar list + scroll, open conversation, send, live receive), and modal/alert behaviour
+throughout.
