@@ -1,4 +1,5 @@
 import { useEffect, Fragment } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import { Link } from "react-router-dom";
 
@@ -21,15 +22,31 @@ import "linkify-plugin-mention";
 
 import { linkifyOptions } from "../../../utils/linkifyUtils";
 
-const NotificationFeed = ({ setShowNotifications }) => {
+interface NotificationFeedProps {
+  setShowNotifications?: (show: boolean) => void;
+}
+
+interface NotificationUserCardProps {
+  username: string;
+  avatar?: string;
+  subTextDark: boolean;
+  token: string | null;
+  date: string;
+  style: CSSProperties;
+  subText?: ReactNode;
+}
+
+const NotificationFeed = ({ setShowNotifications }: NotificationFeedProps) => {
   const dispatch = useAppDispatch();
   const notifications = useAppSelector(selectNotifications);
   const notificationState = useAppSelector(selectNotificationState);
   const token = useAppSelector(selectToken);
 
   useEffect(() => {
-    dispatch(fetchNotificationsStart(token));
-    dispatch(readNotificationsStart(token));
+    // NotificationFeed only renders for an authenticated viewer (behind the
+    // notification bell), so token is never actually null here.
+    dispatch(fetchNotificationsStart(token ?? ""));
+    dispatch(readNotificationsStart(token ?? ""));
 
     return () => {
       dispatch(clearNotifications());
@@ -42,7 +59,7 @@ const NotificationFeed = ({ setShowNotifications }) => {
         <UsersListSkeleton style={{ height: "7rem" }} />
       ) : notifications.length > 0 ? (
         notifications.map((notification, idx) => {
-          const userCardProps = {
+          const userCardProps: NotificationUserCardProps = {
             username: notification.sender.username,
             avatar: notification.sender.avatar,
             subTextDark: true,
@@ -50,7 +67,7 @@ const NotificationFeed = ({ setShowNotifications }) => {
             date: notification.date,
             style: { minHeight: "7rem", padding: "1rem 1.5rem" },
           };
-          let userCardChild = null;
+          let userCardChild: ReactNode = null;
 
           switch (notification.notificationType) {
             case "follow": {
@@ -68,12 +85,12 @@ const NotificationFeed = ({ setShowNotifications }) => {
             case "like": {
               userCardProps.subText = "liked your photo.";
               userCardChild = (
-                <Link to={`/post/${notification.notificationData.postId}`}>
+                <Link to={`/post/${notification.notificationData?.postId}`}>
                   <img
-                    src={notification.notificationData.image}
+                    src={notification.notificationData?.image}
                     style={{
                       display: "flex",
-                      filter: notification.notificationData.filter,
+                      filter: notification.notificationData?.filter,
                     }}
                     onClick={() =>
                       setShowNotifications && setShowNotifications(false)
@@ -90,15 +107,15 @@ const NotificationFeed = ({ setShowNotifications }) => {
                   notification.notificationType === "comment"
                     ? "commented:"
                     : "mentioned you in a comment:"
-                } ${notification.notificationData.message}`}</Linkify>
+                } ${notification.notificationData?.message}`}</Linkify>
               );
               userCardChild = (
-                <Link to={`/post/${notification.notificationData.postId}`}>
+                <Link to={`/post/${notification.notificationData?.postId}`}>
                   <img
-                    src={notification.notificationData.image}
+                    src={notification.notificationData?.image}
                     style={{
                       display: "flex",
-                      filter: notification.notificationData.filter,
+                      filter: notification.notificationData?.filter,
                     }}
                     onClick={() =>
                       setShowNotifications && setShowNotifications(false)

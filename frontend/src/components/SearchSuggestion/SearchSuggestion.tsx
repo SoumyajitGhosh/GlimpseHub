@@ -3,15 +3,28 @@ import { useState, useRef } from "react";
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 
 import { searchUsers } from "../../services/userService";
+import type { User } from "../../types";
 
 import UsersListSkeleton from "../UsersList/UsersListSkeleton/UsersListSkeleton";
 import UserCard from "../UserCard/UserCard";
 
-const SearchSuggestion = ({ fetching, result, onClick, username }) => {
-  const [additionalUsers, setAdditionalUsers] = useState([]);
+interface SearchSuggestionProps {
+  fetching: boolean;
+  result: User[];
+  onClick: (user: User) => void;
+  username: string;
+}
+
+const SearchSuggestion = ({
+  fetching,
+  result,
+  onClick,
+  username,
+}: SearchSuggestionProps) => {
+  const [additionalUsers, setAdditionalUsers] = useState<User[]>([]);
   const [shouldFetch, setShouldFetch] = useState(false);
   const [fetchingAdditionalUsers, setFetchingAdditionalUsers] = useState(false);
-  const componentRef = useRef();
+  const componentRef = useRef<HTMLUListElement>(null);
   const offset = 10;
 
   const resultLength = result.length;
@@ -44,7 +57,7 @@ const SearchSuggestion = ({ fetching, result, onClick, username }) => {
     [shouldFetch, fetching, fetchingAdditionalUsers]
   );
 
-  const renderUserCard = (user, idx) => (
+  const renderUserCard = (user: User, idx: number) => (
     <li key={idx}>
       <UserCard
         username={user.username}

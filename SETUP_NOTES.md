@@ -1003,6 +1003,95 @@ Verification: `npm run typecheck` — still **68** (the one test-fixture error i
 missing `ProfilePost` shape — same pre-existing gap, not a new error). `npm test` — 55/55.
 `npm run lint` — 27 errors + 42 warnings, unchanged.
 
+#### 8.10.6 `PostDialogCommentForm`/`NotificationFeed` cleared (68 → 18 `tsc` errors)
+
+Cleared every `tsc --noEmit` error rooted in `components/PostDialog/PostDialogCommentForm/
+PostDialogCommentForm.tsx`, its direct dependency `components/SearchSuggestion/
+SearchSuggestion.tsx`, and `components/Notification/NotificationFeed/NotificationFeed.tsx`.
+Left everything else alone — `SignUpCard.tsx` (Formik generics, a different flavor of fix),
+`Feed.tsx`'s own pre-existing `PostDialog` prop bug, `profilePageSlice.test.ts`'s fixture
+gap, and the handful of single-digit errors in `App.tsx`/`ConfirmationPage.tsx`/
+`LoginPage.tsx`/`main.tsx` — confirmed zero fallout in any of them.
+
+- **`types/models.ts`'s `Notification` type was wrong, same class of bug as `Profile`/
+  `Message`/`PostSummary`.** It declared `notificationData: { postId?, image?, thumbnail?,
+  comment? }` and had no `isFollowing` field at all. Checked the actual aggregation in
+  `backend/controllers/notificationController.js` (`retrieveNotifications`) and the three
+  notification-creation sites (`postController.js`'s like notification,
+  `controllerUtils.js`'s `sendCommentNotification`/`sendMentionNotification`): every
+  notification carries a real, always-present `isFollowing: boolean` (whether the receiver
+  follows the sender back — added via a `$lookup`+`$addFields` in the aggregation, unrelated
+  to `FollowResponse`'s `operation` field of the same name elsewhere), and
+  `notificationData` is `{ postId?, image?, filter?, message? }` — `thumbnail`/`comment`
+  were never real fields; `filter` and `message` were the ones missing.
+  `NotificationFeed.tsx`'s existing `notification.isFollowing`/`.notificationData.message`/
+  `.filter` reads were already correct against the real API; the type was what needed
+  fixing. `notificationData` fields accessed with `?.` since presence is only implied by
+  `notificationType` (never `follow`), not encoded in the type as a discriminated union —
+  matches the `?? ""` "can't happen with valid data, but not provable to the compiler"
+  pattern used throughout §8.10.
+- **`PostDialogCommentForm.tsx`**: added a `Replying` type (`false | { commentUser: string;
+  commentId: string }`) mirroring `postDialogReducer.tsx`'s `SET_REPLYING` case exactly;
+  `dialogDispatch: Dispatch<PostDialogAction>` (the reducer's own dispatch); `profileDispatch
+  ?: Dispatch<any>`, matching the identical convention already established for this same
+  prop name in `Comment.tsx`/`CommentReply.tsx`/`PostDialog.tsx`/`PostDialogStats.tsx`
+  (which all predate this file in getting typed, apparently outside the §8.10 log — verified
+  each still compiles clean before and after this pass). Converted the runtime `PropTypes`
+  validation to the native interface, closing the item §8.10.1 explicitly deferred.
+  `commentInputRef`/`commentsRef` null-guarded consistently with the `useRef<T>(null)`
+  pattern used throughout §8.10 (`ChangeAvatarButton`, `NewPostButton`, …).
+- **Found, not fixed (dead code, out of scope — would mean redesigning
+  `profilePageSlice.ts`'s action set)**: `profileDispatch({ type:
+  "INCREMENT_POST_COMMENTS_COUNT", payload: postId })` — this plain action object type-checks
+  fine against `Dispatch<any>`, which is exactly why it hid as a silent bug rather than a
+  compile error. Tracing where `profileDispatch` actually comes from
+  (`ProfilePage.tsx`: `profileDispatch: dispatch` — the real Redux `AppDispatch`, not a local
+  reducer dispatch) confirms this has dispatched an action type that
+  `profilePageSlice.ts` has never had a case for since the RTK migration (§8.4) — a
+  reducer silently ignores an unmatched action type and returns state unchanged. So the
+  "increment the comment count shown on the profile grid overlay when you comment from the
+  post dialog" feature has been a no-op since Phase 3, confirmed via the same call chain
+  through `Comment.tsx`/`CommentReply.tsx`/`PostDialogStats.tsx` (all dispatch the same
+  dead action types — `INCREMENT_POST_COMMENTS_COUNT`, presumably also `VOTE_POST` etc.).
+  Flagged here since it's a real, currently-invisible feature gap, not fixed since it needs
+  a deliberate decision about what `profilePageSlice.ts` should actually do with these
+  events, not a type fix.
+- **A genuine type-vs-consumer conflict, resolved by decoupling, not by loosening either
+  side**: §8.10.2 narrowed `useSearchUsersDebounced`'s `result` state from `User[] | null` to
+  `User[]` because the hook itself never calls `setResult(null)` — true for its only other
+  consumer, `SearchBox.tsx`. But `PostDialogCommentForm.tsx` (not fixed until now) *does*
+  rely on `setResult(null)` from outside the hook, as a sentinel for "hide the @mention
+  dropdown." Re-widening the hook's type back to nullable would have broken `SearchBox.tsx`,
+  which reads `result.length`/`result.map()` unguarded. Instead, added a local
+  `showMentionSuggestions` boolean state to `PostDialogCommentForm.tsx` that tracks the
+  dropdown's visibility independently of the hook's array data — `setResult(null)` calls
+  became `setResult([]); setShowMentionSuggestions(false)` (and the reverse on a match).
+  Same visible behavior, no shared-hook type change, no fallout in `SearchBox.tsx`.
+- **`SearchSuggestion.tsx`** (pulled in as a direct dependency): typed `fetching: boolean`,
+  `result: User[]`, `onClick: (user: User) => void`, `username: string` (matching its only
+  call site, `PostDialogCommentForm.tsx`, which now passes `mention ?? ""`);
+  `additionalUsers` state and `renderUserCard`'s params typed against `User`; `componentRef`
+  → `useRef<HTMLUListElement>(null)` matching the actual `<ul ref={componentRef}>` element.
+- **`NotificationFeed.tsx`**: `userCardProps` (built incrementally, `.subText` assigned
+  later inside the `switch`) needed an explicit `NotificationUserCardProps` interface up
+  front — TS infers an object literal's type from its initial shape and rejects later
+  property assignment otherwise, the same class of issue as `EditProfileForm`'s Formik
+  `errors: {}` in §8.10.2. `token`/`username()` nullability resolved with `?? ""` at the
+  `fetchNotificationsStart`/`readNotificationsStart` call sites — this component only
+  renders behind the authenticated notification bell.
+
+Verification: `npm run typecheck` — 68 → **18** errors, zero remaining in the three touched
+files. `npm test` — 55/55, unchanged. `npm run lint` — 27 errors + 42 warnings, unchanged.
+`npm run build` still fails overall (18 errors remain). Remaining, in full:
+`SignUpCard.tsx` (8, Formik generics — a different flavor of fix than the prop-typing
+pattern used throughout §8.10), `Feed.tsx` (3, its own pre-existing `PostDialog` prop bug
+from §8.10.1), `App.tsx` (2, `document.querySelector("body")` null-checks),
+`ConfirmationPage.tsx` (2), `main.tsx` (1, `createRoot(document.getElementById("root"))`
+possibly-null), `LoginPage.tsx` (1, the last remaining runtime `prop-types` import), and
+`profilePageSlice.test.ts` (1, the pre-existing fixture gap from §8.10.5). None of these
+share a common cluster the way prior passes did — each is a one-off, and `SignUpCard.tsx`
+is the only one with double-digit effort remaining.
+
 ## 9. Backend dependency vulnerability fixes, round 2 (8 → 0)
 
 Dependabot/`npm audit` flagged 8 vulnerabilities in `backend/` (4 moderate, 3 high, 1

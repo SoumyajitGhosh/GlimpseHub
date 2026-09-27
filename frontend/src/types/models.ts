@@ -114,17 +114,28 @@ export type NotificationType =
   | "commentReply"
   | "mention";
 
+/**
+ * A notification as returned by `GET /api/notification`
+ * (`backend/controllers/notificationController.js` `retrieveNotifications`).
+ * `isFollowing` is a real, always-present field the aggregation adds (whether
+ * the receiver follows the sender back) — not to be confused with the
+ * `follow`/`unfollow` operation on `FollowResponse`. `notificationData` is
+ * only present for `like`/`comment`/`mention` (never `follow`); its shape
+ * comes from `postController.js`'s like-notification and
+ * `controllerUtils.js`'s `sendCommentNotification`/`sendMentionNotification`.
+ */
 export interface Notification {
   _id: Id;
   notificationType: NotificationType;
   sender: User;
   date: IsoDateString;
   read: boolean;
+  isFollowing: boolean;
   notificationData?: {
     postId?: Id;
     image?: string;
-    thumbnail?: string;
-    comment?: string;
+    filter?: string;
+    message?: string;
   };
 }
 
