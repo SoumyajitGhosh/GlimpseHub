@@ -620,3 +620,56 @@ Verification: `npm run lint` (0 errors, 42 warnings, down from 68), `npm test` (
 
 Still pending: Phase 4 (RTK Query), Phase 5 (incremental TS), Phase 9 (forms → RHF + zod),
 and the a11y interactive-element follow-up (42 warnings).
+
+### 8.10 Phase 5 — TypeScript migration (in progress, branch `frontend-typescript-migration`)
+
+§8's original roadmap scoped Phase 5 as *incremental* typing (`jsconfig.json` + `checkJs` +
+typed JSDoc, leaf-inward). This branch instead did a **full `.jsx`/`.js` → `.tsx`/`.ts`
+conversion** of the entire `src/` tree in one pass — every component, page, redux slice,
+service, hook, and util file was renamed and given real TypeScript syntax. That's a
+deliberately larger scope than the roadmap called for; noted here as a divergence, not a
+correction.
+
+- **Tooling**: `typescript` + `typescript-eslint` added; `frontend/tsconfig.json` (bundler
+  resolution, `strict: true`, `noUnusedLocals`/`noUnusedParameters`, `jsx: react-jsx`).
+  `eslint.config.js` rewritten on `tseslint.config(...)`, `files` patterns extended to
+  `ts,tsx`, `no-unused-vars` handed off to `@typescript-eslint/no-unused-vars`.
+  `vite.config.js` → `vite.config.ts`. `package.json`: `build` is now
+  `tsc --noEmit && vite build`; new `typecheck` script (`tsc --noEmit`).
+- **New files**: `src/vite-env.d.ts` (Vite/plugin ambient types + the `ImportMetaEnv` shape +
+  an `ion-icon` JSX intrinsic, since Ionicons is a web component used directly in JSX);
+  `src/redux/hooks.ts` (typed `useAppDispatch`/`useAppSelector` + an `AppThunk` helper —
+  the piece §8.4 deferred "meaningless without the TS layer"); `src/types/` (`api.ts`,
+  `models.ts`, `components.ts`, `index.ts`) as the shared type-definition surface referenced
+  across slices/services/components instead of inlining shapes per file.
+- **`backend/scripts/dev-mongo.cjs`** (untracked, not part of this branch's commits): a local
+  convenience script (in-memory MongoDB via `mongodb-memory-server`) used to run the backend
+  without a system `mongod` while manually exercising the app during this migration. Not
+  wired into any npm script.
+
+**Current state — build and lint are both red; this is a WIP push, not a finished phase:**
+
+- `npm run typecheck` (`tsc --noEmit`): **333 errors.** Dominant patterns: components
+  destructuring untyped props (`TS7031`/`TS7006` implicit `any`), thunk/selector return
+  values coming back as `unknown` from Redux Toolkit's typed state (`TS2339`/`TS18046`),
+  optional/nullable fields not narrowed before use (`TS18047`/`TS18048`/`TS2345` "possibly
+  null/undefined"), and prop-types on connected components not yet matching real call sites
+  (`TS2739`/`TS2741`/`TS2322`). Since `build` now runs `tsc --noEmit` first, **`npm run
+  build` currently fails** — do not deploy off this branch until that's cleared.
+- `npm run lint`: 27 errors + 42 warnings (was 0 errors / 42 warnings before this branch).
+  The regression is `@typescript-eslint/no-unused-expressions` firing on the codebase's
+  existing `cond && doThing()` short-circuit side-effect idiom, which the JS-only ruleset
+  never flagged (`useScrollPositionThrottled.ts`, `ProfileHeader.tsx`, others). The 42
+  warnings are the pre-existing §8.9 a11y backlog, unchanged.
+- `npm test`: **55/55 pass, unchanged** — Vitest runs through `esbuild`/`babel` transforms
+  that don't type-check, so the test suite being green doesn't mean the types are sound.
+
+**Recommended before merging this branch**: work the 333 `tsc` errors down to zero (the
+`ProfilePage`/`ProfileHeader`/`HomePage`/`PostPage`/`SettingsPage` files carry the bulk of
+them — thunk-return typing and prop shapes for the `Card`/`Header` family look like the
+highest-leverage fixes), decide whether `prop-types` (still imported at runtime in a few
+files, now also missing type declarations — `TS7016`) is dropped in favor of the new TS
+prop types or kept as a runtime check, then fix the 27 new lint errors (either allow the
+short-circuit idiom via a scoped rule config, matching the §4.2 guardrail of not silently
+rewriting working patterns, or convert those specific sites to `if` statements) before
+flipping `build`/`typecheck`/lint back to green in CI.

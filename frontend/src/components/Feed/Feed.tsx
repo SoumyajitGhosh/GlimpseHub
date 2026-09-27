@@ -1,0 +1,34 @@
+import { Fragment } from "react";
+import { useAppSelector } from "../../redux/hooks";
+
+import {
+  selectFeedPosts,
+  selectFeedFetching,
+} from "../../redux/feed/feedSlice";
+
+import PostDialog from "../PostDialog/PostDialog";
+import FeedBottom from "./FeedBottom/FeedBottom";
+
+const Feed = () => {
+  const feedPosts = useAppSelector(selectFeedPosts);
+  const feedFetching = useAppSelector(selectFeedFetching);
+
+  return (
+    <section className="feed">
+      {feedPosts &&
+        feedPosts.map((post, idx) => (
+          <PostDialog simple postData={post} postId={post._id} key={idx} />
+        ))}
+      {feedFetching && (
+        <Fragment>
+          <PostDialog simple loading />
+          <PostDialog simple loading />
+          <PostDialog simple loading />
+        </Fragment>
+      )}
+      {!feedFetching && feedPosts.length > 0 && <FeedBottom />}
+    </section>
+  );
+};
+
+export default Feed;

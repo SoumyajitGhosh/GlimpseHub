@@ -1,17 +1,19 @@
 import js from "@eslint/js";
 import globals from "globals";
+import tseslint from "typescript-eslint";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import prettier from "eslint-config-prettier";
 
-export default [
-  { ignores: ["dist", "coverage"] },
+export default tseslint.config(
+  { ignores: ["dist", "coverage", "dev-dist"] },
   {
-    files: ["**/*.{js,jsx}"],
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 2022,
       globals: globals.browser,
       parserOptions: {
         ecmaVersion: "latest",
@@ -19,7 +21,7 @@ export default [
         sourceType: "module",
       },
     },
-    settings: { react: { version: "18.3" } },
+    settings: { react: { version: "19" } },
     plugins: {
       react,
       "react-hooks": reactHooks,
@@ -27,14 +29,10 @@ export default [
       "jsx-a11y": jsxA11y,
     },
     rules: {
-      ...js.configs.recommended.rules,
       ...react.configs.recommended.rules,
       ...react.configs["jsx-runtime"].rules,
       ...reactHooks.configs.recommended.rules,
       ...jsxA11y.flatConfigs.recommended.rules,
-      // The `const { x, ...rest } = obj` idiom for omitting a key is used
-      // deliberately in a few reducers.
-      "no-unused-vars": ["error", { ignoreRestSiblings: true }],
       // a11y gaps are tracked as a dedicated follow-up (see SETUP_NOTES);
       // surface them as warnings for now rather than failing the build.
       ...Object.fromEntries(
@@ -43,16 +41,18 @@ export default [
           "warn",
         ])
       ),
+      // The `const { x, ...rest } = obj` idiom for omitting a key is used
+      // deliberately in a few reducers.
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { ignoreRestSiblings: true, argsIgnorePattern: "^_" },
+      ],
       "react/jsx-no-target-blank": "off",
       // `label-has-for` is deprecated by eslint-plugin-jsx-a11y itself
-      // (superseded by `label-has-associated-control`, which stays on). It
-      // still ships in `recommended` and mis-fires on our forms, which pair
-      // `<label htmlFor>` with a control `id` correctly (see FormInput).
+      // (superseded by `label-has-associated-control`, which stays on).
       "jsx-a11y/label-has-for": "off",
-      // Runtime PropTypes validation is being retired in favour of
-      // `checkJs` + typed JSDoc (modernization roadmap Phase 5). ~225 of the
-      // components never declared propTypes; rather than backfill a pattern
-      // we're removing, the rule is off until the type layer replaces it.
+      // Runtime PropTypes validation has been replaced by TypeScript prop types.
       "react/prop-types": "off",
       "react-refresh/only-export-components": [
         "warn",
@@ -61,17 +61,15 @@ export default [
     },
   },
   {
-    // Node-context config files: give them Node globals so `process`,
-    // `__dirname`, etc. don't trip `no-undef`.
-    files: ["*.config.js", "eslint.config.js"],
+    // Node-context config files.
+    files: ["*.config.{js,ts}", "eslint.config.js"],
     languageOptions: {
       globals: { ...globals.node },
     },
   },
   {
-    // Vitest test files run in a jsdom + Vitest-globals environment
-    // (`globals: true` in vite.config.js).
-    files: ["**/*.{test,spec}.{js,jsx}", "src/utils/test/**/*.{js,jsx}"],
+    // Vitest test files run in a jsdom + Vitest-globals environment.
+    files: ["**/*.{test,spec}.{js,jsx,ts,tsx}", "src/utils/test/**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -88,5 +86,5 @@ export default [
     },
   },
   // Turn off stylistic rules that Prettier owns. Must be last.
-  prettier,
-];
+  prettier
+);

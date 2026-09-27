@@ -1,0 +1,48 @@
+import { Routes, Route } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+
+import { selectToken } from "../../redux/user/userSlice";
+import { showAlert } from "../../redux/alert/alertSlice";
+import { showModal } from "../../redux/modal/modalSlice";
+import SuggestedPosts from "../../components/SuggestedPosts/SuggestedPosts";
+import HashtagPosts from "../../components/HashtagPosts/HashtagPosts";
+import NotFoundPage from "../NotFoundPage/NotFoundPage";
+
+const ExplorePage = () => {
+  const dispatch = useAppDispatch();
+  const token = useAppSelector(selectToken);
+
+  const handleShowAlert = (text, onClick) => dispatch(showAlert(text, onClick));
+  const handleShowModal = (props, component) =>
+    dispatch(showModal(props, component));
+
+  return (
+    <main className="explore-page grid">
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <SuggestedPosts
+              token={token}
+              showModal={handleShowModal}
+              showAlert={handleShowAlert}
+            />
+          }
+        />
+        <Route
+          path="tags/:hashtag"
+          element={
+            <HashtagPosts
+              token={token}
+              showModal={handleShowModal}
+              showAlert={handleShowAlert}
+            />
+          }
+        />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </main>
+  );
+};
+
+export default ExplorePage;
