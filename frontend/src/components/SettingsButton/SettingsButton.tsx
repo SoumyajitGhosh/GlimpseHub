@@ -3,10 +3,16 @@ import { useNavigate } from "react-router-dom";
 
 import { showModal } from "../../redux/modal/modalSlice";
 import { signOut } from "../../redux/user/userSlice";
+import type { AppDispatch } from "../../redux/store";
 
 import Icon from "../Icon/Icon";
 
-const SettingsButton = ({ showModal, signOut }) => {
+interface SettingsButtonProps {
+  showModal: (props: Record<string, unknown>, component: string) => void;
+  signOut: () => void;
+}
+
+const SettingsButton = ({ showModal, signOut }: SettingsButtonProps) => {
   const navigate = useNavigate();
   return (
     <Icon
@@ -36,9 +42,17 @@ const SettingsButton = ({ showModal, signOut }) => {
   );
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  showModal: (props, component) => dispatch(showModal(props, component)),
+const mapDispatchToProps = (dispatch: AppDispatch) => ({
+  showModal: (props: Record<string, unknown>, component: string) =>
+    dispatch(showModal(props, component)),
   signOut: () => dispatch(signOut()),
 });
 
-export default connect(null, mapDispatchToProps)(SettingsButton);
+export default connect<
+  Record<string, never>,
+  ReturnType<typeof mapDispatchToProps>,
+  Record<string, never>
+>(
+  null,
+  mapDispatchToProps
+)(SettingsButton);

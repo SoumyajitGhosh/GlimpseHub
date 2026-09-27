@@ -1,5 +1,5 @@
+import type { FormEvent } from "react";
 import { useState, useEffect } from "react";
-import PropTypes from "prop-types";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { Link } from "react-router-dom";
 
@@ -16,7 +16,12 @@ import Divider from "../Divider/Divider";
 import TextButton from "../Button/TextButton/TextButton";
 import Card from "../Card/Card";
 
-const LoginCard = ({ onClick, modal }) => {
+interface LoginCardProps {
+  onClick?: () => void;
+  modal?: boolean;
+}
+
+const LoginCard = ({ onClick, modal }: LoginCardProps) => {
   const dispatch = useAppDispatch();
   const error = useAppSelector(selectError);
   const fetching = useAppSelector(selectFetching);
@@ -25,7 +30,7 @@ const LoginCard = ({ onClick, modal }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     dispatch(signInStart(email, password));
   };
@@ -98,11 +103,6 @@ const LoginCard = ({ onClick, modal }) => {
       </Card>
     </div>
   );
-};
-
-LoginCard.propTypes = {
-  onClick: PropTypes.func,
-  modal: PropTypes.bool,
 };
 
 export default LoginCard;

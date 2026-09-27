@@ -1,3 +1,4 @@
+import type { ChangeEvent, MouseEvent, ReactNode } from "react";
 import { Fragment, useRef, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
@@ -11,14 +12,18 @@ import {
 import { showModal } from "../../redux/modal/modalSlice";
 import { showAlert } from "../../redux/alert/alertSlice";
 
-const ChangeAvatarButton = ({ children }) => {
+interface ChangeAvatarButtonProps {
+  children?: ReactNode;
+}
+
+const ChangeAvatarButton = ({ children }: ChangeAvatarButtonProps) => {
   const dispatch = useAppDispatch();
 
   const currentUser = useAppSelector(selectCurrentUser);
   const token = useAppSelector(selectToken);
   const error = useAppSelector(selectError);
 
-  const inputRef = useRef();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (error) {
@@ -26,8 +31,8 @@ const ChangeAvatarButton = ({ children }) => {
     }
   }, [error, dispatch]);
 
-  const handleClick = (event) => {
-    if (currentUser.avatar) {
+  const handleClick = (event: MouseEvent<HTMLLabelElement>) => {
+    if (currentUser?.avatar) {
       event.preventDefault();
       dispatch(
         showModal(
@@ -37,14 +42,14 @@ const ChangeAvatarButton = ({ children }) => {
                 text: "Upload Photo",
                 className: "color-blue font-bold",
                 onClick: () => {
-                  inputRef.current.click();
+                  inputRef.current?.click();
                 },
               },
               {
                 warning: true,
                 text: "Remove Current Photo",
                 onClick: () => {
-                  changeAvatar(null, true);
+                  changeAvatar(undefined, true);
                 },
               },
             ],
@@ -53,15 +58,20 @@ const ChangeAvatarButton = ({ children }) => {
         )
       );
     } else {
-      inputRef.current.click();
+      inputRef.current?.click();
     }
   };
 
-  const changeAvatar = async (event, remove) => {
+  const changeAvatar = async (
+    event?: ChangeEvent<HTMLInputElement>,
+    remove?: boolean
+  ) => {
     if (remove) {
-      await dispatch(removeAvatarStart(token));
+      await dispatch(removeAvatarStart(token ?? ""));
     } else {
-      await dispatch(changeAvatarStart(event.target.files[0], token));
+      const file = event?.target.files?.[0];
+      if (!file) return;
+      await dispatch(changeAvatarStart(file, token ?? ""));
     }
     if (!error) dispatch(showAlert("Profile picture updated."));
   };

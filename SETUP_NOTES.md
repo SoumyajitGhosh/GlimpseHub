@@ -673,3 +673,68 @@ prop types or kept as a runtime check, then fix the 27 new lint errors (either a
 short-circuit idiom via a scoped rule config, matching the §4.2 guardrail of not silently
 rewriting working patterns, or convert those specific sites to `if` statements) before
 flipping `build`/`typecheck`/lint back to green in CI.
+
+#### 8.10.1 `HomePage`/`ProfileHeader`/`ProfilePage` cleared (333 → 219 `tsc` errors)
+
+Fixed every `tsc --noEmit` error rooted in `HomePage.tsx`, `ProfileHeader.tsx`,
+`ProfilePage.tsx`, and `EmptyProfile.tsx`, plus every leaf component those four import that
+needed real prop types to make that possible: `MobileHeader`, `SuggestedUsers`,
+`SuggestionCard`, `NewPostButton`, `ChangeAvatarButton`, `SettingsButton`, `LoginCard`. Left
+everything else (`PostPage`, `SettingsPage`, `Header.tsx`, `NotificationButton`,
+`SignUpCard`, `Feed`'s own internal `PostDialog` bug, …) for a follow-up pass — none of it
+blocks a clean typecheck of the files above.
+
+- **`types/models.ts` — `Profile` was the wrong shape.** It was authored flat
+  (`{ username, avatar, … }`), but `retrieveUser` in
+  `backend/controllers/userController.js` actually responds `{ user, followers, following,
+  isFollowing, posts }` — a nested `user` sub-document. Every consumer (`ProfileHeader`,
+  `ProfilePage`, `EmptyProfile`) already read `data.user.avatar` etc., so the *type* was
+  wrong, not the components. Replaced `Profile` with the nested shape and added
+  `ProfileUser`; `ProfileResponse`/`ProfilePageData` follow from it. `data.user` is
+  non-null-asserted at each read site with a comment — `ProfileHeader`/`ProfilePage` only
+  render once `fetchProfileAction` has resolved (gated by `ProfilePage`'s `renderProfile`),
+  so the fetch-in-flight state where `user` is genuinely absent never reaches these reads.
+- **`types/models.ts` — added `SuggestedUser` (`User & { posts?: Post[] }`)** for
+  `GET /api/user/suggested/:max`, which embeds up to 3 preview posts per suggestion
+  (confirmed against the aggregation in `retrieveSuggestedUsers`); threaded through
+  `userService.getSuggestedUsers` and `SuggestedUsersResponse`.
+- **Three real, pre-existing bugs surfaced by the stricter types** (same class as the ones
+  fixed in §8.4, no test coverage available to pin them so documented here instead):
+  - `ProfileHeader.tsx`'s `showUsersModal` passed the numeric `following` **count** as
+    `UsersList`'s `following` prop, which is actually a boolean "show the following list
+    (vs. followers)" flag — present verbatim in the original pre-TS `.jsx`, so it predates
+    this migration. Fixed to `following={!followers}`, mirroring the `title: followers ?
+    "Followers" : "Following"` logic one line above it.
+  - `ProfilePage.tsx` passed `PreviewImage` the raw `postVotes`/`comments` **arrays** where
+    it declares (and needs) `number` counts — same vintage bug, would have rendered
+    `[object Object]`-style output instead of a count had the arrays ever been non-empty.
+    Fixed to `.length` with a `?? 0` fallback.
+  - `ProfilePage.tsx`'s `handleClick` (opens the post dialog) read `data.avatar`, a field
+    that has never existed on the profile payload (the real value is nested at
+    `data.user.avatar`) — dead code that always sent `undefined`. Fixed to `data.user?.avatar`.
+- **Deleted `pages/ProfilePage/ProfilePageReducer.ts`** — a pre-RTK `useReducer` reducer
+  superseded by `profilePageSlice.ts` (§8.4) but never removed; confirmed unimported
+  anywhere before deleting.
+- **`token`/`username` nullability**: `selectToken` is `string | null` and `useParams()`'s
+  route params are `string | undefined`, but the thunks/services they feed
+  (`fetchFeedPostsStart`, `followUserAction`, `getSuggestedUsers`, `changeAvatarStart`, …)
+  require plain `string`. These routes/components only render for an authenticated viewer
+  with the route param present, so resolved with `token ?? ""` / `username = ""` defaults
+  at the call sites rather than loosening the thunk signatures — no observable behavior
+  change (a missing token was already going to fail auth either way).
+- **`connect()`-wrapped components** (`NewPostButton`, `SettingsButton`) had entirely
+  untyped `mapDispatchToProps` and own-props. Typed both with explicit `connect<TStateProps,
+  TDispatchProps, TOwnProps>(...)` generics rather than leaving them to infer (inference
+  degrades badly on `connect()` once any argument is untyped).
+- **`LoginCard.tsx`**: converted its runtime `PropTypes` to a native interface (matches the
+  `react/prop-types` → TS-types direction already decided in §8's Phase 5 entry). Other
+  files still importing `prop-types` (`PostDialogCommentForm`, `LoginPage`) are untouched —
+  out of scope for this pass.
+
+Verification: `npm run typecheck` — 333 → **219** errors, zero remaining in the touched
+files or their direct dependencies. `npm test` — 55/55, unchanged. `npm run lint` — 27
+errors + 42 warnings, unchanged (none of the 27 are in files touched this pass; the
+pre-existing `no-unused-expressions` regression from §8.10 is untouched). `npm run build`
+still fails overall (219 errors remain elsewhere) — the remaining files are listed in this
+session's `tsc` output; `PostPage`/`SettingsPage`/`Header.tsx` are likely the next
+highest-leverage targets since they're still widely imported.

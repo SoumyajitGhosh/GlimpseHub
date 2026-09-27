@@ -8,19 +8,35 @@ import UnfollowPrompt from "../../components/UnfollowPrompt/UnfollowPrompt";
 import Button from "../../components/Button/Button";
 import SettingsButton from "../../components/SettingsButton/SettingsButton";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { showModal as showModalAction } from "../../redux/modal/modalSlice";
 import {
   fetchProfileAction,
   followUserAction,
 } from "../../redux/profilePage/profilePageSlice";
+import type { CurrentUser } from "../../types";
 
-const ProfileHeader = ({ currentUser, showModal, token, follow }) => {
+interface ProfileHeaderProps {
+  currentUser: CurrentUser | null;
+  showModal: typeof showModalAction;
+  token: string | null;
+  follow: () => void;
+}
+
+const ProfileHeader = ({
+  currentUser,
+  showModal,
+  token,
+  follow,
+}: ProfileHeaderProps) => {
   const dispatch = useAppDispatch();
-  const state = useAppSelector((state) => state?.profile);
+  const state = useAppSelector((state) => state.profile);
   const { data } = state;
-  const { avatar, username, bio, website, fullName } = data.user;
+  // ProfileHeader only renders once the profile fetch has completed
+  // (see ProfilePage's renderProfile), so `data.user` is always populated here.
+  const { avatar, username, bio, website, fullName } = data.user!;
   const { following, followers, postCount } = data;
-  const loading = useAppSelector((state) => state?.profile.fetching);
-  const showUsersModal = (followers, following) => {
+  const loading = useAppSelector((state) => state.profile.fetching);
+  const showUsersModal = (followers?: number, following?: number) => {
     token &&
       dispatch(
         showModal(
@@ -30,11 +46,11 @@ const ProfileHeader = ({ currentUser, showModal, token, follow }) => {
             cancelButton: false,
             children: (
               <UsersList
-                userId={data.user._id}
+                userId={data.user!._id}
                 token={token}
                 followersCount={followers}
                 followingCount={following}
-                following={following}
+                following={!followers}
               />
             ),
           },
@@ -71,8 +87,8 @@ const ProfileHeader = ({ currentUser, showModal, token, follow }) => {
                     ],
                     children: (
                       <UnfollowPrompt
-                        avatar={data.user.avatar}
-                        username={data.user.username}
+                        avatar={data.user!.avatar}
+                        username={data.user!.username}
                       />
                     ),
                   },
@@ -91,8 +107,8 @@ const ProfileHeader = ({ currentUser, showModal, token, follow }) => {
       <Button
         loading={loading}
         onClick={() => {
-          dispatch(followUserAction(data.user._id, token));
-          if (currentUser.username === username)
+          dispatch(followUserAction(data.user!._id, token ?? ""));
+          if (currentUser?.username === username)
             dispatch(fetchProfileAction(username, token));
         }}
       >
@@ -130,10 +146,10 @@ const ProfileHeader = ({ currentUser, showModal, token, follow }) => {
             className="heading-3"
           >
             <b>{followers}</b>{" "}
-            {followers > 1 || followers === 0 ? "followers" : "follower"}
+            {(followers ?? 0) > 1 || followers === 0 ? "followers" : "follower"}
           </p>
           <p
-            onClick={() => showUsersModal(null, following)}
+            onClick={() => showUsersModal(undefined, following)}
             style={{ cursor: "pointer" }}
             className="heading-3"
           >
@@ -202,11 +218,11 @@ const ProfileHeader = ({ currentUser, showModal, token, follow }) => {
           >
             <b>{followers}</b>{" "}
             <span className="font-medium color-grey">
-              {followers > 1 || followers === 0 ? "followers" : "follower"}
+              {(followers ?? 0) > 1 || followers === 0 ? "followers" : "follower"}
             </span>
           </h3>
           <h3
-            onClick={() => showUsersModal(null, following)}
+            onClick={() => showUsersModal(undefined, following)}
             style={{ cursor: "pointer" }}
             className="heading-3"
           >

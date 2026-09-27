@@ -1,18 +1,37 @@
+import type { ChangeEvent, CSSProperties, ReactNode } from "react";
 import { Fragment, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { connect } from "react-redux";
 
 import { showModal, hideModal } from "../../../redux/modal/modalSlice";
+import type { AppDispatch } from "../../../redux/store";
 
 import Icon from "../../Icon/Icon";
 
-const NewPostButton = ({ showModal, hideModal, plusIcon, children, style }) => {
-  const fileInputRef = useRef();
+interface NewPostButtonOwnProps {
+  plusIcon?: boolean;
+  children?: ReactNode;
+  style?: CSSProperties;
+}
+
+interface NewPostButtonProps extends NewPostButtonOwnProps {
+  showModal: (props: Record<string, unknown>, component: string) => void;
+  hideModal: (component: string) => void;
+}
+
+const NewPostButton = ({
+  showModal,
+  hideModal,
+  plusIcon,
+  children,
+  style,
+}: NewPostButtonProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  const handleFileChange = (event) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     // Get the first selected file
-    const file = event.target.files[0];
+    const file = event.target.files?.[0];
     if (!file) return;
     if (window.outerWidth > 600) {
       showModal(
@@ -54,9 +73,17 @@ const NewPostButton = ({ showModal, hideModal, plusIcon, children, style }) => {
   );
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  showModal: (props, component) => dispatch(showModal(props, component)),
-  hideModal: (component) => dispatch(hideModal(component)),
+const mapDispatchToProps = (dispatch: AppDispatch) => ({
+  showModal: (props: Record<string, unknown>, component: string) =>
+    dispatch(showModal(props, component)),
+  hideModal: (component: string) => dispatch(hideModal(component)),
 });
 
-export default connect(null, mapDispatchToProps)(NewPostButton);
+export default connect<
+  Record<string, never>,
+  ReturnType<typeof mapDispatchToProps>,
+  NewPostButtonOwnProps
+>(
+  null,
+  mapDispatchToProps
+)(NewPostButton);

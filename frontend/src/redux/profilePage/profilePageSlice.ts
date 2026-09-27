@@ -4,15 +4,15 @@ import { createSelector } from "reselect";
 import { followUser, getUserProfile } from "../../services/profileService";
 import { getPosts } from "../../services/postService";
 import type { AppDispatch, RootState } from "../store";
-import type { Post, ProfileResponse } from "../../types";
+import type { Post, ProfileResponse, ProfileUser } from "../../types";
 
 export interface ProfilePageData {
+  user?: ProfileUser;
   posts: Post[];
   postCount?: number;
   followers?: number;
   following?: number;
   isFollowing?: boolean;
-  [key: string]: unknown;
 }
 
 export interface ProfilePageState {

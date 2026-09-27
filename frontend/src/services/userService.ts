@@ -1,7 +1,13 @@
 import type { AxiosRequestConfig } from "axios";
 
 import apiClient, { authHeader } from "./apiClient";
-import type { AvatarResponse, CurrentUser, ProfileUpdates, User } from "../types";
+import type {
+  AvatarResponse,
+  CurrentUser,
+  ProfileUpdates,
+  SuggestedUser,
+  User,
+} from "../types";
 
 /**
  * Searches for a username similar to the one supplied.
@@ -87,8 +93,8 @@ export const updateProfile = async (
 export const getSuggestedUsers = async (
   authToken: string,
   max?: number
-): Promise<User[]> => {
-  const { data } = await apiClient.get<User[]>(
+): Promise<SuggestedUser[]> => {
+  const { data } = await apiClient.get<SuggestedUser[]>(
     `/user/suggested/${max || ""}`,
     authHeader(authToken)
   );

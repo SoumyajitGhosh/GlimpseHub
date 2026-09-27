@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Fragment, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 
@@ -5,6 +6,7 @@ import { showAlert } from "../../../redux/alert/alertSlice";
 import { selectToken } from "../../../redux/user/userSlice";
 
 import { getSuggestedUsers } from "../../../services/userService";
+import type { SuggestedUser } from "../../../types";
 
 import UserCard from "../../UserCard/UserCard";
 import UserListSkeleton from "../../UsersList/UsersListSkeleton/UsersListSkeleton";
@@ -12,19 +14,25 @@ import Card from "../../Card/Card";
 import FollowButton from "../../Button/FollowButton/FollowButton";
 import SuggestionCard from "../SuggestionCard/SuggestionCard";
 
-const SuggestedUsers = ({ card, style, max }) => {
+interface SuggestedUsersProps {
+  card?: boolean;
+  style?: CSSProperties;
+  max?: number;
+}
+
+const SuggestedUsers = ({ card, style, max }: SuggestedUsersProps) => {
   const dispatch = useAppDispatch();
   const token = useAppSelector(selectToken);
 
-  const [users, setUsers] = useState(null);
+  const [users, setUsers] = useState<SuggestedUser[] | null>(null);
 
   useEffect(() => {
     (async function () {
       try {
-        const response = await getSuggestedUsers(token, max);
+        const response = await getSuggestedUsers(token ?? "", max);
         setUsers(response);
       } catch (err) {
-        dispatch(showAlert(err.message));
+        dispatch(showAlert((err as Error).message));
       }
     })();
   }, [token, max, dispatch]);

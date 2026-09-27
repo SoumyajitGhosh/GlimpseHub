@@ -1,3 +1,4 @@
+import type { CSSProperties, ReactNode } from "react";
 import { Fragment } from "react";
 import { useAppSelector } from "../../../redux/hooks";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +9,14 @@ import Icon from "../../Icon/Icon";
 import Button from "../../Button/Button";
 import TextButton from "../../Button/TextButton/TextButton";
 
-const MobileHeader = ({ children, backArrow, style, show }) => {
+interface MobileHeaderProps {
+  children?: ReactNode;
+  backArrow?: boolean;
+  style?: CSSProperties;
+  show?: boolean;
+}
+
+const MobileHeader = ({ children, backArrow, style, show }: MobileHeaderProps) => {
   const navigate = useNavigate();
   const currentUser = useAppSelector(selectCurrentUser);
 

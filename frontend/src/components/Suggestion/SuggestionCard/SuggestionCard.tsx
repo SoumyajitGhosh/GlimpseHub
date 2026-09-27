@@ -1,9 +1,25 @@
+import type { ReactNode } from "react";
 import { Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Avatar from "../../Avatar/Avatar";
+import type { Post } from "../../../types";
 
-const SuggestionCard = ({ avatar, username, fullName, posts, children }) => {
+interface SuggestionCardProps {
+  avatar?: string;
+  username: string;
+  fullName?: string;
+  posts?: Post[];
+  children?: ReactNode;
+}
+
+const SuggestionCard = ({
+  avatar,
+  username,
+  fullName,
+  posts,
+  children,
+}: SuggestionCardProps) => {
   const navigate = useNavigate();
 
   return (
@@ -16,7 +32,7 @@ const SuggestionCard = ({ avatar, username, fullName, posts, children }) => {
       <h4 className="heading-4 font-bold">{username}</h4>
       <h4 className="heading-4 color-grey font-medium">{fullName}</h4>
       <div className="suggestion-card__content">
-        {posts.length > 0 ? (
+        {posts && posts.length > 0 ? (
           posts.map((post, idx) => (
             <figure className="suggestion-card__image-container" key={idx}>
               <img

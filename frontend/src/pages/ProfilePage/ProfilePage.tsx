@@ -29,7 +29,8 @@ import {
 
 const ProfilePage = () => {
   const dispatch = useAppDispatch();
-  const { username } = useParams();
+  // The route always supplies :username.
+  const { username = "" } = useParams();
   const navigate = useNavigate();
 
   const currentUser = useAppSelector(selectCurrentUser);
@@ -61,7 +62,7 @@ const ProfilePage = () => {
         )
       );
     }
-    dispatch(followUserAction(data.user._id, token));
+    dispatch(followUserAction(data.user!._id, token ?? ""));
     dispatch(fetchProfileAction(username, token));
   };
 
@@ -69,7 +70,7 @@ const ProfilePage = () => {
     if (
       window.innerHeight + document.documentElement.scrollTop ===
         document.documentElement.offsetHeight &&
-      data.posts.length < data.postCount &&
+      data.posts.length < (data.postCount ?? 0) &&
       !fetchingAdditionalPosts
     ) {
       dispatch(fetchingAdditionalPostsAction(username, data.posts.length));
@@ -81,7 +82,7 @@ const ProfilePage = () => {
     dispatch(fetchProfileAction(username, token));
   }, [dispatch, username, token]);
 
-  const handleClick = (postId) => {
+  const handleClick = (postId: string) => {
     if (window.outerWidth <= 600) {
       navigate(`/post/${postId}`);
     } else {
@@ -89,7 +90,7 @@ const ProfilePage = () => {
         showModal(
           {
             postId,
-            avatar: data.avatar,
+            avatar: data.user?.avatar,
             profileDispatch: dispatch,
           },
           "PostDialog/PostDialog"
@@ -118,8 +119,8 @@ const ProfilePage = () => {
                 <PreviewImage
                   onClick={() => handleClick(post._id)}
                   image={post.image}
-                  likes={post.postVotes}
-                  comments={post.comments}
+                  likes={post.postVotes?.length ?? 0}
+                  comments={post.comments?.length ?? 0}
                   filter={post.filter}
                   key={idx}
                 />
@@ -140,9 +141,7 @@ const ProfilePage = () => {
             </div>
           ) : (
             <EmptyProfile
-              currentUserProfile={
-                currentUser && currentUser.username === username
-              }
+              currentUserProfile={currentUser?.username === username}
               username={username}
             />
           )}

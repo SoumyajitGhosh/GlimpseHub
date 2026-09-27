@@ -6,6 +6,7 @@ import type {
   Notification,
   Post,
   Profile,
+  SuggestedUser,
   User,
 } from "./models";
 
@@ -52,7 +53,7 @@ export type FeedPostsResponse = Post[];
 export type PostsResponse = Post[];
 export type NotificationsResponse = Notification[];
 export type SearchUsersResponse = User[];
-export type SuggestedUsersResponse = User[];
+export type SuggestedUsersResponse = SuggestedUser[];
 export type FollowListResponse = User[];
 
 export interface ProfileUpdates {

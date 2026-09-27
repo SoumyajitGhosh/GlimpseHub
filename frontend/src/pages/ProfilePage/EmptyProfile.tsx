@@ -4,7 +4,12 @@ import Icon from "../../components/Icon/Icon";
 import NewPostButton from "../../components/NewPost/NewPostButton/NewPostButton";
 import TextButton from "../../components/Button/TextButton/TextButton";
 
-const EmptyProfile = ({ currentUserProfile, username }) => (
+interface EmptyProfileProps {
+  currentUserProfile?: boolean;
+  username: string;
+}
+
+const EmptyProfile = ({ currentUserProfile, username }: EmptyProfileProps) => (
   <div className="profile-empty">
     <Icon icon="camera-outline" className="icon--larger" />
     {currentUserProfile ? (

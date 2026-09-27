@@ -31,7 +31,7 @@ const HomePage = () => {
 
   useEffect(() => {
     document.title = `GlimpseHub`;
-    dispatch(fetchFeedPostsStart(token));
+    dispatch(fetchFeedPostsStart(token ?? ""));
     return () => {
       dispatch(clearPosts());
     };
@@ -40,7 +40,7 @@ const HomePage = () => {
   useScrollPositionThrottled(
     ({ atBottom }) => {
       if (atBottom && hasMore && !fetching) {
-        dispatch(fetchFeedPostsStart(token, feedPosts.length));
+        dispatch(fetchFeedPostsStart(token ?? "", feedPosts.length));
       }
     },
     null,
@@ -65,9 +65,9 @@ const HomePage = () => {
             <aside className="sidebar">
               <div className="sidebar__content">
                 <UserCard
-                  avatar={currentUser.avatar}
-                  username={currentUser.username}
-                  subText={currentUser.fullName}
+                  avatar={currentUser?.avatar}
+                  username={currentUser?.username ?? ""}
+                  subText={currentUser?.fullName}
                   style={{ padding: "0" }}
                   avatarMedium
                 />

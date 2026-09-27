@@ -122,6 +122,11 @@ export interface ChatUser extends User {
   fullName?: string;
 }
 
+/** A user as returned by `GET /api/user/suggested/:max` — includes preview posts. */
+export interface SuggestedUser extends User {
+  posts?: Post[];
+}
+
 export interface Conversation {
   _id: Id;
   participants: Id[];
@@ -134,20 +139,26 @@ export interface Filter {
   filter: string;
 }
 
-/** Aggregated user-profile payload from `GET /api/user/:username`. */
-export interface Profile {
+/** The nested `user` sub-document of a profile payload (`retrieveUser`'s user select). */
+export interface ProfileUser {
   _id: Id;
   username: string;
   fullName?: string;
   avatar?: string;
   bio?: string;
   website?: string;
-  private?: boolean;
-  followersCount?: number;
-  followers?: number;
-  followingCount?: number;
-  following?: number;
-  isFollowing?: boolean;
+  bookmarks?: Bookmark[];
+}
+
+/**
+ * Aggregated user-profile payload from `GET /api/user/:username`
+ * (`backend/controllers/userController.js` `retrieveUser`).
+ */
+export interface Profile {
+  user: ProfileUser;
+  followers: number;
+  following: number;
+  isFollowing: boolean;
   postCount?: number;
   posts?: Post[];
 }
