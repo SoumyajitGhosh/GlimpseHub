@@ -3,8 +3,16 @@ import { Fragment, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import { selectCurrentUser, selectToken } from "../../../redux/user/userSlice";
 import { fetchAllMessagesAction } from "../../../redux/chat/chatSlice";
+import type { ChatUser } from "../../../types";
 
-const Chats = ({ userToChatId } /*{ message }*/) => {
+interface ChatsProps {
+  userToChatId: string;
+  // Accepted for call-site convenience (ChatContainer passes the same value
+  // this component already re-selects from the store below); not used directly.
+  chatUser?: ChatUser | null;
+}
+
+const Chats = ({ userToChatId }: ChatsProps) => {
   const dispatch = useAppDispatch();
   const token = useAppSelector(selectToken);
   const currentUser = useAppSelector(selectCurrentUser);
@@ -12,7 +20,7 @@ const Chats = ({ userToChatId } /*{ message }*/) => {
   const { messages } = useAppSelector((state) => state.chat);
 
   useEffect(() => {
-    dispatch(fetchAllMessagesAction(userToChatId, token));
+    dispatch(fetchAllMessagesAction(userToChatId, token ?? ""));
   }, [dispatch, userToChatId, token]);
 
   return (
@@ -37,7 +45,8 @@ const Chats = ({ userToChatId } /*{ message }*/) => {
               </p>
             ) : (
               <p className="chat-sender">
-                <span>{currentUser.username}</span>
+                {/* Chats only renders inside ChatPage, gated by ProtectedRoute. */}
+                <span>{currentUser!.username}</span>
                 {message.message}
                 <span>{extractTime(message.createdAt)}</span>
               </p>

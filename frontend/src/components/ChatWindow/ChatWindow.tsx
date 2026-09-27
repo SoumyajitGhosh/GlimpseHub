@@ -7,7 +7,8 @@ import { setChatUserAction } from "../../redux/chat/chatSlice";
 
 const ChatWindow = () => {
   const dispatch = useAppDispatch();
-  const { id } = useParams();
+  // The route always supplies :id (see App.tsx's /direct/:id).
+  const { id = "" } = useParams();
   useEffect(() => {
     dispatch(setChatUserAction(id));
   }, [dispatch, id]);

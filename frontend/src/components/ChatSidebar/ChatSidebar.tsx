@@ -10,7 +10,7 @@ import {
 } from "../../redux/chat/chatSlice";
 
 const ChatSidebar = () => {
-  const componentRef = useRef();
+  const componentRef = useRef<HTMLElement>(null);
   const dispatch = useAppDispatch();
   const currentUser = useAppSelector(selectCurrentUser);
   const token = useAppSelector(selectToken);
@@ -22,23 +22,25 @@ const ChatSidebar = () => {
     // Intentional one-time fetch of the viewer's own profile on mount;
     // re-running on currentUser/token changes would refetch on every render
     // where the selector returns a new reference.
-    dispatch(fetchProfileAction(currentUser?.username, token));
+    dispatch(fetchProfileAction(currentUser?.username ?? "", token));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useScrollPositionThrottled(async ({ atBottom }) => {
-    const count = following;
+    const count = following ?? 0;
     if (
       atBottom &&
-      chat.data.length < count &&
+      (chat.data?.length ?? 0) < count &&
       !chat.fetching &&
       !chat.fetchingAdditional
     ) {
       dispatch(
+        // ChatSidebar only renders inside ChatPage, which is gated by
+        // ProtectedRoute, so currentUser/token are always populated here.
         fetchChatUsersActionOnScroll(
-          currentUser._id,
+          currentUser?._id ?? "",
           stateRef.current?.length ?? 0,
-          token
+          token ?? ""
         )
       );
     }
@@ -51,9 +53,9 @@ const ChatSidebar = () => {
   useEffect(() => {
     dispatch(
       fetchChatUsersAction(
-        currentUser._id,
+        currentUser?._id ?? "",
         /*stateRef.current?.length ??*/ 0,
-        token
+        token ?? ""
       )
     );
   }, [dispatch, currentUser?._id, token]);

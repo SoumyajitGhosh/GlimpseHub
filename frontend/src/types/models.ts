@@ -107,14 +107,18 @@ export interface Notification {
   };
 }
 
+/**
+ * A persisted message document, as returned verbatim by `getMessages`/`sendMessage`
+ * (`backend/models/Message.js` — `senderId`/`receiverId`, not nested `User`s;
+ * `createdAt` is guaranteed by the schema's `timestamps: true`).
+ */
 export interface Message {
   _id: Id;
-  sender: Id;
-  receiver?: Id;
+  senderId: Id;
+  receiverId: Id;
   message: string;
-  conversation?: Id;
-  createdAt?: IsoDateString;
-  date?: IsoDateString;
+  createdAt: IsoDateString;
+  updatedAt?: IsoDateString;
 }
 
 /** A chat-eligible user (someone the viewer follows), as the sidebar lists them. */

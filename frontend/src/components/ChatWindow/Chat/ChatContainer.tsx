@@ -2,7 +2,11 @@ import ChatInput from "./ChatInput";
 import Chats from "./Chats";
 import { useAppSelector } from "../../../redux/hooks";
 
-const ChatContainer = ({ userToChatId }) => {
+interface ChatContainerProps {
+  userToChatId: string;
+}
+
+const ChatContainer = ({ userToChatId }: ChatContainerProps) => {
   const { chatUser } = useAppSelector((state) => state.chat);
   return (
     <div className="chat-container">

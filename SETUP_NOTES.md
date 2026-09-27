@@ -814,6 +814,69 @@ own pre-existing `PostDialog` prop bug, noted but untouched in §8.10.1), `Notif
 `ExplorePage`, `ActivityPage`, `App.tsx`, `main.tsx`). The Chat cluster looks like the next
 highest-leverage target — four files, one feature, likely shared prop-typing gaps.
 
+#### 8.10.3 Chat cluster cleared (181 → 151 `tsc` errors)
+
+Targeted the Chat surface flagged above: `ChatSidebar.tsx`, `ChatSidebar/ChatUsers.tsx`,
+`ChatWindow.tsx`, `ChatWindow/Chat/{ChatContainer,ChatInput,Chats}.tsx`, `MobileNav.tsx`.
+
+- **`types/models.ts`'s `Message` type was wrong, same class of bug as §8.10.1's `Profile`.**
+  It declared `sender`/`receiver`/`conversation`/`date`, but
+  `backend/models/Message.js`/`messageController.js` actually persist and return
+  `senderId`/`receiverId` with no `conversation` field on the message document itself
+  (that lives on the `Conversation` doc instead) and no `date` field (just Mongoose's
+  `timestamps: true` → `createdAt`/`updatedAt`). `Chats.tsx`'s `message.senderId` was
+  already correct runtime code that the wrong type was flagging as an error
+  (`TS2551: ... did you mean 'sender'?`). Fixed the type; `createdAt` is now required
+  since `timestamps: true` guarantees it's always present.
+- **`ChatSidebar.tsx`**: `useRef()` → `useRef<HTMLElement>(null)` (matches the pattern
+  already used for `UsersList`/`NewPostButton`/`ChangeAvatarButton`); `chat.data` is
+  `ChatUser[] | null` per `chatSlice.ts`, guarded with `?? 0` before the length
+  comparison; `currentUser`/`token` nullability resolved with `?.`/`?? ""` at the call
+  sites (ChatSidebar only renders inside `ChatPage`, gated by `ProtectedRoute`, so these
+  are never actually empty at runtime — verified via `App.tsx`'s route config).
+- **`ChatUsers.tsx`**: typed `chattableUsers` (`ChatUser[] | null | undefined`) and a new
+  local `ChatUserCardProps` interface for the `userCardProps` object spread into
+  `UserCard`. Left the known `src={"S"}` placeholder-image bug untouched per directive.
+  Also found (and left, documented inline) a second bug of the same vintage in the same
+  component: `<UserCard>{ChatUserBody}</UserCard>` passes the `ChatUserBody` *component
+  reference* as children instead of invoking it (`<ChatUserBody userCardProps={...} />`),
+  present verbatim in the pre-TS `.jsx` — React silently drops a function child, so this
+  has never actually rendered anything. Fixing it would newly render the `src={"S"}` bug,
+  so left as-is with an explicit `as unknown as ReactNode` cast and a comment, rather than
+  changing two behaviors under one "type fix."
+- **`ChatWindow.tsx`**: `const { id } = useParams()` → `const { id = "" } = useParams()`,
+  same pattern as `ProfilePage.tsx`'s `username` in §8.10.1 (the route always supplies
+  `:id`).
+- **`ChatContainer.tsx`/`Chats.tsx`/`ChatInput.tsx`**: added `userToChatId: string` prop
+  types throughout. `Chats.tsx` also receives an unused `chatUser` prop from
+  `ChatContainer` (it re-selects the same value from the store itself) — kept as an
+  accepted-but-unused optional prop rather than removing the pass-through, since that's
+  a `ChatContainer.tsx` call-site change outside a single component's type fix; confirmed
+  identical in the pre-TS `.jsx`. `ChatInput.tsx`'s `useState()` (untyped, inferred
+  `undefined`) → `useState("")`; its `<form>` has no `onSubmit` wired (Enter-to-send is
+  already broken, send only works via the icon's `onClick`) — confirmed identical
+  pre-TS, left untouched, just typed `handleSubmit`'s event as the `MouseEvent<HTMLDivElement>`
+  `Icon.onClick` actually delivers.
+- **`MobileNav.tsx`**: typed `currentUser: CurrentUser` (required, not nullable) — `App.tsx`
+  only renders `<MobileNav>` inside a `{currentUser && ...}` guard, so the narrower type
+  matches the real call site without adding a redundant guard inside the component.
+- One lint regression surfaced and fixed during this pass: asserting `currentUser!._id`
+  inside a `useEffect` whose deps array read `currentUser?._id` triggered a new
+  `react-hooks/exhaustive-deps` warning (the assertion form doesn't match the dep-array
+  expression pattern the rule looks for). Switched both to `currentUser?._id ?? ""` —
+  same runtime behavior, no lint delta.
+
+Verification: `npm run typecheck` — 181 → **151** errors, zero remaining in the touched
+files or their direct dependencies. `npm test` — 55/55, unchanged. `npm run lint` — 27
+errors + 42 warnings, unchanged (see the exhaustive-deps note above). `npm run build`
+still fails overall (151 errors remain). Remaining clusters by concentration:
+`SuggestedPosts.tsx` (24) + `HashtagPosts.tsx` (20) — both `ExplorePage` tab routes, 44
+errors combined; the `NewPost*` family — `NewPostEdit` (14), `NewPostForm` (9), `NewPost`
+(6), `NewPostFilter` (4) — 33 errors, one feature; `PostDialogCommentForm.tsx` (20,
+still carries the `prop-types` runtime import noted as out-of-scope in §8.10.1);
+`NotificationFeed.tsx` (17); `SearchSuggestion.tsx` (12); `SignUpCard.tsx` (8). The
+`ExplorePage` pair or the `NewPost*` family look like the next highest-leverage targets.
+
 ## 9. Backend dependency vulnerability fixes, round 2 (8 → 0)
 
 Dependabot/`npm audit` flagged 8 vulnerabilities in `backend/` (4 moderate, 3 high, 1

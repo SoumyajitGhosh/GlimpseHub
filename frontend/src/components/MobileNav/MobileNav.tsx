@@ -3,8 +3,14 @@ import { Link, useLocation } from "react-router-dom";
 import Icon from "../Icon/Icon";
 import NotificationButton from "../Notification/NotificationButton/NotificationButton";
 import NewPostButton from "../NewPost/NewPostButton/NewPostButton";
+import type { CurrentUser } from "../../types";
 
-const MobileNav = ({ currentUser }) => {
+interface MobileNavProps {
+  // App.tsx only renders MobileNav inside a `currentUser &&` guard.
+  currentUser: CurrentUser;
+}
+
+const MobileNav = ({ currentUser }: MobileNavProps) => {
   const { pathname } = useLocation();
 
   return (
