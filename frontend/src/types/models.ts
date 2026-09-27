@@ -85,6 +85,27 @@ export interface Post {
   isBookmarked?: boolean;
 }
 
+/**
+ * A post as returned by the `populatePostsPipeline`-based list endpoints
+ * (`GET /post/suggested/:offset`, `GET /post/hashtag/:hashtag/:offset` —
+ * `backend/controllers/postController.js` + `backend/utils/controllerUtils.js`).
+ * Unlike feed's {@link Post}, `comments`/`postVotes` here are pre-aggregated
+ * counts (`$size`), not raw arrays — the two pipelines produce genuinely
+ * different shapes under the same field names.
+ */
+export interface PostSummary {
+  _id: Id;
+  image: string;
+  thumbnail?: string;
+  filter?: string;
+  caption?: string;
+  hashtags?: string[];
+  date: IsoDateString;
+  author: User;
+  comments: number;
+  postVotes: number;
+}
+
 export type NotificationType =
   | "follow"
   | "like"

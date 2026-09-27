@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 import { getHashtagPosts } from "../../services/postService";
+import type { PostSummary } from "../../types";
+import type { AlertClickHandler } from "../../redux/alert/alertSlice";
 
 import MobileHeader from "../Header/MobileHeader/MobileHeader";
 import TextButton from "../Button/TextButton/TextButton";
@@ -10,18 +12,32 @@ import PreviewImage from "../PreviewImage/PreviewImage";
 import SkeletonLoader from "../SkeletonLoader/SkeletonLoader";
 import ImageGrid from "../ImageGrid/ImageGrid";
 
-const HashtagPosts = ({ token, showModal, showAlert }) => {
-  const [posts, setPosts] = useState({
+interface HashtagPostsProps {
+  token: string | null;
+  showModal: (props: Record<string, unknown>, component: string) => void;
+  showAlert: (text: string, onClick?: AlertClickHandler) => void;
+}
+
+interface PostsState {
+  posts: PostSummary[];
+  postCount: number;
+  fetching: boolean;
+  hasMore: boolean;
+}
+
+const HashtagPosts = ({ token, showModal, showAlert }: HashtagPostsProps) => {
+  const [posts, setPosts] = useState<PostsState>({
     posts: [],
     postCount: 0,
     fetching: false,
     hasMore: false,
   });
 
-  const { hashtag } = useParams();
+  // The route always supplies :hashtag.
+  const { hashtag = "" } = useParams();
   const navigate = useNavigate();
 
-  const handleClick = (postId, avatar) => {
+  const handleClick = (postId: string, avatar?: string) => {
     if (window.outerWidth <= 600) {
       navigate(`/post/${postId}`);
     } else {
@@ -35,10 +51,10 @@ const HashtagPosts = ({ token, showModal, showAlert }) => {
     }
   };
 
-  const retrievePosts = async (offset) => {
+  const retrievePosts = async (offset = 0) => {
     try {
       setPosts((previous) => ({ ...previous, fetching: true }));
-      const response = await getHashtagPosts(token, hashtag, offset);
+      const response = await getHashtagPosts(token ?? "", hashtag, offset);
       response.posts
         ? setPosts((previous) => ({
             posts: previous.posts
@@ -46,15 +62,15 @@ const HashtagPosts = ({ token, showModal, showAlert }) => {
               : response.posts,
             postCount: response.postCount,
             fetching: false,
-            hasMore: response.length === 20,
+            hasMore: response.posts.length === 20,
           }))
         : setPosts((previous) => ({ ...previous, fetching: false }));
     } catch (err) {
-      showAlert(err.message);
+      showAlert((err as Error).message);
     }
   };
 
-  const renderSkeleton = (amount) => {
+  const renderSkeleton = (amount: number) => {
     const skeleton = [];
     for (let i = 0; i < amount; i++) {
       skeleton.push(
@@ -105,11 +121,11 @@ const HashtagPosts = ({ token, showModal, showAlert }) => {
           posts.posts.map((post, idx) => (
             <PreviewImage
               key={idx}
-              image={post.thumbnail}
+              image={post.thumbnail ?? post.image}
               likes={post.postVotes}
               comments={post.comments}
               filter={post.filter}
-              onClick={() => handleClick(post._id, post.avatar)}
+              onClick={() => handleClick(post._id, post.author.avatar)}
             />
           ))}
         {posts.fetching && renderSkeleton(10)}

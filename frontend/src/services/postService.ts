@@ -1,5 +1,11 @@
 import apiClient, { authHeader } from "./apiClient";
-import type { BookmarkResponse, Filter, Post } from "../types";
+import type {
+  BookmarkResponse,
+  HashtagPostsResponse,
+  Post,
+  PostFiltersResponse,
+  SuggestedPostsResponse,
+} from "../types";
 
 /**
  * Fetches a complete post with comments and the fully sized image instead of a
@@ -66,8 +72,8 @@ export const bookmarkPost = async (
 /**
  * Retrieves all filters.
  */
-export const getPostFilters = async (): Promise<Filter[]> => {
-  const { data } = await apiClient.get<Filter[]>("/post/filters");
+export const getPostFilters = async (): Promise<PostFiltersResponse> => {
+  const { data } = await apiClient.get<PostFiltersResponse>("/post/filters");
   return data;
 };
 
@@ -77,8 +83,8 @@ export const getPostFilters = async (): Promise<Filter[]> => {
 export const getSuggestedPosts = async (
   authToken: string,
   offset = 0
-): Promise<Post[]> => {
-  const { data } = await apiClient.get<Post[]>(
+): Promise<SuggestedPostsResponse> => {
+  const { data } = await apiClient.get<SuggestedPostsResponse>(
     `/post/suggested/${offset}`,
     authHeader(authToken)
   );
@@ -92,8 +98,8 @@ export const getHashtagPosts = async (
   authToken: string,
   hashtag: string,
   offset = 0
-): Promise<Post[]> => {
-  const { data } = await apiClient.get<Post[]>(
+): Promise<HashtagPostsResponse> => {
+  const { data } = await apiClient.get<HashtagPostsResponse>(
     `/post/hashtag/${hashtag}/${offset}`,
     authHeader(authToken)
   );

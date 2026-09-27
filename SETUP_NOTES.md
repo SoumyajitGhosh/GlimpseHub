@@ -877,6 +877,106 @@ still carries the `prop-types` runtime import noted as out-of-scope in §8.10.1)
 `NotificationFeed.tsx` (17); `SearchSuggestion.tsx` (12); `SignUpCard.tsx` (8). The
 `ExplorePage` pair or the `NewPost*` family look like the next highest-leverage targets.
 
+#### 8.10.4 ExplorePage tabs + NewPost family cleared (151 → 68 `tsc` errors)
+
+Covered both clusters flagged above in one pass: `SuggestedPosts.tsx`, `HashtagPosts.tsx`,
+`ExplorePage.tsx` (and the two now-typed call sites of the same components inside
+`App.tsx` — see below), plus `NewPost.tsx`, `NewPostFilter.tsx`, `NewPostForm.tsx`,
+`NewPostPage.tsx` (already clean). `NewPostButton.tsx` (typed in §8.10.1) reverified clean.
+
+- **A third type-authoring bug of the same class as `Profile`/`Message`: `Post` doesn't
+  describe what `getSuggestedPosts`/`getHashtagPosts` actually return.** Both endpoints go
+  through `populatePostsPipeline` (`backend/utils/controllerUtils.js`), which — unlike the
+  feed pipeline the `Post` type was modeled on — reduces `comments`/`postVotes` to
+  pre-aggregated **counts** (`$size`) rather than leaving them as arrays, and never
+  produces the feed's `commentData` field. Rather than bend the shared `Post` type (used by
+  Feed/ProfilePage, both out of scope and currently *relying* on the array-shaped
+  interpretation — see the open question below), added a distinct `PostSummary` type plus
+  `SuggestedPostsResponse`/`HashtagPostsResponse`/`PostFiltersResponse` in `types/api.ts`,
+  and retyped `postService.ts`'s `getSuggestedPosts`/`getHashtagPosts`/`getPostFilters`
+  accordingly. `getHashtagPosts` was also flatly wrong about its own return shape (typed as
+  `Post[]`; the backend actually sends `{ posts, postCount }` via a `$facet`) — the
+  component's existing `response.posts`/`response.postCount` reads were already correct.
+- **`getPostFilters` had the same "type disagrees with a correct component" bug**: typed
+  `Filter[]`, but `backend/routes/post.js` sends `{ filters }` (an object), matching
+  `NewPost.tsx`'s pre-existing `response.filters` read. Added `PostFiltersResponse`.
+- **Four more pre-existing bugs surfaced, confirmed against the pre-TS `.jsx`, fixed**
+  (same low-risk class as §8.10.1's `UsersList`/`PreviewImage` fixes):
+  - `SuggestedPosts.tsx`'s "already seen" dedup filter compared `post.id === newPost.id` —
+    but these are raw aggregate results, never Mongoose documents, so neither side has an
+    `.id` (only `._id`); `undefined === undefined` is always `true`, so once a first page
+    loaded, **every subsequent suggested post was silently filtered out** — infinite scroll
+    on the suggested-posts tab has never actually appended anything past page one. Fixed to
+    `post._id === newPost._id`.
+  - `HashtagPosts.tsx` computed `hasMore: response.length === 20` against
+    `{ posts, postCount }` (no `.length` on that shape, always `undefined`) — pagination
+    past the first page has never worked here either. Fixed to `response.posts.length === 20`.
+  - Both `SuggestedPosts.tsx` and `HashtagPosts.tsx` called
+    `handleClick(post._id, post.avatar)` — `avatar` has never been a top-level `Post`/
+    `PostSummary` field (it's nested at `post.author.avatar`), so the post-dialog's avatar
+    has always opened blank from these two entry points. Fixed to `post.author.avatar`.
+  - `NewPost.tsx`'s effect cleanup called `window.URL.revokeObjectURL(previewImage)` —
+    passing the whole state *object* where `revokeObjectURL` expects a blob-URL *string*;
+    always a silent no-op (browsers ignore malformed arguments). Removed rather than
+    "fixed forward" — the surviving code only ever calls `readAsDataURL` (not
+    `createObjectURL`), so there's no actual object URL to revoke; the revoke call was
+    inherited from a since-removed image-cropping flow (see `NewPostEdit` below). Removing
+    it also made a stale `eslint-disable-next-line react-hooks/exhaustive-deps` comment
+    reportable as unused (`previewImage` was the only thing the rule had been complaining
+    about); removed that too — net lint delta zero.
+- **Deleted `NewPostEdit.tsx`** — confirmed unimported anywhere (`grep -rn NewPostEdit
+  src/` matches only a commented-out block in `NewPost.tsx`) and depends on
+  `react-image-crop`, a package that isn't installed (`TS2307`, and absent from
+  `package.json`/`node_modules`) — this is a legacy image-cropping step that was disabled
+  before the TS migration and never cleaned up. Same treatment as `ProfilePageReducer.ts`
+  in §8.10.1.
+- **`Avatar`'s dead `size` prop**: `NewPostForm.tsx` passed `size="3rem"` to `<Avatar>`,
+  but `Avatar.tsx`'s component body has never read a `size` prop (only its old
+  `PropTypes` declaration mentioned one) — confirmed dead in the pre-TS `.jsx` too. Dropped
+  the prop at the call site rather than adding a fake one to `Avatar`'s type.
+- **`showModal`/`showAlert` prop typing**: `SuggestedPosts.tsx`/`HashtagPosts.tsx` receive
+  these as plain dispatch-wrapping functions from their caller (unlike `ProfileHeader.tsx`
+  in §8.10.1, which receives the raw `showModal` action creator itself forwarded as a
+  prop) — typed as plain call signatures (`(props: Record<string, unknown>, component:
+  string) => void`), not `typeof showModalAction`, which demands the full
+  `ActionCreatorWithPreparedPayload` shape and doesn't match a wrapper function.
+- **`App.tsx` fallout**: typing `SuggestedPosts`/`HashtagPosts` props as required broke two
+  existing call sites there — `App.tsx` independently declares
+  `<Route path="/explore">` with nested children rendering these same two components with
+  *no* props, alongside `ExplorePage.tsx`'s own internal `<Routes>` for the identical two
+  sub-paths. Since `ExplorePage.tsx` has no `<Outlet/>`, React Router never actually inserts
+  the outer tree's child `element` anywhere — confirmed unreachable by the exact same
+  "no Outlet → child element never rendered" mechanism that
+  makes nested routes require an `<Outlet/>` at all (`ExplorePage`'s own JSX has no such
+  outlet). The route *paths* still matter for URL matching (removing them would 404), so
+  left the route structure alone; wired matching real props (mirroring
+  `ExplorePage.tsx`'s own handlers) at the two `element={...}` call sites instead of
+  deleting anything — safe either way, and strictly safer if this analysis is wrong.
+- **Open item, not fixed (would touch out-of-scope files)**: `ProfilePage.tsx`'s
+  `PreviewImage` usage (§8.10.1) treats `post.postVotes`/`post.comments` as arrays
+  (`.length ?? 0`) because it trusted the (also wrong, but differently wrong) `Post` type.
+  `ProfilePage`'s own posts come from `retrieveUser`'s `$facet` in
+  `backend/controllers/userController.js`, which — like `populatePostsPipeline` — also
+  reduces both to `$size` counts, not arrays. So `.length` on a number is `undefined`,
+  and `§8.10.1`'s fix likely renders 0 likes/comments on every profile post. Flagged here
+  rather than fixed, since correcting it means either changing the shared `Post` type
+  (breaks `Feed.tsx`/anything else assuming the array shape) or introducing a
+  `ProfilePostSummary`-style type split there too — a call best made deliberately, not as
+  a side effect of this pass.
+
+Verification: `npm run typecheck` — 151 → **68** errors, zero remaining in the touched
+files (including `App.tsx`'s two now-fixed call sites; its other 2 pre-existing errors —
+unrelated `document.querySelector("body")` null-checks — are untouched and out of scope).
+`npm test` — 55/55, unchanged. `npm run lint` — 27 errors + 42 warnings, unchanged (see the
+exhaustive-deps note above). `npm run build` still fails overall (68 errors remain).
+Remaining, by concentration: `PostDialogCommentForm.tsx` (20, `prop-types` import noted
+since §8.10.1), `NotificationFeed.tsx` (17), `SearchSuggestion.tsx` (12), `SignUpCard.tsx`
+(8), `Feed.tsx` (3, its own pre-existing `PostDialog` prop bug from §8.10.1), plus single
+digits in `App.tsx`/`ConfirmationPage.tsx`/`LoginPage.tsx`/`ActivityPage.tsx`/`main.tsx`/
+`profilePageSlice.test.ts`. `PostDialogCommentForm.tsx` and `NotificationFeed.tsx` look
+like the next highest-leverage targets; `SignUpCard.tsx`'s Formik generics are a different
+flavor of fix (typed form values) than the prop-typing pattern used throughout §8.10.
+
 ## 9. Backend dependency vulnerability fixes, round 2 (8 → 0)
 
 Dependabot/`npm audit` flagged 8 vulnerabilities in `backend/` (4 moderate, 3 high, 1

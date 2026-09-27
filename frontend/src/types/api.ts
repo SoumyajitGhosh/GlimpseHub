@@ -3,8 +3,10 @@ import type {
   Comment,
   CommentReply,
   CurrentUser,
+  Filter,
   Notification,
   Post,
+  PostSummary,
   Profile,
   SuggestedUser,
   User,
@@ -55,6 +57,20 @@ export type NotificationsResponse = Notification[];
 export type SearchUsersResponse = User[];
 export type SuggestedUsersResponse = SuggestedUser[];
 export type FollowListResponse = User[];
+
+/** `GET /api/post/suggested/:offset` */
+export type SuggestedPostsResponse = PostSummary[];
+
+/** `GET /api/post/hashtag/:hashtag/:offset` */
+export interface HashtagPostsResponse {
+  posts: PostSummary[];
+  postCount: number;
+}
+
+/** `GET /api/post/filters` (`backend/routes/post.js` sends `{ filters }`, not a bare array). */
+export interface PostFiltersResponse {
+  filters: Filter[];
+}
 
 export interface ProfileUpdates {
   fullName?: string;

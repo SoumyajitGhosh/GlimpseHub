@@ -1,3 +1,4 @@
+import type { FormEvent } from "react";
 import { useState, Fragment } from "react";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -7,6 +8,7 @@ import { showAlert } from "../../../redux/alert/alertSlice";
 import { addPost } from "../../../redux/feed/feedSlice";
 
 import { createPost } from "../../../services/postService";
+import type { PreviewImageState } from "../NewPost";
 
 import Avatar from "../../Avatar/Avatar";
 import MobileHeader from "../../Header/MobileHeader/MobileHeader";
@@ -15,7 +17,14 @@ import TextButton from "../../Button/TextButton/TextButton";
 import Loader from "../../Loader/Loader";
 import defaultAvatar from "../../../assets/img/default-avatar.png";
 
-const NewPostForm = ({ file, previewImage, hide, back }) => {
+interface NewPostFormProps {
+  file: File;
+  previewImage: PreviewImageState;
+  hide: () => void;
+  back: () => void;
+}
+
+const NewPostForm = ({ file, previewImage, hide, back }: NewPostFormProps) => {
   const dispatch = useAppDispatch();
   const token = useAppSelector(selectToken);
   const currentUser = useAppSelector(selectCurrentUser);
@@ -25,7 +34,7 @@ const NewPostForm = ({ file, previewImage, hide, back }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  const handleClick = async (event) => {
+  const handleClick = async (event: FormEvent) => {
     event.preventDefault();
     const formData = new FormData();
     formData.append("image", file);
@@ -35,7 +44,7 @@ const NewPostForm = ({ file, previewImage, hide, back }) => {
 
     try {
       setLoading(true);
-      const post = await createPost(formData, token);
+      const post = await createPost(formData, token ?? "");
       setLoading(false);
       hide();
       if (pathname === "/") {
@@ -46,7 +55,7 @@ const NewPostForm = ({ file, previewImage, hide, back }) => {
     } catch (err) {
       setLoading(false);
       dispatch(
-        showAlert(err.message || "Could not share post.", () =>
+        showAlert((err as Error).message || "Could not share post.", () =>
           handleClick(event)
         )
       );
@@ -80,9 +89,8 @@ const NewPostForm = ({ file, previewImage, hide, back }) => {
           <div className="post-form__input">
             <div className="post-form__avatar">
               <Avatar
-                size="3rem"
                 className="avatar--small"
-                imageSrc={currentUser.avatar || defaultAvatar}
+                imageSrc={currentUser?.avatar || defaultAvatar}
               />
             </div>
             <textarea
@@ -93,9 +101,13 @@ const NewPostForm = ({ file, previewImage, hide, back }) => {
             />
             <div className="post-form__preview">
               <img
-                src={previewImage.src}
+                src={
+                  typeof previewImage.src === "string"
+                    ? previewImage.src
+                    : undefined
+                }
                 alt="Preview"
-                style={{ filter: previewImage.filter }}
+                style={{ filter: previewImage.filter ?? undefined }}
               />
             </div>
           </div>

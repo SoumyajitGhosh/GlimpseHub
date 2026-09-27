@@ -6,6 +6,8 @@ import { useTransition as useSpringTransition } from "@react-spring/web";
 import { selectCurrentUser, signInStart } from "./redux/user/userSlice";
 import { connectSocket } from "./redux/socket/socketSlice";
 import { fetchNotificationsStart } from "./redux/notification/notificationSlice";
+import { showAlert, type AlertClickHandler } from "./redux/alert/alertSlice";
+import { showModal } from "./redux/modal/modalSlice";
 
 import SkipLink from "./components/SkipLink/SkipLink";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
@@ -83,6 +85,15 @@ const App = () => {
     }
   }, [dispatch, token]);
 
+  // Passed down to the (currently unreachable — ExplorePage renders these
+  // itself via its own internal <Routes>, without an <Outlet/>) nested
+  // /explore route elements below, so they're not crash-prone if that ever
+  // changes. Mirrors ExplorePage.tsx's own handlers.
+  const handleShowAlert = (text: string, onClick?: AlertClickHandler) =>
+    dispatch(showAlert(text, onClick));
+  const handleShowModal = (props: Record<string, unknown>, component: string) =>
+    dispatch(showModal(props, component));
+
   const renderModals = () => {
     if (modal.modals.length > 0) {
       document.querySelector("body").setAttribute("style", "overflow: hidden;");
@@ -144,8 +155,26 @@ const App = () => {
                 <Route path="password" element={<ChangePasswordForm />} />
               </Route>
               <Route path="/explore" element={<ExplorePage />}>
-                <Route path="" element={<SuggestedPosts />} />
-                <Route path="tags/:hashtag" element={<HashtagPosts />} />
+                <Route
+                  path=""
+                  element={
+                    <SuggestedPosts
+                      token={token}
+                      showModal={handleShowModal}
+                      showAlert={handleShowAlert}
+                    />
+                  }
+                />
+                <Route
+                  path="tags/:hashtag"
+                  element={
+                    <HashtagPosts
+                      token={token}
+                      showModal={handleShowModal}
+                      showAlert={handleShowAlert}
+                    />
+                  }
+                />
               </Route>
               <Route path="/new" element={<NewPostPage />} />
             </Route>

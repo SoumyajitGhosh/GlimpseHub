@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
 import { selectToken } from "../../redux/user/userSlice";
-import { showAlert } from "../../redux/alert/alertSlice";
+import { showAlert, type AlertClickHandler } from "../../redux/alert/alertSlice";
 import { showModal } from "../../redux/modal/modalSlice";
 import SuggestedPosts from "../../components/SuggestedPosts/SuggestedPosts";
 import HashtagPosts from "../../components/HashtagPosts/HashtagPosts";
@@ -12,8 +12,9 @@ const ExplorePage = () => {
   const dispatch = useAppDispatch();
   const token = useAppSelector(selectToken);
 
-  const handleShowAlert = (text, onClick) => dispatch(showAlert(text, onClick));
-  const handleShowModal = (props, component) =>
+  const handleShowAlert = (text: string, onClick?: AlertClickHandler) =>
+    dispatch(showAlert(text, onClick));
+  const handleShowModal = (props: Record<string, unknown>, component: string) =>
     dispatch(showModal(props, component));
 
   return (

@@ -1,6 +1,8 @@
+import type { Dispatch, SetStateAction } from "react";
 import { useState, useEffect } from "react";
 
 import { getPostFilters } from "../../services/postService";
+import type { Filter } from "../../types";
 
 import NewPostForm from "./NewPostForm/NewPostForm";
 import NewPostFilter from "./NewPostFilter/NewPostFilter";
@@ -8,15 +10,30 @@ import MobileHeader from "../Header/MobileHeader/MobileHeader";
 import TextButton from "../Button/TextButton/TextButton";
 import Icon from "../Icon/Icon";
 
-const NewPost = ({ file, hide }) => {
-  const [previewImage, setPreviewImage] = useState({
+/** Shared across NewPost/NewPostFilter/NewPostForm while building a post. */
+export interface PreviewImageState {
+  src: string | ArrayBuffer | null;
+  crop: Record<string, unknown>;
+  filter: string | null;
+  filterName: string;
+}
+
+export type SetPreviewImage = Dispatch<SetStateAction<PreviewImageState>>;
+
+interface NewPostProps {
+  file: File;
+  hide: () => void;
+}
+
+const NewPost = ({ file, hide }: NewPostProps) => {
+  const [previewImage, setPreviewImage] = useState<PreviewImageState>({
     src: null,
     crop: {},
     filter: null,
     filterName: "",
   });
   const [activeSection, setActiveSection] = useState("filter");
-  const [filters, setFilters] = useState([]);
+  const [filters, setFilters] = useState<Filter[]>([]);
 
   // Load a preview image of the image to post
   useEffect(() => {
@@ -26,17 +43,12 @@ const NewPost = ({ file, hide }) => {
       reader.onload = (event) => {
         setPreviewImage((previous) => ({
           ...previous,
-          src: event.target.result,
+          src: event.target?.result ?? null,
         }));
       };
     } else {
       // Display error
     }
-
-    return () => {
-      window.URL.revokeObjectURL(previewImage);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file]);
 
   useEffect(() => {
@@ -63,13 +75,6 @@ const NewPost = ({ file, hide }) => {
         );
       }
       default: {
-        // return (
-        //   <NewPostEdit
-        //     previewImage={previewImage}
-        //     setPreviewImage={setPreviewImage}
-        //     file={file}
-        //   />
-        // );
         return (
           <NewPostFilter
             previewImage={previewImage}

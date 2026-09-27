@@ -1,8 +1,11 @@
+import type { CSSProperties } from "react";
 import { Fragment, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useScrollPositionThrottled from "../../hooks/useScrollPositionThrottled";
 import { getSuggestedPosts } from "../../services/postService";
+import type { PostSummary, User } from "../../types";
+import type { AlertClickHandler } from "../../redux/alert/alertSlice";
 
 import MobileHeader from "../Header/MobileHeader/MobileHeader";
 import SearchBox from "../SearchBox/SearchBox";
@@ -12,18 +15,30 @@ import PreviewImage from "../PreviewImage/PreviewImage";
 import SkeletonLoader from "../SkeletonLoader/SkeletonLoader";
 import ImageGrid from "../ImageGrid/ImageGrid";
 
-const SuggestedPosts = ({ token, showModal, showAlert }) => {
+interface SuggestedPostsProps {
+  token: string | null;
+  showModal: (props: Record<string, unknown>, component: string) => void;
+  showAlert: (text: string, onClick?: AlertClickHandler) => void;
+}
+
+interface PostsState {
+  posts: PostSummary[] | null;
+  fetching: boolean;
+  hasMore: boolean;
+}
+
+const SuggestedPosts = ({ token, showModal, showAlert }: SuggestedPostsProps) => {
   const navigate = useNavigate();
-  const [result, setResult] = useState([]);
+  const [result, setResult] = useState<User[]>([]);
   const [search, setSearch] = useState(false);
 
-  const [posts, setPosts] = useState({
+  const [posts, setPosts] = useState<PostsState>({
     posts: null,
     fetching: false,
     hasMore: false,
   });
 
-  const handleClick = (postId, avatar) => {
+  const handleClick = (postId: string, avatar?: string) => {
     if (window.outerWidth <= 600) {
       navigate(`/post/${postId}`);
     } else {
@@ -37,17 +52,17 @@ const SuggestedPosts = ({ token, showModal, showAlert }) => {
     }
   };
 
-  const retrievePosts = async (offset) => {
+  const retrievePosts = async (offset = 0) => {
     try {
       setPosts((previous) => ({ ...previous, fetching: true }));
-      const response = await getSuggestedPosts(token, offset);
+      const response = await getSuggestedPosts(token ?? "", offset);
       setPosts((previous) => ({
         posts: previous.posts
           ? [
               ...previous.posts,
               ...response.filter(
                 (newPost) =>
-                  !previous.posts.some((post) => post.id === newPost.id)
+                  !previous.posts!.some((post) => post._id === newPost._id)
               ),
             ]
           : response,
@@ -55,7 +70,7 @@ const SuggestedPosts = ({ token, showModal, showAlert }) => {
         hasMore: response.length >= 20,
       }));
     } catch (err) {
-      showAlert(err.message);
+      showAlert((err as Error).message);
     }
   };
 
@@ -68,14 +83,14 @@ const SuggestedPosts = ({ token, showModal, showAlert }) => {
   useScrollPositionThrottled(
     ({ atBottom }) => {
       if (atBottom && posts.hasMore && !posts.fetching) {
-        retrievePosts(posts.posts.length);
+        retrievePosts(posts.posts?.length ?? 0);
       }
     },
     null,
     [posts]
   );
 
-  const renderSkeleton = (amount) => {
+  const renderSkeleton = (amount: number) => {
     const skeleton = [];
     for (let i = 0; i < amount; i++) {
       skeleton.push(
@@ -89,10 +104,12 @@ const SuggestedPosts = ({ token, showModal, showAlert }) => {
     <Fragment>
       <MobileHeader
         style={
-          search && {
-            gridTemplateColumns: "repeat(2, 1fr) min-content",
-            gridColumnGap: "2rem",
-          }
+          search
+            ? ({
+                gridTemplateColumns: "repeat(2, 1fr) min-content",
+                gridColumnGap: "2rem",
+              } as CSSProperties)
+            : undefined
         }
       >
         <SearchBox
@@ -123,11 +140,11 @@ const SuggestedPosts = ({ token, showModal, showAlert }) => {
             posts.posts.map((post, idx) => (
               <PreviewImage
                 key={idx}
-                image={post.thumbnail}
+                image={post.thumbnail ?? post.image}
                 likes={post.postVotes}
                 comments={post.comments}
                 filter={post.filter}
-                onClick={() => handleClick(post._id, post.avatar)}
+                onClick={() => handleClick(post._id, post.author.avatar)}
               />
             ))}
           {posts.fetching && renderSkeleton(10)}
