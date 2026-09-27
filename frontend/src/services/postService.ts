@@ -4,6 +4,7 @@ import type {
   HashtagPostsResponse,
   Post,
   PostFiltersResponse,
+  ProfilePost,
   SuggestedPostsResponse,
 } from "../types";
 
@@ -17,10 +18,17 @@ export const getPost = async (postId: string): Promise<Post> => {
 };
 
 /**
- * Retrieves a page of a user's posts.
+ * Retrieves a page of a user's posts (profile grid pagination). `comments`/
+ * `postVotes` here are pre-aggregated counts, not raw arrays — see
+ * {@link ProfilePost}.
  */
-export const getPosts = async (username: string, offset = 0): Promise<Post[]> => {
-  const { data } = await apiClient.get<Post[]>(`/user/${username}/posts/${offset}`);
+export const getPosts = async (
+  username: string,
+  offset = 0
+): Promise<ProfilePost[]> => {
+  const { data } = await apiClient.get<ProfilePost[]>(
+    `/user/${username}/posts/${offset}`
+  );
   return data;
 };
 

@@ -176,6 +176,23 @@ export interface ProfileUser {
 }
 
 /**
+ * A post as it appears inside a profile's `posts` array — from both
+ * `retrieveUser`'s initial page (`GET /api/user/:username`) and
+ * `retrievePosts`'s subsequent pages (`GET /api/user/:username/posts/:offset`).
+ * Like {@link PostSummary}, `comments`/`postVotes` here are pre-aggregated
+ * counts, not raw arrays. The two endpoints project slightly different extra
+ * fields (nested `author` vs `user`, presence of `date`/`hashtags`), so this
+ * only lists what's common to both and actually used by the UI.
+ */
+export interface ProfilePost {
+  _id: Id;
+  image: string;
+  filter?: string;
+  comments: number;
+  postVotes: number;
+}
+
+/**
  * Aggregated user-profile payload from `GET /api/user/:username`
  * (`backend/controllers/userController.js` `retrieveUser`).
  */
@@ -185,5 +202,5 @@ export interface Profile {
   following: number;
   isFollowing: boolean;
   postCount?: number;
-  posts?: Post[];
+  posts?: ProfilePost[];
 }

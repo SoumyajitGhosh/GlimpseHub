@@ -977,6 +977,32 @@ digits in `App.tsx`/`ConfirmationPage.tsx`/`LoginPage.tsx`/`ActivityPage.tsx`/`m
 like the next highest-leverage targets; `SignUpCard.tsx`'s Formik generics are a different
 flavor of fix (typed form values) than the prop-typing pattern used throughout §8.10.
 
+#### 8.10.5 Fixed the open `ProfilePage`/`PreviewImage` display bug flagged in §8.10.4
+
+§8.10.4 flagged (but deliberately left unfixed) that §8.10.1's `PreviewImage` fix in
+`ProfilePage.tsx` — `post.postVotes?.length ?? 0` / `post.comments?.length ?? 0` — was
+itself wrong: `ProfilePage`'s posts come from `retrieveUser`'s `$facet` and
+`retrievePosts` in `backend/controllers/userController.js`, both of which reduce
+`comments`/`postVotes` to `$size` counts (numbers), not arrays, the same pre-aggregated
+shape as §8.10.4's new `PostSummary` type. `.length` on a number is `undefined`, so every
+profile post was rendering **0 likes and 0 comments** since §8.10.1 — confirmed as a
+regression introduced by this migration itself, not a pre-existing bug.
+
+Fixed by adding a dedicated `ProfilePost` type (`_id`, `image`, `filter?`, `comments:
+number`, `postVotes: number` — only the fields both `retrieveUser`'s initial page and
+`retrievePosts`'s paginated page actually share and the UI uses; the two endpoints project
+different extra fields — nested `author` vs `user`, presence of `date`/`hashtags` — so
+unifying further wasn't worth it for what's rendered today) rather than bending the shared
+`Post` type, which `Feed.tsx` still correctly relies on as arrays. Threaded through
+`Profile.posts`/`ProfileResponse` (`types/models.ts`/`types/api.ts`), `postService.getPosts`,
+and `profilePageSlice.ts`'s `ProfilePageData.posts`/`addPosts`. `ProfilePage.tsx` now passes
+`post.postVotes`/`post.comments` straight through as the counts they are.
+
+Verification: `npm run typecheck` — still **68** (the one test-fixture error in
+`profilePageSlice.test.ts` shifted from complaining about a missing `Post` shape to a
+missing `ProfilePost` shape — same pre-existing gap, not a new error). `npm test` — 55/55.
+`npm run lint` — 27 errors + 42 warnings, unchanged.
+
 ## 9. Backend dependency vulnerability fixes, round 2 (8 → 0)
 
 Dependabot/`npm audit` flagged 8 vulnerabilities in `backend/` (4 moderate, 3 high, 1

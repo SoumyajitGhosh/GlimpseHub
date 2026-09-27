@@ -119,8 +119,8 @@ const ProfilePage = () => {
                 <PreviewImage
                   onClick={() => handleClick(post._id)}
                   image={post.image}
-                  likes={post.postVotes?.length ?? 0}
-                  comments={post.comments?.length ?? 0}
+                  likes={post.postVotes}
+                  comments={post.comments}
                   filter={post.filter}
                   key={idx}
                 />

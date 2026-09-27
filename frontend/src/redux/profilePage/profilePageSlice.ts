@@ -4,11 +4,11 @@ import { createSelector } from "reselect";
 import { followUser, getUserProfile } from "../../services/profileService";
 import { getPosts } from "../../services/postService";
 import type { AppDispatch, RootState } from "../store";
-import type { Post, ProfileResponse, ProfileUser } from "../../types";
+import type { ProfilePost, ProfileResponse, ProfileUser } from "../../types";
 
 export interface ProfilePageData {
   user?: ProfileUser;
-  posts: Post[];
+  posts: ProfilePost[];
   postCount?: number;
   followers?: number;
   following?: number;
@@ -88,7 +88,7 @@ const profilePageSlice = createSlice({
       state.fetchingAdditionalPosts = false;
       state.error = false;
     },
-    addPosts(state, action: PayloadAction<Post[]>) {
+    addPosts(state, action: PayloadAction<ProfilePost[]>) {
       state.data.posts.push(...action.payload);
     },
   },

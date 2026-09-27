@@ -8,6 +8,7 @@ import type {
   Post,
   PostSummary,
   Profile,
+  ProfilePost,
   SuggestedUser,
   User,
 } from "./models";
@@ -48,7 +49,7 @@ export type CommentRepliesResponse = CommentReply[];
 
 /** `GET /api/user/:username` — the raw aggregated profile. */
 export type ProfileResponse = Omit<Profile, "posts"> & {
-  posts?: { data: Post[]; postCount: number } | Post[];
+  posts?: { data: ProfilePost[]; postCount: number } | ProfilePost[];
 };
 
 export type FeedPostsResponse = Post[];
