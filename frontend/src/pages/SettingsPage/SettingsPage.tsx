@@ -15,18 +15,10 @@ const SettingsPage = () => (
     <main className="settings-page grid">
       <Card className="settings-card">
         <ul className="settings-card__sidebar">
-          <NavLink
-            className="sidebar-link"
-            to="/settings/edit"
-            activeClassName="font-bold sidebar-link--active"
-          >
+          <NavLink className="sidebar-link" to="/settings/edit">
             <li className="sidebar-link__text">Edit Profile</li>
           </NavLink>
-          <NavLink
-            className="sidebar-link"
-            to="/settings/password"
-            activeClassName="font-bold sidebar-link--active"
-          >
+          <NavLink className="sidebar-link" to="/settings/password">
             <li className="sidebar-link__text">Change Password</li>
           </NavLink>
         </ul>

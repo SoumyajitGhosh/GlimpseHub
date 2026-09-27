@@ -1,7 +1,9 @@
+import type { CSSProperties, MouseEventHandler } from "react";
 import { Fragment, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useSearchUsersDebounced from "../../hooks/useSearchUsersDebounced";
+import type { User } from "../../types";
 
 import Icon from "../Icon/Icon";
 import PopupCard from "../PopupCard/PopupCard";
@@ -9,7 +11,14 @@ import UserCard from "../UserCard/UserCard";
 import Divider from "../Divider/Divider";
 import Loader from "../Loader/Loader";
 
-const SearchBox = ({ style, setResult, onClick, type = undefined }) => {
+interface SearchBoxProps {
+  style?: CSSProperties;
+  setResult?: (result: User[]) => void;
+  onClick?: MouseEventHandler<HTMLInputElement>;
+  type?: string;
+}
+
+const SearchBox = ({ style, setResult, onClick, type = undefined }: SearchBoxProps) => {
   const [query, setQuery] = useState("");
   const { handleSearchDebouncedRef, result, fetching, setFetching } =
     useSearchUsersDebounced();

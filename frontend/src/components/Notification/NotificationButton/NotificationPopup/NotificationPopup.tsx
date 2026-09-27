@@ -1,8 +1,14 @@
 import { animated } from "@react-spring/web";
 
 import Icon from "../../../Icon/Icon";
+import type { AnimatedStyle, Notification } from "../../../../types";
 
-const NotificationPopup = ({ style, notifications }) => {
+interface NotificationPopupProps {
+  style: AnimatedStyle;
+  notifications: Notification[];
+}
+
+const NotificationPopup = ({ style, notifications }: NotificationPopupProps) => {
   let newFollowers = 0;
   let newLikes = 0;
   let newComments = 0;
@@ -26,7 +32,7 @@ const NotificationPopup = ({ style, notifications }) => {
     }
   });
 
-  const renderIcons = (icon, number) => (
+  const renderIcons = (icon: string, number: number) => (
     <div>
       <Icon className="icon--small" icon={icon} />
       <span>{number}</span>

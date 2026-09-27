@@ -1,3 +1,4 @@
+import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { selectCurrentUser, selectToken } from "../../redux/user/userSlice";
@@ -24,7 +25,7 @@ const ChangePasswordForm = () => {
     document.title = "Change Password • Instaclone";
   }, []);
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (newPassword !== confirmNewPassword) {
       return dispatch(showAlert("Please make sure both passwords match."));
@@ -34,7 +35,7 @@ const ChangePasswordForm = () => {
 
     try {
       setFetching(true);
-      await changePassword(oldPassword, newPassword, token);
+      await changePassword(oldPassword, newPassword, token ?? "");
       dispatch(
         showAlert(
           "Your password has been changed. You'll have to log in with the new one next time."
@@ -43,16 +44,16 @@ const ChangePasswordForm = () => {
       setFetching(false);
     } catch (err) {
       setFetching(false);
-      dispatch(showAlert(err.message));
+      dispatch(showAlert((err as Error).message));
     }
   };
 
   return (
     <SettingsForm onSubmit={handleSubmit}>
       <SettingsFormGroup>
-        <Avatar className="avatar--small" imageSrc={currentUser.avatar} />
+        <Avatar className="avatar--small" imageSrc={currentUser?.avatar} />
         <h1 className="font-medium" style={{ fontSize: "2.5rem" }}>
-          {currentUser.username}
+          {currentUser?.username}
         </h1>
       </SettingsFormGroup>
       <SettingsFormGroup>

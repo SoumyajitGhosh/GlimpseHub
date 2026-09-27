@@ -26,14 +26,22 @@ import SettingsForm from "../SettingsForm/SettingsForm";
 import SettingsFormGroup from "../SettingsForm/SettingsFormGroup/SettingsFormGroup";
 import ChangeAvatarButton from "../ChangeAvatarButton/ChangeAvatarButton";
 
+interface EditProfileFormValues {
+  email: string;
+  fullName: string;
+  username: string;
+  bio: string;
+  website: string;
+}
+
 const EditProfileForm = () => {
   const dispatch = useAppDispatch();
   const currentUser = useAppSelector(selectCurrentUser);
   const token = useAppSelector(selectToken);
   const updatingProfile = useAppSelector(selectUpdatingProfile);
 
-  const validate = (values) => {
-    const errors = {};
+  const validate = (values: EditProfileFormValues) => {
+    const errors: Partial<Record<keyof EditProfileFormValues, string>> = {};
     const emailError = validateEmail(values.email);
     if (emailError) errors.email = emailError;
 
@@ -52,17 +60,17 @@ const EditProfileForm = () => {
     return errors;
   };
 
-  const formik = useFormik({
+  const formik = useFormik<EditProfileFormValues>({
     initialValues: {
-      email: currentUser.email,
-      fullName: currentUser.fullName,
-      username: currentUser.username,
-      bio: currentUser.bio || "",
-      website: currentUser.website || "",
+      email: currentUser?.email ?? "",
+      fullName: currentUser?.fullName ?? "",
+      username: currentUser?.username ?? "",
+      bio: currentUser?.bio || "",
+      website: currentUser?.website || "",
     },
     validate,
     onSubmit: async (values) => {
-      await dispatch(updateProfileStart(token, values));
+      await dispatch(updateProfileStart(token ?? "", values));
       dispatch(showAlert("Profile saved."));
     },
   });
@@ -77,7 +85,7 @@ const EditProfileForm = () => {
         <ChangeAvatarButton>
           <Avatar
             className="avatar--small"
-            imageSrc={currentUser.avatar}
+            imageSrc={currentUser?.avatar}
             style={{ alignSelf: "start" }}
           />
         </ChangeAvatarButton>

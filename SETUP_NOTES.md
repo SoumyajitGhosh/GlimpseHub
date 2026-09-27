@@ -743,3 +743,73 @@ pre-existing `no-unused-expressions` regression from §8.10 is untouched). `npm 
 still fails overall (219 errors remain elsewhere) — the remaining files are listed in this
 session's `tsc` output; `PostPage`/`SettingsPage`/`Header.tsx` are likely the next
 highest-leverage targets since they're still widely imported.
+
+#### 8.10.2 `PostPage`/`SettingsPage`/`Header.tsx` cleared (219 → 181 `tsc` errors)
+
+Cleared every `tsc --noEmit` error rooted in `pages/PostPage/PostPage.tsx`,
+`pages/SettingsPage/SettingsPage.tsx`, and `components/Header/Header.tsx` (the desktop nav
+bar — distinct from `MobileHeader`, already fixed in §8.10.1), plus every leaf component
+those three needed properly typed: `SearchBox`, `NotificationButton` (+ its
+`NotificationPopup` child), `EditProfileForm`, `ChangePasswordForm`, `SettingsForm` /
+`SettingsFormGroup`. Same scoping rule as before — fixed what's rooted in these files and
+their direct dependencies, left the rest (`Feed.tsx`'s own internal `PostDialog` bug, the
+Chat cluster, `NewPost*`, `SignUpCard`, …) alone.
+
+- **`PostPage.tsx`**: `useParams()`'s `postId` is `string | undefined`, but `PostDialog`
+  requires `postId: string`. Same fix as `ProfilePage`'s `:username` in §8.10.1 — default
+  destructure (`const { postId = "" } = useParams()`) rather than loosening `PostDialog`'s
+  prop type, since the route always supplies `:postId`.
+- **`SettingsPage.tsx` — a real, pre-existing dead prop.** Both `<NavLink>`s passed
+  `activeClassName="font-bold sidebar-link--active"`, which was react-router v5 API; v6
+  removed it in favor of a `className` render-prop (`({isActive}) => ...}`), so this has
+  been a silent no-op since the router v6 bump in §3. Confirmed it's genuinely dead, not
+  just wrongly named: `sidebar-link--active` doesn't exist anywhere in `src/sass/`, so there
+  was no working active-state styling to preserve or reimplement. Removed the invalid prop
+  rather than inventing new active-link styling with no corresponding design — flagging here
+  since restoring an active nav-link indicator is a legitimate small UX follow-up, just not
+  one this pass should improvise.
+- **`Header.tsx`'s two direct leaf deps**:
+  - `SearchBox.tsx`: typed props (`style?`, `setResult?: (result: User[]) => void`,
+    `onClick?`, `type?: string`) matching its two real call sites (`Header.tsx` bare,
+    `SuggestedPosts.tsx` with all three). Also fixed `useSearchUsersDebounced`'s `result`
+    state, which was typed `User[] | null` despite never actually being set to `null`
+    anywhere (initial value and every `setResult` call use `[]`) — narrowed to `User[]`,
+    which resolves `SearchBox`'s "possibly null" errors at the source instead of guarding
+    every read.
+  - `NotificationButton.tsx` (+ `NotificationPopup.tsx`): typed `mobile?`/`icon?` props
+    (confirmed against both call sites — bare in `Header.tsx`, `mobile` + `icon` in
+    `MobileNav.tsx`). Three real typing traps here, not bugs — documented since they're easy
+    to get wrong:
+    - `setShowNotificationPopupTimeout(setTimeout(...))` needs
+      `useState<ReturnType<typeof setTimeout> | null>(null)`, not bare `useState(null)`.
+    - A later `clearTimeout(notificationPopupTimeout)` call was missing the null-guard its
+      sibling call three lines up already had — added `if (notificationPopupTimeout)`.
+    - `@react-spring/web`'s `useTransition(cond ? {notifications} : false, config)` infers
+      `Item` ambiguously from a two-argument call with a conditional first argument; giving
+      the ternary result an explicit local type
+      (`const transitionItem: { notifications: Notification[] } | false = …`) resolves it
+      cleanly without touching the render callback.
+    - The `const Wrapper = mobile ? "span" : "button"` dynamic-tag pattern (renders a
+      `<span>` on mobile since it sits inside an already-interactive `<Link>`, a `<button>`
+      otherwise) needs `Wrapper: ElementType` *and* `wrapperProps` typed as
+      `ComponentPropsWithoutRef<"button">` — TS's JSX checker validates a spread against the
+      narrowest branch of a string-literal-union tag type, so leaving `wrapperProps`
+      untyped (or typing `Wrapper` alone) still fails.
+- **`SettingsPage.tsx`'s form routes**: `EditProfileForm` and `ChangePasswordForm` both read
+  `currentUser.*` unguarded (`CurrentUser | null`) and passed a nullable `token` into thunks
+  requiring plain `string` — same `?? ""` / optional-chaining treatment as §8.10.1, since
+  both forms are only reachable while authenticated. `EditProfileForm`'s Formik `validate`
+  callback and `initialValues` got a real `EditProfileFormValues` interface (was
+  implicit-`any` throughout, including `errors: {}` being assigned arbitrary keys).
+  `SettingsForm`/`SettingsFormGroup` had no prop types at all (`onSubmit`/`children`); typed
+  both minimally (`FormEventHandler`, `ReactNode`).
+
+Verification: `npm run typecheck` — 219 → **181** errors, zero remaining in the touched
+files or their direct dependencies. `npm test` — 55/55, unchanged. `npm run lint` — 27
+errors + 42 warnings, unchanged. `npm run build` still fails overall (181 errors remain).
+Remaining clusters, roughly by concentration: the Chat surface (`ChatSidebar`, `ChatUsers`,
+`ChatWindow/*`, `MobileNav.tsx`), the `NewPost*` family + `Feed.tsx` (which also carries its
+own pre-existing `PostDialog` prop bug, noted but untouched in §8.10.1), `NotificationFeed`,
+`SearchSuggestion`, `SignUpCard`, and the auth/explore pages (`LoginPage`, `ConfirmationPage`,
+`ExplorePage`, `ActivityPage`, `App.tsx`, `main.tsx`). The Chat cluster looks like the next
+highest-leverage target — four files, one feature, likely shared prop-typing gaps.

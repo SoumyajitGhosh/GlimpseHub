@@ -1,3 +1,4 @@
+import type { ComponentPropsWithoutRef, ElementType } from "react";
 import { useState, useEffect } from "react";
 import { useAppSelector } from "../../../redux/hooks";
 import { useTransition } from "@react-spring/web";
@@ -6,20 +7,26 @@ import {
   selectNotifications,
   selectNotificationState,
 } from "../../../redux/notification/notificationSlice";
+import type { Notification } from "../../../types";
 
 import Icon from "../../Icon/Icon";
 import NotificationPopup from "./NotificationPopup/NotificationPopup";
 import PopupCard from "../../PopupCard/PopupCard";
 import NotificationFeed from "../NotificationFeed/NotificationFeed";
 
-const NotificationButton = ({ mobile, icon }) => {
+interface NotificationButtonProps {
+  mobile?: boolean;
+  icon?: string;
+}
+
+const NotificationButton = ({ mobile, icon }: NotificationButtonProps) => {
   const notifications = useAppSelector(selectNotifications);
   const notificationState = useAppSelector(selectNotificationState);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [notificationPopupTimeout, setShowNotificationPopupTimeout] =
-    useState(null);
+    useState<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (notificationPopupTimeout) {
@@ -39,16 +46,19 @@ const NotificationButton = ({ mobile, icon }) => {
 
   useEffect(() => {
     if (showNotifications) {
-      clearTimeout(notificationPopupTimeout);
+      if (notificationPopupTimeout) clearTimeout(notificationPopupTimeout);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- dismisses the popup as soon as the notification feed is opened
       setShowNotificationPopup(false);
     }
   }, [showNotifications, notificationPopupTimeout]);
 
-  const transitions = useTransition(
+  const transitionItem: { notifications: Notification[] } | false =
     notificationState.unreadCount > 0 && showNotificationPopup
       ? { notifications }
-      : false,
+      : false;
+
+  const transitions = useTransition(
+    transitionItem,
     {
       from: { transform: "scale(0) translateX(-50%)", opacity: 0 },
       enter: { transform: "scale(1) translateX(-50%)", opacity: 1 },
@@ -60,8 +70,8 @@ const NotificationButton = ({ mobile, icon }) => {
   // On mobile this sits inside a <Link> that already handles navigation and
   // accessible naming, so it must render as non-interactive markup — a
   // nested <button> would be invalid HTML and confuse assistive tech.
-  const Wrapper = mobile ? "span" : "button";
-  const wrapperProps = mobile
+  const Wrapper: ElementType = mobile ? "span" : "button";
+  const wrapperProps: ComponentPropsWithoutRef<"button"> = mobile
     ? { className: "notification-button" }
     : {
         className: "notification-button",

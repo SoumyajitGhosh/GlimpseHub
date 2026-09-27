@@ -5,7 +5,8 @@ import PostDialog from "../../components/PostDialog/PostDialog";
 import MobileHeader from "../../components/Header/MobileHeader/MobileHeader";
 
 const PostPage = () => {
-  const { postId } = useParams();
+  // The route always supplies :postId.
+  const { postId = "" } = useParams();
 
   return (
     <Fragment>

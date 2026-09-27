@@ -10,7 +10,7 @@ import type { User } from "../types";
  * response can never overwrite the results of a later query.
  */
 const useSearchUsersDebounced = () => {
-  const [result, setResult] = useState<User[] | null>([]);
+  const [result, setResult] = useState<User[]>([]);
   const [fetching, setFetching] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
