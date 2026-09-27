@@ -264,6 +264,10 @@ so the servers load without the per-project approval prompt.
 Requires Node's `npx` on PATH (already used by the frontend toolchain). No secrets stored. Verify
 with `/mcp` after restarting Claude Code in this repo.
 
+**Correction**: despite the "committed" wording above, `.mcp.json` and `.claude/settings.json` were
+never actually pushed in the session that wrote this section — they sat untracked in the working
+copy until the commit that added this correction. No content changed; this is a bookkeeping fix.
+
 ## 8. Planned: full frontend modernization roadmap
 
 Asked Claude Code (as a senior frontend architect) to survey the frontend and propose a
@@ -642,10 +646,11 @@ correction.
   the piece §8.4 deferred "meaningless without the TS layer"); `src/types/` (`api.ts`,
   `models.ts`, `components.ts`, `index.ts`) as the shared type-definition surface referenced
   across slices/services/components instead of inlining shapes per file.
-- **`backend/scripts/dev-mongo.cjs`** (untracked, not part of this branch's commits): a local
-  convenience script (in-memory MongoDB via `mongodb-memory-server`) used to run the backend
-  without a system `mongod` while manually exercising the app during this migration. Not
-  wired into any npm script.
+- **`backend/scripts/dev-mongo.cjs`**: a local convenience script (in-memory MongoDB via
+  `mongodb-memory-server`) used to run the backend without a system `mongod` while manually
+  exercising the app during this migration. Committed later alongside `mongodb-memory-server`
+  as a `backend` devDependency and a `dev:mongo` script (`node scripts/dev-mongo.cjs`) — it
+  was backend tooling unrelated to the TS migration itself, so it went in as its own commit.
 
 **Current state — build and lint are both red; this is a WIP push, not a finished phase:**
 
