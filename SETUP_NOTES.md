@@ -813,3 +813,24 @@ own pre-existing `PostDialog` prop bug, noted but untouched in §8.10.1), `Notif
 `SearchSuggestion`, `SignUpCard`, and the auth/explore pages (`LoginPage`, `ConfirmationPage`,
 `ExplorePage`, `ActivityPage`, `App.tsx`, `main.tsx`). The Chat cluster looks like the next
 highest-leverage target — four files, one feature, likely shared prop-typing gaps.
+
+## 9. Backend dependency vulnerability fixes, round 2 (8 → 0)
+
+Dependabot/`npm audit` flagged 8 vulnerabilities in `backend/` (4 moderate, 3 high, 1
+critical), all transitive:
+
+- **`npm audit fix` (no `--force`)** cleared 6 of the 8 by re-resolving already-declared
+  semver ranges — no `package.json` change needed: `express` (moderate), `morgan`
+  (moderate), `body-parser`'s `qs` dependency (moderate), and the `brace-expansion` /
+  `minimatch` transitives (high/low) pulled in by dev tooling.
+- **`bcrypt` major-bumped `^5.1.1` → `^6.0.0`** for the remaining two — a critical `tar`
+  vulnerability and a high one in `@mapbox/node-pre-gyp`, both pulled in only by bcrypt 5's
+  native-build toolchain (`node-pre-gyp` downloads prebuilt binaries via `tar`). bcrypt 6
+  moved to `node-gyp-build`, dropping that dependency chain entirely. No API change between
+  the versions used here (`hash`/`compare`), so `authController.js` needed no edits.
+
+Verification: `npm audit` → **0 vulnerabilities**; `node --check` over every backend `.js`
+file; a live `bcrypt.hash`/`bcrypt.compare` round-trip confirming the new native binary
+actually loads on this platform; and a full boot smoke test — `node scripts/dev-mongo.cjs`
+(§8.10) for an in-memory Mongo, `node index.js` against it, confirmed `GET
+/api/post/filters` → `200` over real HTTP before tearing both down.
