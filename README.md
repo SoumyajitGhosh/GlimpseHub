@@ -13,22 +13,26 @@ GlimpseHub is a cutting-edge social networking and content creation platform bui
 - **Real-time Chats**: Chat with users that you're following.
 
 ## Tech Stack used
-- **Frontend**: React
-- **State management**: Redux
-- **Routing**: React Router
+- **Frontend**: React 19 + TypeScript (Vite)
+- **State management**: Redux Toolkit
+- **Routing**: React Router 7
 - **Form management**: Formik
-- **Animations**: React Spring
+- **Animations**: `@react-spring/web`
 - **Websocket management**: Socket.io
 - **Backend**: Express
-- **Database**: MongoDB
+- **Database**: MongoDB (Mongoose)
 - **Image hosting**: Cloudinary
+- **CI**: GitHub Actions (lint/test/build on every PR)
 
 ## Areas to improve on
-- Use redis to store the users connected via socket.
+- Use redis to store the users connected via socket (currently in-memory, single-instance only).
 - Scaling of the application.
-- Creation of a CI/CD pipeline.
 - Dockerize the application.
 - Add analytics to it.
+- A real backend test runner (`npm test` in `backend/` is currently a placeholder).
+
+See [`SETUP_NOTES.md`](./SETUP_NOTES.md) for the full development history and everything
+that's already been done.
 
 
 ## Installation
@@ -54,15 +58,31 @@ To set up the project locally:
     npm install
 
 4. **Set up environment variables:**
+
+   `backend/.env`:
    ```bash
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret_key
+   PORT=9000
+   HOME_URL=http://localhost:5173
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
+   ```
+   No local MongoDB? Run `npm run dev:mongo` in `backend/` for a disposable in-memory one
+   (listens on the port in `MONGO_URI` above).
 
-5. **Start the development servers:**
+   `frontend/.env`:
+   ```bash
+   VITE_BACKEND_URI=http://localhost:9000
+   ```
+
+5. **Start the development servers** (each has no watcher — restart manually after backend edits):
    ```bash
    # In the backend directory
    npm run dev
-    
+
    # In the frontend directory
-   npm start
+   npm run dev
+   ```
 

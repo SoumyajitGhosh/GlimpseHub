@@ -3,6 +3,38 @@
 This is the single running log of everything done to this repository with Claude Code, in
 chronological order. New work gets appended here rather than tracked in a separate file.
 
+## Summary — what's been done, at a glance
+
+A quick-reference index before the full chronological log below. Each row links to the
+section with the full detail (what changed, why, and how it was verified).
+
+| # | What | Status |
+|---|---|---|
+| [§1](#1-initial-claude-code-setup-tooling-context-only) | Claude Code context/tooling (`CLAUDE.local.md`, `.gitignore`, skill packages) | Done |
+| [§2](#2-dependency-vulnerability-fixes-commit-f82af67) | First Dependabot fix pass (backend + frontend, within-range bumps) | Done |
+| [§3](#3-frontend-modernization-commit-a988607) | Frontend modernization: SASS `@use`, theming/dark-mode, a11y foundations, dependency currency, React/routing polish | Done |
+| [§4](#4-frontend-test-runner--eslint-regression-fix) | First frontend test runner (Vitest + RTL) + an ESLint plugin-bump regression fix | Done |
+| [§5](#5-planned-react-router-dom-v7-migration-done--see-85) | react-router-dom v7 migration | Done (landed as §8.5 Phase 6) |
+| [§6](#6-frontend-audit-slash-command) | `/frontend-audit` reusable slash command | Done |
+| [§7](#7-mcp-servers-for-frontend-work-mcpjson) | MCP servers for frontend work (context7, chrome-devtools, playwright) | Done |
+| [§8](#8-planned-full-frontend-modernization-roadmap) | Full modernization roadmap (Phases 0–10): lint burndown, shared HTTP client, Redux Toolkit, router v7, Vite 7, React 19, CI, PWA, a11y | **Done — all 10 phases** |
+| [§8.10](#810-phase-5--typescript-migration-in-progress-branch-frontend-typescript-migration) | Phase 5: full `.jsx`/`.js` → `.tsx`/`.ts` TypeScript migration (bigger scope than the roadmap's "incremental JSDoc" plan) | **Done** — 333 → 0 `tsc` errors, `npm run build` passes |
+| [§9](#9-backend-dependency-vulnerability-fixes-round-2-8--0) | Backend `npm audit` fixes, round 2 (bcrypt major bump) | Done — 8 → 0 vulnerabilities |
+
+**Current repo state**: both packages build clean, `npm audit` is 0 on both, the frontend
+has 55 passing tests and is fully typed. `main` and the (now-deleted) `frontend-typescript-
+migration` branch converged at commit `8de11b7`. See the final-state tables at the end of
+§8.10 and §9 for exact before/after metrics.
+
+**Still open** (not yet started, or deliberately deferred — see the linked section for why):
+- RTK Query (§8's Phase 4), forms → react-hook-form + zod (§8's Phase 9)
+- The a11y interactive-element follow-up — 42 `jsx-a11y` warnings (§8.9)
+- The §8.10 `no-unused-expressions` lint regression (27 errors, tracked since the TS migration began)
+- A real backend test runner (`npm test` is still `exit 1` — never attempted)
+- A real feature bug, found but not fixed: `profileDispatch({type: "INCREMENT_POST_COMMENTS_COUNT"})` has been a silent no-op since the Redux Toolkit migration (§8.4) — needs a design decision, see the end of §8.10's final-state notes
+- Two documented-but-unfixed UI bugs in the chat feature (§8.10.3): `ChatUsers` renders a component reference instead of invoking it; `ChatInput` has no `onSubmit` wired (Enter-to-send has never worked)
+- README.md's own "Areas to improve" list (Redis for socket scaling, Dockerize, analytics)
+
 ## 1. Initial Claude Code setup (tooling/context only)
 
 Nothing in this section is required for GlimpseHub to build, run, or deploy — it's tooling/context
@@ -215,7 +247,7 @@ mention search, new-post file picker, notification popup) — that manual pass i
 before merging, given `useScrollPositionThrottled`'s signature change and the two
 `useEffect`→render-time-state rewrites touch real user-facing timing/scroll behavior.
 
-## 5. Planned: react-router-dom v7 migration (not yet started)
+## 5. Planned: react-router-dom v7 migration (done — see §8.5)
 
 Current version is `^6.30.6`; `App.jsx` uses the plain `<Routes>/<Route>` tree (not
 `createBrowserRouter`/`RouterProvider`), so a straight v7 bump is low-risk — v7 retains the v6
