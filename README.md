@@ -57,25 +57,15 @@ To set up the project locally:
     cd ../frontend
     npm install
 
-4. **Set up environment variables:**
-
-   `backend/.env`:
+4. **Set up environment variables** — each package has a `.env.example` to copy:
    ```bash
-   MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret_key
-   PORT=9000
-   HOME_URL=http://localhost:5173
-   CLOUDINARY_CLOUD_NAME=your_cloud_name
-   CLOUDINARY_API_KEY=your_api_key
-   CLOUDINARY_API_SECRET=your_api_secret
+   cp backend/.env.example backend/.env
+   cp frontend/.env.example frontend/.env
    ```
-   No local MongoDB? Run `npm run dev:mongo` in `backend/` for a disposable in-memory one
-   (listens on the port in `MONGO_URI` above).
-
-   `frontend/.env`:
-   ```bash
-   VITE_BACKEND_URI=http://localhost:9000
-   ```
+   Then fill in real values in `backend/.env` (Cloudinary credentials, a `JWT_SECRET`, SMTP
+   if you want confirmation emails to actually send). No local MongoDB? Run `npm run
+   dev:mongo` in `backend/` for a disposable in-memory one — it listens on the exact
+   `MONGO_URI` the example file already has. `frontend/.env` works as-is for local dev.
 
 5. **Start the development servers** (each has no watcher — restart manually after backend edits):
    ```bash
