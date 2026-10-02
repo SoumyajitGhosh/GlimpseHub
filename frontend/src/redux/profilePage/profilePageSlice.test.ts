@@ -6,6 +6,14 @@ import reducer, {
   type ProfilePageState,
 } from "./profilePageSlice";
 import type { RootState } from "../store";
+import type { ProfilePost } from "../../types";
+
+const post = (id: string): ProfilePost => ({
+  _id: id,
+  image: "image.jpg",
+  comments: 0,
+  postVotes: 0,
+});
 
 const follow = { type: "profile/followUserSuccess", payload: "follow" };
 const unfollow = { type: "profile/followUserSuccess", payload: "unfollow" };
@@ -47,7 +55,7 @@ describe("profilePageSlice", () => {
   });
 
   it("addPosts appends to the existing list", () => {
-    const state = st({ data: { posts: [{ _id: "p1" }] } });
+    const state = st({ data: { posts: [post("p1")] } });
     const next = reducer(state, {
       type: "profile/addPosts",
       payload: [{ _id: "p2" }],

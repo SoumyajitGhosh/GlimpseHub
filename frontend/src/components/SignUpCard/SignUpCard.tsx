@@ -22,13 +22,20 @@ import Divider from "../Divider/Divider";
 import Card from "../Card/Card";
 import FormInput from "../FormInput/FormInput";
 
+interface SignUpFormValues {
+  email: string;
+  fullName: string;
+  username: string;
+  password: string;
+}
+
 const SignUpCard = () => {
   const dispatch = useAppDispatch();
   const error = useAppSelector(selectError);
   const fetching = useAppSelector(selectFetching);
 
-  const validate = (values) => {
-    const errors = {};
+  const validate = (values: SignUpFormValues) => {
+    const errors: Partial<Record<keyof SignUpFormValues, string>> = {};
     const emailError = validateEmail(values.email);
     if (emailError) errors.email = emailError;
 
@@ -43,7 +50,7 @@ const SignUpCard = () => {
     return errors;
   };
 
-  const formik = useFormik({
+  const formik = useFormik<SignUpFormValues>({
     initialValues: {
       email: "",
       fullName: "",
@@ -73,7 +80,7 @@ const SignUpCard = () => {
           Sign up to see photos and videos from your friends.
         </h2>
         <Divider>OR</Divider>
-        {Object.keys(formik.errors).map(
+        {(Object.keys(formik.errors) as Array<keyof SignUpFormValues>).map(
           (field) =>
             formik.touched[field] && (
               <p

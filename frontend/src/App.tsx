@@ -96,12 +96,12 @@ const App = () => {
 
   const renderModals = () => {
     if (modal.modals.length > 0) {
-      document.querySelector("body").setAttribute("style", "overflow: hidden;");
+      document.body.setAttribute("style", "overflow: hidden;");
       return modal.modals.map((modal, idx) => (
         <Modal key={idx} component={modal.component} {...modal.props} />
       ));
     } else {
-      document.querySelector("body").setAttribute("style", "");
+      document.body.setAttribute("style", "");
     }
   };
 

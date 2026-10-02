@@ -18,12 +18,13 @@ const VerificationPage = () => {
 
   useEffect(() => {
     if (!authToken) {
-      return navigate("/");
+      navigate("/");
+      return;
     }
     (async function () {
       let children = null;
       try {
-        await confirmUser(authToken, token);
+        await confirmUser(authToken, token ?? "");
         children = (
           <h3 style={{ padding: "2rem" }} className="heading-3">
             Successfully confirmed your email.

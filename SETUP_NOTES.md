@@ -1112,3 +1112,87 @@ file; a live `bcrypt.hash`/`bcrypt.compare` round-trip confirming the new native
 actually loads on this platform; and a full boot smoke test — `node scripts/dev-mongo.cjs`
 (§8.10) for an in-memory Mongo, `node index.js` against it, confirmed `GET
 /api/post/filters` → `200` over real HTTP before tearing both down.
+
+#### 8.10.7 Last 18 `tsc` errors cleared — `npm run build` passes for the first time
+
+The remaining 18 errors (down from the original 333 across §8.10.1–§8.10.6) were all
+single-file one-offs with no shared cluster left, so finished directly rather than via
+another background pass:
+
+- **`App.tsx` (2)**: `document.querySelector("body")` returns `Element | null` in DOM lib
+  types; swapped for `document.body`, which is typed non-null (same element, more direct).
+- **`main.tsx` (1 + a latent bug)**: `import App from "./App.jsx"` pointed at a file that no
+  longer exists (`App.tsx` since §8.10) — this only kept working because nothing had
+  type-checked the entry point until now; fixed to the extensionless specifier. Also
+  non-null-asserted `document.getElementById("root")` — `index.html` always has the div.
+- **`ConfirmationPage.tsx` (2)**: split `return navigate("/")` into `navigate("/"); return;`
+  inside the effect (TS was inferring the effect callback's return type as
+  `void | Promise<void>` through that expression-return, which isn't a valid
+  `EffectCallback`); resolved the confirmation-link `token` param (`string | undefined` from
+  `useParams()`) with `?? ""` at the call site, matching the established pattern.
+- **`LoginPage.tsx` (1) — dead code removed**: deleted a `LoginPage.propTypes = { currentUser:
+  PropTypes.object }` block. `LoginPage` takes no props at all; `currentUser` is a local
+  `useAppSelector` result, not a prop — this was always meaningless. Also the last `import
+  PropTypes` anywhere in `src/`, so **removed the now-fully-unused `prop-types` package**
+  from `package.json`/lockfile (it had been promoted to an explicit dependency in §8 Phase 0
+  when 16 files used it; §8.10.1 and §8.10.6 converted the rest to native TS prop types).
+- **`SignUpCard.tsx` (8)**: same Formik-generics treatment as `EditProfileForm.tsx`
+  (§8.10.2) — a `SignUpFormValues` interface, `useFormik<SignUpFormValues>`, and
+  `Object.keys(formik.errors) as Array<keyof SignUpFormValues>` for the error-list `.map`
+  (plain `Object.keys` returns `string[]`, which doesn't index `FormikTouched<T>`/
+  `FormikErrors<T>`).
+- **`Feed.tsx` (3) — the pre-existing bug flagged since §8.10.1, now actually fixed**:
+  `PostDialogProps.postId` was `string` (required), but `Feed.tsx`'s three loading-skeleton
+  placeholders (`<PostDialog simple loading />`) render with no post yet, so no `postId`.
+  Traced every `postId` use inside `PostDialog.tsx` and confirmed each one sits behind a
+  `!loading`/`!fetching` guard (the effect's fetch branch, delete/comment handlers, the full
+  (non-skeleton) header JSX) — so `postId` is only ever read once it's genuinely present.
+  Made it optional on the prop type and non-null-asserted it at those confirmed-guarded call
+  sites, rather than threading a fake default through Feed.tsx.
+- **`profilePageSlice.test.ts` (1)**: the long-standing fixture gap — `{ _id: "p1" }` test
+  posts didn't satisfy `ProfilePost`'s required `image`/`comments`/`postVotes`. Added a small
+  `post(id)` fixture helper with dummy values for the one assertion (`addPosts`) that's
+  strictly typed through `st()`'s `ProfilePageState`; left the two looser `reducer(state,
+  rawActionObject)` calls elsewhere in the file alone since they don't type-check the payload
+  shape as strictly and already pass.
+
+**Also while in the area**: `npm audit` on `frontend/` turned up 3 vulnerabilities (1 high,
+1 moderate, 1 low — `brace-expansion`, `fast-uri`, `serialize-javascript`, all transitive dev
+tooling pulled in since `typescript`-eslint was added in §8.10 and never audited) — cleared
+to **0** with `npm audit fix` (no `--force` needed), same as backend's §9.
+
+Verification: `npm run typecheck` — 18 → **0 errors**. `npm run lint` — 27 errors + 42
+warnings, unchanged (the §8.10 `no-unused-expressions` regression and the §8.9 a11y backlog
+remain their own tracked follow-ups). `npm test` — 55/55. **`npm run build` — passes clean
+end-to-end for the first time since the TS migration began** (`tsc --noEmit && vite build`,
+PWA `sw.js` still generated, 61 precache entries). `npm audit` — 0 vulnerabilities.
+
+### TypeScript migration (§8.10) — final state
+
+| | At §8.10's start | Now |
+|---|---|---|
+| `tsc --noEmit` errors | 333 | **0** |
+| `npm run build` | fails | **passes** |
+| `npm run lint` | 0 errors / 42 warnings | 27 errors / 42 warnings (tracked: §8.10's `no-unused-expressions` regression) |
+| `npm test` | 55/55 | 55/55 |
+| `npm audit` (frontend) | 0 | 0 |
+
+Real bugs found and fixed along the way (type-authoring bugs in **bold** — a type didn't
+match what the backend actually sends, surfaced only because `strict` mode forced every
+field to be accounted for): **`Profile`** (§8.10.1, nested `user` vs. assumed-flat),
+`UsersList`'s `following` prop receiving a count instead of a boolean (§8.10.1),
+`ProfilePage`'s dead `data.avatar` read (§8.10.1 — then its own `.length`-on-a-number
+regression caught and fixed in §8.10.5), **`Message`** (§8.10.3, `senderId`/`receiverId` vs.
+assumed nested `User`s), `ChatUsers` rendering a component reference instead of invoking it
+and `ChatInput` missing `onSubmit` entirely (§8.10.3, both flagged but left as-is — real UI
+bugs needing a design call, not a type fix), **`PostSummary`/`ProfilePost`** (§8.10.4/5,
+count-shaped vs. assumed-array post endpoints — four pagination/display bugs fixed as a
+result), **`Notification`** (§8.10.6, wrong `notificationData` fields), and `Feed.tsx`'s
+`PostDialog.postId` (§8.10.7, closing the loop on the one bug §8.10.1 flagged and deferred).
+
+**Known, deliberately unfixed**: `profileDispatch({type: "INCREMENT_POST_COMMENTS_COUNT"})`
+in `PostDialogCommentForm`/`Comment` has been a silent no-op since the RTK migration
+(§8.4) — `profilePageSlice` has no matching reducer case, so the profile grid's
+comment-count overlay has never actually incremented post-RTK. `tsc` can't catch this (it
+type-checks fine); it's a real feature gap needing a deliberate design decision, not a type
+fix, so it's recorded here rather than patched in passing.

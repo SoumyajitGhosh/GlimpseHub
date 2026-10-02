@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import { useAppSelector } from "../../redux/hooks";
 import { useNavigate } from "react-router-dom";
 
@@ -34,10 +33,6 @@ const LoginPage = () => {
       <LoginCard />
     </main>
   );
-};
-
-LoginPage.propTypes = {
-  currentUser: PropTypes.object,
 };
 
 export default LoginPage;

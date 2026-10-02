@@ -22,7 +22,8 @@ import PostDialogStats from "./PostDialogStats/PostDialogStats";
 import { INITIAL_STATE, postDialogReducer } from "./postDialogReducer";
 
 interface PostDialogProps {
-  postId: string;
+  /** Only needed when `loading` isn't set — the loading skeleton renders with no post yet. */
+  postId?: string;
   profileDispatch?: Dispatch<any>;
   style?: CSSProperties;
   className?: string;
@@ -62,7 +63,7 @@ const PostDialog = ({
         );
         (async function () {
           try {
-            const response = await getPost(postId);
+            const response = await getPost(postId!);
             localDispatch({ type: "FETCH_POST_SUCCESS", payload: response });
           } catch (err) {
             navigate("/");
@@ -86,7 +87,7 @@ const PostDialog = ({
   const fetchAdditionalComments = async () => {
     try {
       const commentData = await getComments(
-        postId,
+        postId!,
         state.data.comments.length,
         state.localStateComments.size
       );
@@ -103,7 +104,7 @@ const PostDialog = ({
 
   const handleDeletePost = async () => {
     try {
-      await deletePost(postId, token ?? "");
+      await deletePost(postId!, token ?? "");
       profileDispatch &&
         profileDispatch({
           type: "DELETE_POST",
@@ -318,7 +319,7 @@ const PostDialog = ({
           )}
           {!fetching && (
             <PostDialogCommentForm
-              postId={postId}
+              postId={postId!}
               token={token}
               currentUser={currentUser}
               commentsRef={commentsRef}
