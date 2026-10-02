@@ -39,7 +39,7 @@
 // export default MessageInput;
 
 // STARTER CODE SNIPPET
-import type { MouseEvent } from "react";
+import type { SyntheticEvent } from "react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import Icon from "../../Icon/Icon";
@@ -55,14 +55,14 @@ const ChatInput = ({ userToChatId }: ChatInputProps) => {
   const token = useAppSelector(selectToken);
   const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e: MouseEvent<HTMLDivElement>) => {
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
     if (!message) return;
     dispatch(pushMessageAction(userToChatId, token ?? "", message));
     setMessage("");
   };
   return (
-    <form className="message-input">
+    <form className="message-input" onSubmit={handleSubmit}>
       <input
         type="text"
         aria-label="Message"

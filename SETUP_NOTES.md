@@ -20,19 +20,18 @@ section with the full detail (what changed, why, and how it was verified).
 | [§8](#8-planned-full-frontend-modernization-roadmap) | Full modernization roadmap (Phases 0–10): lint burndown, shared HTTP client, Redux Toolkit, router v7, Vite 7, React 19, CI, PWA, a11y | **Done — all 10 phases** |
 | [§8.10](#810-phase-5--typescript-migration-in-progress-branch-frontend-typescript-migration) | Phase 5: full `.jsx`/`.js` → `.tsx`/`.ts` TypeScript migration (bigger scope than the roadmap's "incremental JSDoc" plan) | **Done** — 333 → 0 `tsc` errors, `npm run build` passes |
 | [§9](#9-backend-dependency-vulnerability-fixes-round-2-8--0) | Backend `npm audit` fixes, round 2 (bcrypt major bump) | Done — 8 → 0 vulnerabilities |
+| [§11](#11-fixed-the-two-chat-ui-bugs-flagged-but-left-in-8103) | The two chat UI bugs flagged in §8.10.3 | Done |
 
 **Current repo state**: both packages build clean, `npm audit` is 0 on both, the frontend
-has 55 passing tests and is fully typed. `main` and the (now-deleted) `frontend-typescript-
-migration` branch converged at commit `8de11b7`. See the final-state tables at the end of
-§8.10 and §9 for exact before/after metrics.
+has 55 passing tests and is fully typed. See the final-state tables at the end of §8.10 and
+§9 for exact before/after metrics.
 
 **Still open** (not yet started, or deliberately deferred — see the linked section for why):
 - RTK Query (§8's Phase 4), forms → react-hook-form + zod (§8's Phase 9)
-- The a11y interactive-element follow-up — 42 `jsx-a11y` warnings (§8.9)
+- The a11y interactive-element follow-up — 40 `jsx-a11y` warnings (§8.9, §11)
 - The §8.10 `no-unused-expressions` lint regression (27 errors, tracked since the TS migration began)
 - A real backend test runner (`npm test` is still `exit 1` — never attempted)
 - A real feature bug, found but not fixed: `profileDispatch({type: "INCREMENT_POST_COMMENTS_COUNT"})` has been a silent no-op since the Redux Toolkit migration (§8.4) — needs a design decision, see the end of §8.10's final-state notes
-- Two documented-but-unfixed UI bugs in the chat feature (§8.10.3): `ChatUsers` renders a component reference instead of invoking it; `ChatInput` has no `onSubmit` wired (Enter-to-send has never worked)
 - README.md's own "Areas to improve" list (Redis for socket scaling, Dockerize, analytics)
 
 ## 1. Initial Claude Code setup (tooling/context only)
@@ -1228,3 +1227,25 @@ in `PostDialogCommentForm`/`Comment` has been a silent no-op since the RTK migra
 comment-count overlay has never actually incremented post-RTK. `tsc` can't catch this (it
 type-checks fine); it's a real feature gap needing a deliberate design decision, not a type
 fix, so it's recorded here rather than patched in passing.
+
+## 11. Fixed the two chat UI bugs flagged (but left) in §8.10.3
+
+- **`ChatUsers.tsx` — deleted the dead `ChatUserBody`/`ChatUser` wrapper.** Traced it back
+  to the very first "Basic UI for chat" commit: hardcoded placeholder data
+  (`username: "username"`, `linkTo: /direct/1`, `src={"S"}`) that was never wired up, and
+  — because the wrapper passed `ChatUserBody` as a component *reference* instead of
+  invoking it — never actually rendered anything in the first place (React silently drops
+  a function child). `UserCard` (already rendered as the sibling wrapper) already provides
+  the exact same avatar + username + click-to-navigate behavior via the `linkTo` prop it's
+  already being passed, so there was nothing to "fix" — removed the dead wrapper and
+  rendered `<UserCard {...userCardProps} />` directly. No behavior change for anyone who
+  was actually using chat, since the broken code never rendered to begin with.
+- **`ChatInput.tsx` — wired up `onSubmit`, so Enter-to-send now works.** `handleSubmit` was
+  typed for the send icon's `onClick` only; retyped it to `SyntheticEvent` (covers both
+  `MouseEvent` and `FormEvent`) and added `onSubmit={handleSubmit}` to the `<form>`. A lone
+  `<input type="text">` inside a form already triggers submission on Enter by default, so
+  no other markup changes were needed.
+
+Verification: `npm run typecheck` — still **0** errors. `npm run lint` — **27 errors / 40
+warnings** (2 fewer warnings than §8.10.7's end state — the deleted `ChatUsers` code carried
+its own now-gone `jsx-a11y` hits). `npm test` — 55/55. `npm run build` — still passes clean.
