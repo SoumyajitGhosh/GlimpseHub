@@ -6,6 +6,8 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 },
 }).single('image');
 const rateLimit = require('express-rate-limit');
+const { RedisStore } = require('rate-limit-redis');
+const { getRedisClient } = require('../utils/redis');
 
 const { requireAuth } = require('../controllers/authController');
 const {
@@ -19,7 +21,15 @@ const {
 } = require('../controllers/postController');
 const filters = require('../utils/filters');
 
+const redisClient = getRedisClient();
+
 const postLimiter = rateLimit({
+    // Shared counters so the limit holds across all backend instances
+    ...(redisClient && {
+        store: new RedisStore({
+            sendCommand: (...args) => redisClient.sendCommand(args),
+        }),
+    }),
     windowMs: 15 * 60 * 1000,
     max: 5,
     // Failed uploads (4xx/5xx) shouldn't use up the user's quota
