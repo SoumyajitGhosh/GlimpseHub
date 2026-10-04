@@ -21,7 +21,7 @@ section with the full detail (what changed, why, and how it was verified).
 | [§8.10](#810-phase-5--typescript-migration) | Phase 5: full `.jsx`/`.js` → `.tsx`/`.ts` TypeScript migration (bigger scope than the roadmap's "incremental JSDoc" plan) | **Done** — 333 → 0 `tsc` errors, `npm run build` passes |
 | [§9](#9-backend-dependency-vulnerability-fixes-round-2-8--0) | Backend `npm audit` fixes, round 2 (bcrypt major bump) | Done — 8 → 0 vulnerabilities |
 | [§10](#10-fixed-the-two-chat-ui-bugs-flagged-but-left-in-8103) | The two chat UI bugs flagged in §8.10.3 | Done |
-| [§11](#11-post-upload-failures-cloudinary-credentials-error-codes-temp-cleanup) | Post-upload failures: shared Cloudinary client, proper error codes, temp-file cleanup | Code done — **needs valid Cloudinary credentials** |
+| [§11](#11-post-upload-failures-cloudinary-credentials-error-codes-temp-cleanup) | Post-upload failures: shared Cloudinary client, proper error codes, temp-file cleanup | Done — verified end to end |
 
 **Current repo state**: both packages build clean, `npm audit` is 0 on both, the frontend
 has 55 passing tests and is fully typed. See the final-state tables at the end of §8.10 and
@@ -31,7 +31,6 @@ has 55 passing tests and is fully typed. See the final-state tables at the end o
 - RTK Query (§8's Phase 4), forms → react-hook-form + zod (§8's Phase 9)
 - The a11y interactive-element follow-up — 40 `jsx-a11y` warnings (§8.9, §10)
 - The §8.10 `no-unused-expressions` lint regression (27 errors, tracked since the TS migration began)
-- Valid `CLOUDINARY_API_KEY`/`CLOUDINARY_API_SECRET` in `backend/.env` — uploads fail until then (§11)
 - A real backend test runner (`npm test` is still `exit 1` — never attempted)
 - A real feature bug, found but not fixed: `profileDispatch({type: "INCREMENT_POST_COMMENTS_COUNT"})` has been a silent no-op since the Redux Toolkit migration (§8.4) — needs a design decision, see the end of §8.10's final-state notes
 - README.md's own "Areas to improve" list (Redis for socket scaling, Dockerize, analytics)
@@ -1239,12 +1238,12 @@ its own now-gone `jsx-a11y` hits). `npm test` — 55/55. `npm run build` — sti
 **Symptom**: `POST /api/post` failed — first with a generic "Error uploading image", then
 `429 Too many requests` after a few retries, then `502 Bad Gateway`.
 
-**Root cause (config, not code)**: Cloudinary rejects the credentials in `backend/.env` with
+**Root cause (config, not code)**: Cloudinary rejected the credentials in `backend/.env` with
 `401 unknown api_key`, confirmed directly with `cloudinary.api.ping()`. The `CLOUDINARY_API_KEY`
-value is malformed (35 characters, not all digits; real keys are 15 digits) and the secret's
-length is also off. **Still to do by the owner**: copy the real key/secret from the Cloudinary
-Console into `backend/.env` and restart (`npm run dev` has no watcher). Nothing in code can
-make uploads succeed until then.
+value was malformed (35 characters, not all digits; real keys are 15 digits) and the secret's
+length was also off. Fixed by replacing the key/secret (and cloud name) in `backend/.env` with
+the real ones from the Cloudinary Console and restarting (`npm run dev` has no watcher). No
+code change could have made uploads succeed before that.
 
 What made it hard to diagnose, and is now fixed:
 
@@ -1278,9 +1277,17 @@ What made it hard to diagnose, and is now fixed:
   `mongodb+srv://` lookup fails even though the OS resolves it; in that case `dns.setServers`
   falls back to `8.8.8.8`/`1.1.1.1`.
 
-Verification: `node --check` on every touched file and a live `api.ping()` that reproduces the
-401. The upload path itself has **not** been exercised end-to-end, because that needs valid
-credentials. After fixing `.env`, a successful ping prints `{ status: 'ok' }`.
+Verification, against the real Cloudinary account and dev database with the corrected credentials:
+
+- `api.ping()` → `ok` (was `401 unknown api_key`).
+- `POST /api/post` with a real image → **201**; image and thumbnail URLs stored, `backend/temp/`
+  empty afterwards. The test post was deleted again (`DELETE` → 204).
+- Error paths return `{ error }`: no image → 400, wrong field name → 400 `Unexpected field`
+  (was a 500), no token → 401.
+
+Not exercised: the 502/503 branches of `cloudinaryUploadError()` (they need Cloudinary to
+fail, and the credentials now work), the rate limiter's 429, the browser upload form, and
+`changeAvatar`, which shares the new client.
 
 Deliberately not part of this change: the in-progress chat/SCSS edits and a stray
 `imagekit_url_endpoint` line in `backend/.env.example` were already in the working tree and
