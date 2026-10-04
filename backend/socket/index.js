@@ -2,6 +2,8 @@ const { Server } = require("socket.io");
 const http = require("http");
 const express = require("express");
 const jwt = require('jwt-simple');
+const { createAdapter } = require("@socket.io/redis-adapter");
+const { getRedisClient } = require("../utils/redis");
 
 const app = express();
 
@@ -11,17 +13,18 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        // origin: ["http://localhost:5173"],
-        origin: "*",
+        // Restricted to the configured frontend origin when set; falls back to
+        // wide-open so local dev without HOME_URL in .env keeps working.
+        origin: process.env.HOME_URL || "*",
         methods: ["GET", "POST"],
     },
 });
 
-const userSocketMap = {}; // {userId: socketId}
-
-const getReceiverSocketId = (receiverId) => {
-    return userSocketMap[receiverId];
-};
+// Multi-instance: with REDIS_URL set, io.to(room).emit() is relayed to every backend instance.
+const redisClient = getRedisClient();
+if (redisClient) {
+    io.adapter(createAdapter(redisClient, redisClient.duplicate()));
+}
 
 io.use((socket, next) => {
     // Retrieve the token from query parameters in the handshake
@@ -52,18 +55,13 @@ io.use((socket, next) => {
 
     console.log("User connected:", userId, "with socket ID:", socket.id);
 
-    // Map the user's ID to their socket ID
-    userSocketMap[userId] = socket.id;
+    // One room per user: events target `io.to(userId)`, which works across instances
+    // (and across a user's several tabs/devices) without any in-memory lookup table.
+    socket.join(userId);
 
-    // Notify all clients of online users
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-    // Handle disconnection
     socket.on("disconnect", () => {
         console.log("User disconnected:", userId);
-        delete userSocketMap[userId];
-        io.emit("getOnlineUsers", Object.keys(userSocketMap));
     });
 });
 
-module.exports = { app, io, server, getReceiverSocketId };
+module.exports = { app, io, server };

@@ -1362,24 +1362,25 @@ Not run end to end here — only a local socket smoke test (room delivery) was v
 
 ---
 
-## 14. Pentest findings: NoSQL injection in login, ReDoS in user search
+## 14. Pentest findings and fixes
 
-**Goal:** fix the two highest-severity findings from a security review of `backend/` (auth, validation,
-injection surface): a NoSQL-operator injection path in login and an unauthenticated ReDoS in the
-username search endpoint.
+**Goal:** fix every finding from a security review of `backend/` (auth, validation, injection
+surface, rate limiting, CORS).
 
 | Finding | Fix | File |
 |---|---|---|
 | `loginAuthentication` passed `req.body.usernameOrEmail`/`password` straight into a Mongo `$or` query. A client sending an object (e.g. `{"$gt": ""}`) instead of a string could inject a Mongo operator into the query, risking auth bypass. | Reject the request with a generic 400 ("incorrect credentials") whenever either field isn't a plain string, before the query is built. | `backend/controllers/authController.js` |
 | `searchUsers` built `new RegExp(username)` from the raw, unescaped `:username` route param. A crafted pattern (nested quantifiers) could hang the event loop for every request — and the endpoint is unauthenticated — while unbalanced parens throw synchronously. | Added `escapeRegExp()` and apply it to `username` before constructing the `RegExp`, so user input is matched literally instead of as a pattern. | `backend/utils/controllerUtils.js`, `backend/controllers/userController.js` |
+| No rate limiting on `/api/auth/login` or `/api/auth/register`, allowing unthrottled brute-force/credential-stuffing and registration spam. | Added a 10-requests/15-min limiter (reusing the Redis-backed store pattern from the post-creation limiter, so it holds across instances) on both routes. | `backend/routes/auth.js` |
+| JWTs issued by `jwt-simple` carried no `exp` claim and never expired — a leaked token stayed valid forever with no revocation path. | Added a `generateToken()` helper that sets `exp` 7 days out; `verifyJwt` now rejects a decoded token whose `exp` is in the past. | `backend/controllers/authController.js` |
+| Leftover debug `console.log("I am here", err)` in `changePassword`'s catch block could leak error/stack details into server logs. | Removed; the error still flows to `next(err)` and the central handler. | `backend/controllers/authController.js` |
+| CORS was wide open (`origin: "*"`) on both the Express app and the Socket.IO server. | Restricted to `process.env.HOME_URL` when set, falling back to `*` so local dev without it in `.env` keeps working. | `backend/index.js`, `backend/socket/index.js` |
 
-Other findings from the same review, not yet fixed (tracked here for follow-up): no rate limiting
-on `/api/auth/login` or `/api/auth/register` (brute force/credential stuffing); JWTs issued by
-`jwt-simple` have no `exp` claim and never expire; leftover `console.log` of the raw error in
-`changePassword`; wide-open CORS (`*`) on both Express and Socket.IO (likely intentional per
-project notes, revisit before adding cookie-based auth).
-
-Verification: code review only — reasoned through the injection/ReDoS paths and confirmed the fix
-sites by reading the surrounding controllers. Not exercised against a running instance; no test
-runner exists in this repo (see root notes). Restart the backend (`npm run dev` doesn't hot-reload)
-before relying on these fixes.
+Verification: code review only — reasoned through each path and confirmed the fix sites by reading
+the surrounding controllers/routes. Not exercised against a running instance; no test runner exists
+in this repo (see root notes). Restart the backend (`npm run dev` doesn't hot-reload) before relying
+on these fixes. Existing tokens issued before this change have no `exp` claim, so `verifyJwt`'s
+`decoded.exp && ...` check treats them as still valid (never expiring) — only newly issued tokens
+get the 7-day lifetime; no migration needed, but mention this if you want to force-expire old
+sessions. If `HOME_URL` is set in production, double check it exactly matches the deployed frontend
+origin (scheme + host + port) or legitimate requests will start failing CORS.
