@@ -11,6 +11,18 @@ const fs = require('fs');
 const socketHandler = require('../handlers/socketHandler');
 
 /**
+ * Escapes RegExp metacharacters in a user-supplied string so it can be safely
+ * passed to `new RegExp()` as a literal match rather than a pattern. Prevents
+ * both injection of unintended regex semantics and ReDoS via crafted patterns.
+ * @function escapeRegExp
+ * @param {string} value The raw, untrusted string
+ * @returns {string} The escaped string, safe to use inside `new RegExp()`
+ */
+module.exports.escapeRegExp = (value) => {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+/**
  * Retrieves a post's comments with a specified offset
  * @function retrieveComments
  * @param {string} postId The id of the post to retrieve comments from

@@ -83,6 +83,14 @@ module.exports.loginAuthentication = async (req, res, next) => {
             .send({ error: 'Please provide both a username/email and a password.' });
     }
 
+    // Both fields must be plain strings — otherwise a Mongo operator object
+    // (e.g. { "$gt": "" }) could be injected into the query below.
+    if (typeof usernameOrEmail !== 'string' || typeof password !== 'string') {
+        return res
+            .status(400)
+            .send({ error: 'The credentials you provided are incorrect, please try again.' });
+    }
+
     try {
         const user = await User.findOne({
             $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
