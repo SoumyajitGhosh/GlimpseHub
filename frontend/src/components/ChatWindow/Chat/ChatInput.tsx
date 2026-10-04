@@ -7,7 +7,7 @@
 
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
-//     if (!message) return;
+//     if (!message.trim()) return;
 //     await sendMessage(message);
 //     setMessage("");
 //   };
@@ -42,7 +42,6 @@
 import type { SyntheticEvent } from "react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
-import Icon from "../../Icon/Icon";
 import { pushMessageAction } from "../../../redux/chat/chatSlice";
 import { selectToken } from "../../../redux/user/userSlice.js";
 
@@ -66,18 +65,18 @@ const ChatInput = ({ userToChatId }: ChatInputProps) => {
       <input
         type="text"
         aria-label="Message"
-        style={{
-          flex: 1, // Makes input take all available space
-        }}
         value={message}
         placeholder="Send a message"
         onChange={(e) => setMessage(e.target.value)}
       />
-      <Icon
-        icon={"send"}
-        style={{ cursor: "pointer" }}
-        onClick={(e) => handleSubmit(e)}
-      />
+      <button
+        type="submit"
+        className="send-btn"
+        aria-label="Send message"
+        disabled={!message.trim()}
+      >
+        <ion-icon name="send"></ion-icon>
+      </button>
     </form>
   );
 };

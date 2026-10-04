@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import UserCard from "../../UserCard/UserCard";
 import Divider from "../../Divider/Divider";
 import type { ChatUser as ChatUserType } from "../../../types";
@@ -19,6 +19,7 @@ interface ChatUserCardProps {
 
 const ChatUsers = ({ chattableUsers }: ChatUsersProps) => {
   const navigate = useNavigate();
+  const { id: activeId } = useParams();
 
   return chattableUsers?.map((chattableUser, idx) => {
     const userCardProps: ChatUserCardProps = {
@@ -35,7 +36,7 @@ const ChatUsers = ({ chattableUsers }: ChatUsersProps) => {
         onClick={() => {
           navigate(`/direct/${chattableUser?._id}`);
         }}
-        className="chat-user"
+        className={`chat-user${chattableUser?._id === activeId ? " active" : ""}`}
       >
         <UserCard {...userCardProps} />
         <Divider />

@@ -22,6 +22,7 @@ section with the full detail (what changed, why, and how it was verified).
 | [§9](#9-backend-dependency-vulnerability-fixes-round-2-8--0) | Backend `npm audit` fixes, round 2 (bcrypt major bump) | Done — 8 → 0 vulnerabilities |
 | [§10](#10-fixed-the-two-chat-ui-bugs-flagged-but-left-in-8103) | The two chat UI bugs flagged in §8.10.3 | Done |
 | [§11](#11-post-upload-failures-cloudinary-credentials-error-codes-temp-cleanup) | Post-upload failures: shared Cloudinary client, proper error codes, temp-file cleanup | Done — verified end to end |
+| [§12](#12-chat-ui-redesign-conversation-state-fixes-responsive-new-post-modal) | Chat UI redesign, conversation-state fixes, responsive new-post modal | Done |
 
 **Current repo state**: both packages build clean, `npm audit` is 0 on both, the frontend
 has 55 passing tests and is fully typed. See the final-state tables at the end of §8.10 and
@@ -1292,3 +1293,35 @@ fail, and the credentials now work), the rate limiter's 429, the browser upload 
 Deliberately not part of this change: the in-progress chat/SCSS edits and a stray
 `imagekit_url_endpoint` line in `backend/.env.example` were already in the working tree and
 are unrelated.
+
+## 12. Chat UI redesign, conversation-state fixes, responsive new-post modal
+
+**Chat layout (`_chatPage.scss`, `ChatPage`, `ChatSidebar`).** The page is now one rounded,
+bordered panel (`height: calc(100vh - 9rem)`, sidebar 28–32rem + flexible thread) instead of
+two loosely bordered boxes. Hard-coded greys/blues moved to the theme variables
+(`--color-surface`, `--color-grey-2`, `--color-accent`, …) so dark mode applies. Inline styles
+on the sidebar wrapper and the page's bordered `<div>` became a `.chat-sidebar` class.
+
+**Input and thread (`ChatInput`, `Chats`).** The send control is a real
+`<button type="submit" class="send-btn">` with an `aria-label`, disabled while the message is
+blank (it replaces the clickable `Icon`); the thread auto-scrolls to the newest message via an
+end-of-list ref. The active conversation is highlighted in the sidebar (`ChatUsers` reads the
+route `:id`).
+
+**State fixes (`chatSlice`).** Added `activeChatId`, which fixes three real issues:
+- Switching conversations cleared nothing, so the previous thread could bleed into the new one;
+  `setChatUser` now resets `messages` when the id changes.
+- A slow `getMessages` response for a conversation the user already left is discarded
+  (`fetchAllMessagesAction` checks `activeChatId` via `getState`).
+- `pushMessageSuccess` ignores messages for a different conversation and de-duplicates by `_id`.
+  `pushMessageAction` now appends from the HTTP response too, so a sent message shows even if
+  the socket is down; the `newMessage` socket echo is de-duplicated. This supersedes the
+  old doc comment about the sent message arriving only via the socket.
+
+**New-post modal (`_new-post.scss`).** Width is `min(60rem, 92vw)` and height is capped at
+`92vh`; the preview grid row is `minmax(0, 1fr)` so it absorbs whatever height the viewport can't
+spare instead of overflowing short screens. The mobile variant opts out of the cap.
+
+Verification: `npm run typecheck` — 0 errors; `npm test` — 55/55. Not verified in a browser
+or with a second account, so the live socket de-duplication and the conversation-switch race
+are untested beyond the types and the existing slice tests.

@@ -1,5 +1,5 @@
 import { extractTime } from "../../../utils/extractTime";
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import { selectCurrentUser, selectToken } from "../../../redux/user/userSlice";
 import { fetchAllMessagesAction } from "../../../redux/chat/chatSlice";
@@ -22,6 +22,11 @@ const Chats = ({ userToChatId }: ChatsProps) => {
   useEffect(() => {
     dispatch(fetchAllMessagesAction(userToChatId, token ?? ""));
   }, [dispatch, userToChatId, token]);
+
+  const endRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    endRef.current?.scrollIntoView?.({ block: "end" });
+  }, [messages?.length]);
 
   return (
     <div style={{ height: "100%" }}>
@@ -53,6 +58,7 @@ const Chats = ({ userToChatId }: ChatsProps) => {
             )}
           </Fragment>
         ))}
+        <div ref={endRef} />
       </div>
     </div>
   );

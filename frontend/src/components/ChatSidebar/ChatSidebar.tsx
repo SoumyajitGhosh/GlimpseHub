@@ -64,11 +64,7 @@ const ChatSidebar = () => {
     <Fragment>
       <section
         ref={componentRef}
-        style={{
-          overflowY: "auto",
-          height: "90vh",
-          borderRight: "1px solid #dbdbdb",
-        }}
+        className="chat-sidebar"
       >
         <ChatUsers chattableUsers={chat?.data} />
       </section>

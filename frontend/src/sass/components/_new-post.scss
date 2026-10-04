@@ -2,14 +2,25 @@
 
 .new-post {
   min-height: 20rem;
-  width: 60rem;
+  width: min(60rem, 92vw);
+  max-height: 92vh;
+  overflow: hidden;
   grid-column: center-start / center-end;
   justify-self: center;
   background-color: $color-grey-3;
   box-shadow: 0 1rem 2rem $color-black;
   position: relative;
   display: grid;
-  grid-template-rows: min-content 50rem 15rem min-content;
+  // the preview row absorbs whatever height the viewport can't spare
+  grid-template-rows: min-content minmax(0, 1fr) min-content min-content;
+
+  & > .new-post__preview {
+    min-height: 0;
+  }
+
+  .filter-selector {
+    height: 17rem;
+  }
 
   &__nav {
     height: $mobile-header-height;
@@ -84,7 +95,13 @@
     grid-column: full-start / full-end;
     background-color: $color-white;
     grid-template-rows: 40rem 15rem;
+    max-height: none;
+    overflow: visible;
     box-shadow: none;
+
+    .filter-selector {
+      height: 100%;
+    }
     position: unset;
 
     &__preview {

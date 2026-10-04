@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 import { retrieveUserFollowing } from "../../services/profileService";
 import { getMessages, sendMessage } from "../../services/messageServices";
-import type { AppDispatch } from "../store";
+import type { AppDispatch, RootState } from "../store";
 import type { ChatUser, Message } from "../../types";
 
 export interface ChatState {
@@ -11,6 +11,8 @@ export interface ChatState {
   error: string | false;
   data: ChatUser[] | null;
   chatUser: ChatUser | null;
+  /** The conversation currently open (route `:id`); null before any is opened. */
+  activeChatId: string | null;
   messages: Message[];
   messageSending: boolean;
   messageSendingError: string | false;
@@ -22,6 +24,7 @@ export const INITIAL_STATE: ChatState = {
   error: false,
   data: null,
   chatUser: null,
+  activeChatId: null,
   messages: [],
   messageSending: true,
   messageSendingError: false,
@@ -56,6 +59,11 @@ const chatSlice = createSlice({
       state.data = [...(state.data ?? []), ...action.payload];
     },
     setChatUser(state, action: PayloadAction<string>) {
+      if (state.activeChatId !== action.payload) {
+        // Switching conversations: drop the previous thread so it can't bleed in.
+        state.messages = [];
+        state.activeChatId = action.payload;
+      }
       state.chatUser =
         state.data?.find((datum) => datum._id === action.payload) ?? null;
     },
@@ -75,7 +83,13 @@ const chatSlice = createSlice({
     pushMessageSuccess(state, action: PayloadAction<Message>) {
       state.messageSending = false;
       state.messageSendingError = false;
-      state.messages.push(action.payload);
+      const msg = action.payload;
+      const active = state.activeChatId;
+      // Ignore messages belonging to a different conversation than the open one.
+      if (active && msg.senderId !== active && msg.receiverId !== active) return;
+      // The HTTP response and the socket echo both deliver the sender's message.
+      if (state.messages.some((m) => m._id === msg._id)) return;
+      state.messages.push(msg);
     },
     pushMessageFailure(state, action: PayloadAction<string>) {
       state.messageSending = false;
@@ -124,27 +138,29 @@ export const fetchChatUsersActionOnScroll =
 
 /** Loads the full message history with a user. */
 export const fetchAllMessagesAction =
-  (userToChatId: string, token: string) => async (dispatch: AppDispatch) => {
+  (userToChatId: string, token: string) =>
+  async (dispatch: AppDispatch, getState: () => RootState) => {
     try {
       const response = await getMessages(userToChatId, token);
+      // Discard a stale response if the user already switched conversations.
+      const active = getState().chat.activeChatId;
+      if (active && active !== userToChatId) return;
       dispatch(fetchAllMessages(response));
     } catch (err) {
       dispatch(fetchFailure((err as Error).message));
     }
   };
 
-/**
- * Sends a message. Note: the pre-RTK code dispatched a `{ types: ... }` typo on
- * success, so the sent message was never appended here — it arrives instead via
- * the `newMessage` socket echo (`addSocketMessagesAction`). Behaviour is kept:
- * this thunk only flips the sending flag, and the socket echo appends + clears it.
- */
+/** Sends a message and appends it (the socket echo is de-duplicated by _id). */
 export const pushMessageAction =
   (id: string, authToken: string, message: string) =>
   async (dispatch: AppDispatch) => {
     try {
       dispatch(pushMessageStart());
-      await sendMessage(id, authToken, message);
+      const sent = await sendMessage(id, authToken, message);
+      // Append from the HTTP response too, so the message shows even if the socket
+      // is down; the socket echo is de-duplicated by _id.
+      dispatch(pushMessageSuccess(sent));
     } catch (err) {
       dispatch(chatSlice.actions.pushMessageFailure((err as Error).message));
     }
