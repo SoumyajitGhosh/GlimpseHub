@@ -14,13 +14,14 @@ section with the full detail (what changed, why, and how it was verified).
 | [§2](#2-dependency-vulnerability-fixes-commit-f82af67) | First Dependabot fix pass (backend + frontend, within-range bumps) | Done |
 | [§3](#3-frontend-modernization-commit-a988607) | Frontend modernization: SASS `@use`, theming/dark-mode, a11y foundations, dependency currency, React/routing polish | Done |
 | [§4](#4-frontend-test-runner--eslint-regression-fix) | First frontend test runner (Vitest + RTL) + an ESLint plugin-bump regression fix | Done |
-| [§5](#5-planned-react-router-dom-v7-migration-done--see-85) | react-router-dom v7 migration | Done (landed as §8.5 Phase 6) |
+| [§5](#5-react-router-dom-v7-migration-done--see-85) | react-router-dom v7 migration | Done (landed as §8.5 Phase 6) |
 | [§6](#6-frontend-audit-slash-command) | `/frontend-audit` reusable slash command | Done |
 | [§7](#7-mcp-servers-for-frontend-work-mcpjson) | MCP servers for frontend work (context7, chrome-devtools, playwright) | Done |
-| [§8](#8-planned-full-frontend-modernization-roadmap) | Full modernization roadmap (Phases 0–10): lint burndown, shared HTTP client, Redux Toolkit, router v7, Vite 7, React 19, CI, PWA, a11y | **Done — all 10 phases** |
-| [§8.10](#810-phase-5--typescript-migration-in-progress-branch-frontend-typescript-migration) | Phase 5: full `.jsx`/`.js` → `.tsx`/`.ts` TypeScript migration (bigger scope than the roadmap's "incremental JSDoc" plan) | **Done** — 333 → 0 `tsc` errors, `npm run build` passes |
+| [§8](#8-full-frontend-modernization-roadmap) | Full modernization roadmap (Phases 0–10): lint burndown, shared HTTP client, Redux Toolkit, router v7, Vite 7, React 19, CI, PWA, a11y | **Done — all 10 phases** |
+| [§8.10](#810-phase-5--typescript-migration) | Phase 5: full `.jsx`/`.js` → `.tsx`/`.ts` TypeScript migration (bigger scope than the roadmap's "incremental JSDoc" plan) | **Done** — 333 → 0 `tsc` errors, `npm run build` passes |
 | [§9](#9-backend-dependency-vulnerability-fixes-round-2-8--0) | Backend `npm audit` fixes, round 2 (bcrypt major bump) | Done — 8 → 0 vulnerabilities |
-| [§11](#11-fixed-the-two-chat-ui-bugs-flagged-but-left-in-8103) | The two chat UI bugs flagged in §8.10.3 | Done |
+| [§10](#10-fixed-the-two-chat-ui-bugs-flagged-but-left-in-8103) | The two chat UI bugs flagged in §8.10.3 | Done |
+| [§11](#11-post-upload-failures-cloudinary-credentials-error-codes-temp-cleanup) | Post-upload failures: shared Cloudinary client, proper error codes, temp-file cleanup | Code done — **needs valid Cloudinary credentials** |
 
 **Current repo state**: both packages build clean, `npm audit` is 0 on both, the frontend
 has 55 passing tests and is fully typed. See the final-state tables at the end of §8.10 and
@@ -28,8 +29,9 @@ has 55 passing tests and is fully typed. See the final-state tables at the end o
 
 **Still open** (not yet started, or deliberately deferred — see the linked section for why):
 - RTK Query (§8's Phase 4), forms → react-hook-form + zod (§8's Phase 9)
-- The a11y interactive-element follow-up — 40 `jsx-a11y` warnings (§8.9, §11)
+- The a11y interactive-element follow-up — 40 `jsx-a11y` warnings (§8.9, §10)
 - The §8.10 `no-unused-expressions` lint regression (27 errors, tracked since the TS migration began)
+- Valid `CLOUDINARY_API_KEY`/`CLOUDINARY_API_SECRET` in `backend/.env` — uploads fail until then (§11)
 - A real backend test runner (`npm test` is still `exit 1` — never attempted)
 - A real feature bug, found but not fixed: `profileDispatch({type: "INCREMENT_POST_COMMENTS_COUNT"})` has been a silent no-op since the Redux Toolkit migration (§8.4) — needs a design decision, see the end of §8.10's final-state notes
 - README.md's own "Areas to improve" list (Redis for socket scaling, Dockerize, analytics)
@@ -246,23 +248,11 @@ mention search, new-post file picker, notification popup) — that manual pass i
 before merging, given `useScrollPositionThrottled`'s signature change and the two
 `useEffect`→render-time-state rewrites touch real user-facing timing/scroll behavior.
 
-## 5. Planned: react-router-dom v7 migration (done — see §8.5)
+## 5. react-router-dom v7 migration (done — see §8.5)
 
-Current version is `^6.30.6`; `App.jsx` uses the plain `<Routes>/<Route>` tree (not
-`createBrowserRouter`/`RouterProvider`), so a straight v7 bump is low-risk — v7 retains the v6
-`<Routes>` API for apps that don't opt into the data-router APIs, meaning no restructuring is needed
-for the bump itself. Migration surface: 16 files use `<Link>`/`<NavLink>`, 5 use `useParams`, 6 use
-`useLocation` (incl. `App.jsx`'s `matchPath`-driven chrome-visibility logic) — none of these APIs
-change in v7 for non-data-router usage.
-
-Adopting v7's *data-router* features (loaders/actions via `RouterProvider`) is a separate, larger
-follow-up: it would require converting `App.jsx`'s inline route tree into a `createBrowserRouter`
-config, reworking the `NO_CHROME_ROUTES`/`matchPath` visibility check, and moving
-`ProtectedRoute`'s `<Outlet>` pattern into route `children`. Not implied by the version bump alone.
-
-Recommended next step when this is picked up: bump the dependency, then do a manual pass through
-every route (no test suite covers routing yet) watching for v7 deprecation warnings before removing
-any legacy behavior flags.
+Landed as Phase 6 of the roadmap (§8.5): a straight bump that keeps the declarative
+`<Routes>/<Route>` tree. Adopting v7's data-router APIs (`createBrowserRouter`, loaders/actions)
+was deliberately left out and remains a separate, larger follow-up.
 
 ## 6. `/frontend-audit` slash command
 
@@ -295,19 +285,13 @@ so the servers load without the per-project approval prompt.
 Requires Node's `npx` on PATH (already used by the frontend toolchain). No secrets stored. Verify
 with `/mcp` after restarting Claude Code in this repo.
 
-**Correction**: despite the "committed" wording above, `.mcp.json` and `.claude/settings.json` were
-never actually pushed in the session that wrote this section — they sat untracked in the working
-copy until the commit that added this correction. No content changed; this is a bookkeeping fix.
-
-## 8. Planned: full frontend modernization roadmap
+## 8. Full frontend modernization roadmap
 
 Asked Claude Code (as a senior frontend architect) to survey the frontend and propose a
 modernization plan. Unlike sections 3–5, this pass explicitly puts the previously-deferred
 architectural changes on the table (**RTK, RTK Query, incremental TypeScript, forms**) and
 commits to **finishing the PWA** rather than removing it. The roadmap is a sequence of
-independently-shippable phases, one small PR each; nothing below is done yet except Phase 0.
-
-Full plan file: `~/.claude/plans/think-like-a-senior-humming-lark.md`.
+independently-shippable phases, one small PR each; all ten phases are now done (detail in §8.1–§8.10).
 
 **Phases** (S ≈ <½ day, M ≈ 1–3 days, L ≈ multi-PR):
 
@@ -656,7 +640,7 @@ Verification: `npm run lint` (0 errors, 42 warnings, down from 68), `npm test` (
 Still pending: Phase 4 (RTK Query), Phase 5 (incremental TS), Phase 9 (forms → RHF + zod),
 and the a11y interactive-element follow-up (42 warnings).
 
-### 8.10 Phase 5 — TypeScript migration (in progress, branch `frontend-typescript-migration`)
+### 8.10 Phase 5 — TypeScript migration
 
 §8's original roadmap scoped Phase 5 as *incremental* typing (`jsconfig.json` + `checkJs` +
 typed JSDoc, leaf-inward). This branch instead did a **full `.jsx`/`.js` → `.tsx`/`.ts`
@@ -1123,27 +1107,6 @@ possibly-null), `LoginPage.tsx` (1, the last remaining runtime `prop-types` impo
 share a common cluster the way prior passes did — each is a one-off, and `SignUpCard.tsx`
 is the only one with double-digit effort remaining.
 
-## 9. Backend dependency vulnerability fixes, round 2 (8 → 0)
-
-Dependabot/`npm audit` flagged 8 vulnerabilities in `backend/` (4 moderate, 3 high, 1
-critical), all transitive:
-
-- **`npm audit fix` (no `--force`)** cleared 6 of the 8 by re-resolving already-declared
-  semver ranges — no `package.json` change needed: `express` (moderate), `morgan`
-  (moderate), `body-parser`'s `qs` dependency (moderate), and the `brace-expansion` /
-  `minimatch` transitives (high/low) pulled in by dev tooling.
-- **`bcrypt` major-bumped `^5.1.1` → `^6.0.0`** for the remaining two — a critical `tar`
-  vulnerability and a high one in `@mapbox/node-pre-gyp`, both pulled in only by bcrypt 5's
-  native-build toolchain (`node-pre-gyp` downloads prebuilt binaries via `tar`). bcrypt 6
-  moved to `node-gyp-build`, dropping that dependency chain entirely. No API change between
-  the versions used here (`hash`/`compare`), so `authController.js` needed no edits.
-
-Verification: `npm audit` → **0 vulnerabilities**; `node --check` over every backend `.js`
-file; a live `bcrypt.hash`/`bcrypt.compare` round-trip confirming the new native binary
-actually loads on this platform; and a full boot smoke test — `node scripts/dev-mongo.cjs`
-(§8.10) for an in-memory Mongo, `node index.js` against it, confirmed `GET
-/api/post/filters` → `200` over real HTTP before tearing both down.
-
 #### 8.10.7 Last 18 `tsc` errors cleared — `npm run build` passes for the first time
 
 The remaining 18 errors (down from the original 333 across §8.10.1–§8.10.6) were all
@@ -1228,7 +1191,28 @@ comment-count overlay has never actually incremented post-RTK. `tsc` can't catch
 type-checks fine); it's a real feature gap needing a deliberate design decision, not a type
 fix, so it's recorded here rather than patched in passing.
 
-## 11. Fixed the two chat UI bugs flagged (but left) in §8.10.3
+## 9. Backend dependency vulnerability fixes, round 2 (8 → 0)
+
+Dependabot/`npm audit` flagged 8 vulnerabilities in `backend/` (4 moderate, 3 high, 1
+critical), all transitive:
+
+- **`npm audit fix` (no `--force`)** cleared 6 of the 8 by re-resolving already-declared
+  semver ranges — no `package.json` change needed: `express` (moderate), `morgan`
+  (moderate), `body-parser`'s `qs` dependency (moderate), and the `brace-expansion` /
+  `minimatch` transitives (high/low) pulled in by dev tooling.
+- **`bcrypt` major-bumped `^5.1.1` → `^6.0.0`** for the remaining two — a critical `tar`
+  vulnerability and a high one in `@mapbox/node-pre-gyp`, both pulled in only by bcrypt 5's
+  native-build toolchain (`node-pre-gyp` downloads prebuilt binaries via `tar`). bcrypt 6
+  moved to `node-gyp-build`, dropping that dependency chain entirely. No API change between
+  the versions used here (`hash`/`compare`), so `authController.js` needed no edits.
+
+Verification: `npm audit` → **0 vulnerabilities**; `node --check` over every backend `.js`
+file; a live `bcrypt.hash`/`bcrypt.compare` round-trip confirming the new native binary
+actually loads on this platform; and a full boot smoke test — `node scripts/dev-mongo.cjs`
+(§8.10) for an in-memory Mongo, `node index.js` against it, confirmed `GET
+/api/post/filters` → `200` over real HTTP before tearing both down.
+
+## 10. Fixed the two chat UI bugs flagged (but left) in §8.10.3
 
 - **`ChatUsers.tsx` — deleted the dead `ChatUserBody`/`ChatUser` wrapper.** Traced it back
   to the very first "Basic UI for chat" commit: hardcoded placeholder data
@@ -1249,3 +1233,55 @@ fix, so it's recorded here rather than patched in passing.
 Verification: `npm run typecheck` — still **0** errors. `npm run lint` — **27 errors / 40
 warnings** (2 fewer warnings than §8.10.7's end state — the deleted `ChatUsers` code carried
 its own now-gone `jsx-a11y` hits). `npm test` — 55/55. `npm run build` — still passes clean.
+
+## 11. Post-upload failures: Cloudinary credentials, error codes, temp cleanup
+
+**Symptom**: `POST /api/post` failed — first with a generic "Error uploading image", then
+`429 Too many requests` after a few retries, then `502 Bad Gateway`.
+
+**Root cause (config, not code)**: Cloudinary rejects the credentials in `backend/.env` with
+`401 unknown api_key`, confirmed directly with `cloudinary.api.ping()`. The `CLOUDINARY_API_KEY`
+value is malformed (35 characters, not all digits; real keys are 15 digits) and the secret's
+length is also off. **Still to do by the owner**: copy the real key/secret from the Cloudinary
+Console into `backend/.env` and restart (`npm run dev` has no watcher). Nothing in code can
+make uploads succeed until then.
+
+What made it hard to diagnose, and is now fixed:
+
+- **Swallowed error.** `createPost` caught the Cloudinary failure with a bare `catch {}`, so
+  the real reason never reached the log. It now logs `Cloudinary upload failed:` plus the
+  Cloudinary error.
+- **Leaked temp files.** The multer temp file was only deleted after a *successful* upload, so
+  every failure left a file in `backend/temp/`. It is now unlinked on the failure path too.
+- **Shared Cloudinary client.** New `backend/utils/cloudinary.js` configures the SDK once
+  (`secure: true`, warns at startup if any of the three env vars is missing). `postController`
+  and `userController.changeAvatar` use it instead of calling `cloudinary.config()` on every
+  request.
+- **Proper status codes.** A failed upload was always a bare 500. `cloudinaryUploadError()` in
+  `postController.js` now maps the Cloudinary status to a `RequestError`:
+
+  | Cloudinary | Response |
+  |---|---|
+  | 400 | 400 — image could not be processed |
+  | 413 | 413 — file exceeds 10MB |
+  | 420 / 429 | 503 — image service busy |
+  | 401 / 403 / 5xx | 502 — image service unavailable (detail only in the server log) |
+  | anything else | 500 — generic upload error |
+
+- **Rate limiter (`routes/post.js`).** Post creation allows 5 per 15 min per IP, and failed
+  attempts used to count — retries after the credential failure caused the 429. Added
+  `skipFailedRequests: true` and a JSON `{ error }` message so the 429 matches every other
+  error shape. The counter is in memory, so a backend restart also resets it.
+- **Multer errors (`index.js`).** Only `File too large` returned 400; every other `MulterError`
+  fell through to a 500. They now return 400 with `{ error }`.
+- **Startup DNS fallback (`index.js`).** If Node's resolver only knows loopback servers, the
+  `mongodb+srv://` lookup fails even though the OS resolves it; in that case `dns.setServers`
+  falls back to `8.8.8.8`/`1.1.1.1`.
+
+Verification: `node --check` on every touched file and a live `api.ping()` that reproduces the
+401. The upload path itself has **not** been exercised end-to-end, because that needs valid
+credentials. After fixing `.env`, a successful ping prints `{ status: 'ok' }`.
+
+Deliberately not part of this change: the in-progress chat/SCSS edits and a stray
+`imagekit_url_endpoint` line in `backend/.env.example` were already in the working tree and
+are unrelated.

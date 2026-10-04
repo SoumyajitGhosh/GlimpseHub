@@ -22,6 +22,9 @@ const filters = require('../utils/filters');
 const postLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 5,
+    // Failed uploads (4xx/5xx) shouldn't use up the user's quota
+    skipFailedRequests: true,
+    message: { error: 'Too many posts created, please try again later.' },
 });
 
 postRouter.post('/', postLimiter, requireAuth, upload, createPost);

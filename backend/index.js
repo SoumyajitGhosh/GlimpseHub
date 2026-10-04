@@ -1,4 +1,12 @@
 require('dotenv').config();
+const dns = require('dns');
+
+// Node's resolver can fall back to 127.0.0.1 (nothing listening), which breaks the
+// mongodb+srv:// lookup even though the OS resolves it. Use public DNS only in that case.
+if (dns.getServers().every((s) => s === '127.0.0.1' || s === '::1')) {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+}
+
 const cors = require('cors');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
@@ -48,6 +56,8 @@ app.use((err, req, res, next) => {
                 .status(400)
                 .send({ error: 'Your file exceeds the limit of 10MB.' });
         }
+        // Other Multer errors (unexpected field, too many files...) are client mistakes
+        return res.status(400).send({ error: err.message });
     }
     res.status(err.statusCode || 500).send({
         error:

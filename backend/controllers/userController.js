@@ -6,7 +6,7 @@ const ConfirmationToken = require('../models/ConfirmationToken');
 const Notification = require('../models/Notification');
 const socketHandler = require('../handlers/socketHandler');
 const ObjectId = require('mongoose').Types.ObjectId;
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('../utils/cloudinary');
 const fs = require('fs');
 const crypto = require('crypto');
 
@@ -505,12 +505,6 @@ module.exports.changeAvatar = async (req, res, next) => {
     if (!req.file) {
         return res.status(400).send({ error: 'Please provide the image to upload.' });
     }
-
-    cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
-    });
 
     try {
         // Upload the file to Cloudinary

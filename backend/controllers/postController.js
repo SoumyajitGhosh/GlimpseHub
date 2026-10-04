@@ -1,4 +1,4 @@
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('../utils/cloudinary');
 const linkify = require('linkifyjs');
 const axios = require('axios');
 require('linkify-plugin-hashtag');
@@ -9,6 +9,7 @@ const Followers = require('../models/Followers');
 const Notification = require('../models/Notification');
 const socketHandler = require('../handlers/socketHandler');
 const fs = require('fs');
+const RequestError = require('../errorTypes/RequestError');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 const {
@@ -17,6 +18,25 @@ const {
     populatePostsPipeline,
 } = require('../utils/controllerUtils');
 const filters = require('../utils/filters');
+
+// Translates a Cloudinary SDK error into a RequestError with a client-appropriate status.
+// Auth/config failures (401/403) are our fault, not the client's, so they surface as 502.
+const cloudinaryUploadError = (err) => {
+    const code = (err && (err.http_code || (err.error && err.error.http_code))) || 0;
+    if (code === 400) {
+        return new RequestError('The image could not be processed. Please try a different file.', 400);
+    }
+    if (code === 413) {
+        return new RequestError('Your file exceeds the limit of 10MB.', 413);
+    }
+    if (code === 420 || code === 429) {
+        return new RequestError('Image service is busy, please try again later.', 503);
+    }
+    if (code === 401 || code === 403 || code >= 500) {
+        return new RequestError('Image service is unavailable, please try again later.', 502);
+    }
+    return new RequestError('Error uploading image, please try again later.', 500);
+};
 
 module.exports.createPost = async (req, res, next) => {
     const user = res.locals.user;
@@ -36,17 +56,13 @@ module.exports.createPost = async (req, res, next) => {
             .send({ error: 'Please provide the image to upload.' });
     }
 
-    cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
-    });
-
     let response;
     try {
         response = await cloudinary.uploader.upload(req.file.path);
-    } catch {
-        return next({ message: 'Error uploading image, please try again later.' });
+    } catch (err) {
+        console.error('Cloudinary upload failed:', err.error || err);
+        fs.unlink(req.file.path, () => {});
+        return next(cloudinaryUploadError(err));
     }
 
     try {
