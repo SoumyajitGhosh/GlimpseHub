@@ -1,0 +1,31 @@
+# Load-balanced backend: nginx -> N stateless backend replicas -> shared Redis + MongoDB.
+#   docker compose up --build --scale backend=4
+# MongoDB is external (MONGO_URI in backend/.env, e.g. Atlas).
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      REDIS_URL: redis://redis:6379
+      PORT: 9000
+    depends_on:
+      - redis
+    restart: unless-stopped
+    ulimits:
+      nofile: 1048576
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "9000:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
+    ulimits:
+      nofile: 1048576

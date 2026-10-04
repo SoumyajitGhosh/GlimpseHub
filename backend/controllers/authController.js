@@ -16,12 +16,26 @@ const {
     validatePassword,
 } = require('../utils/validation');
 
+// Tokens are valid for 7 days from issuance; verifyJwt rejects anything older.
+const TOKEN_LIFETIME_SECONDS = 7 * 24 * 60 * 60;
+
+const generateToken = (userId) => {
+    return jwt.encode(
+        { id: userId, exp: Math.floor(Date.now() / 1000) + TOKEN_LIFETIME_SECONDS },
+        process.env.JWT_SECRET
+    );
+};
+module.exports.generateToken = generateToken;
+
 module.exports.verifyJwt = (token) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const id = jwt.decode(token, process.env.JWT_SECRET).id;
+            const decoded = jwt.decode(token, process.env.JWT_SECRET);
+            if (decoded.exp && decoded.exp < Math.floor(Date.now() / 1000)) {
+                return reject('Not authorized.');
+            }
             const user = await User.findOne(
-                { _id: id },
+                { _id: decoded.id },
                 'email username avatar bookmarks bio fullName confirmed website'
             );
             if (user) {
@@ -83,6 +97,14 @@ module.exports.loginAuthentication = async (req, res, next) => {
             .send({ error: 'Please provide both a username/email and a password.' });
     }
 
+    // Both fields must be plain strings — otherwise a Mongo operator object
+    // (e.g. { "$gt": "" }) could be injected into the query below.
+    if (typeof usernameOrEmail !== 'string' || typeof password !== 'string') {
+        return res
+            .status(400)
+            .send({ error: 'The credentials you provided are incorrect, please try again.' });
+    }
+
     try {
         const user = await User.findOne({
             $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
@@ -111,7 +133,7 @@ module.exports.loginAuthentication = async (req, res, next) => {
                     username: user.username,
                     avatar: user.avatar,
                 },
-                token: jwt.encode({ id: user._id }, process.env.JWT_SECRET),
+                token: generateToken(user._id),
             });
         });
     } catch (err) {
@@ -149,7 +171,7 @@ module.exports.register = async (req, res, next) => {
                 email: user.email,
                 username: user.username,
             },
-            token: jwt.encode({ id: user._id }, process.env.JWT_SECRET),
+            token: generateToken(user._id),
         });
     } catch (err) {
         next(err);
@@ -270,7 +292,6 @@ module.exports.changePassword = async (req, res, next) => {
             message: "Password updated successfully"
         });
     } catch (err) {
-        console.log("I am here", err);
         return next(err);
     }
 };

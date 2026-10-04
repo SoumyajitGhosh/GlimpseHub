@@ -6,12 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node index.js",
+    "start:cluster": "node cluster.js",
     "dev:mongo": "node scripts/dev-mongo.cjs",
     "build": "npm i"
   },
   "author": "Soumyajit Ghosh",
   "license": "ISC",
   "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
     "axios": "^1.20.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.11.0",
@@ -32,6 +34,8 @@
     "multer": "^2.3.0",
     "nodemailer": "^9.1.1",
     "path": "^0.12.7",
+    "rate-limit-redis": "^4.3.1",
+    "redis": "^6.3.0",
     "socket.io": "^4.8.3",
     "validator": "^13.15.35"
   },

@@ -24,8 +24,12 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use(helmet());
 app.use(helmet.hidePoweredBy());
-app.use(cors());
+// Restricted to the configured frontend origin when set; falls back to wide-open
+// so local dev without HOME_URL in .env keeps working.
+app.use(cors({ origin: process.env.HOME_URL || '*' }));
 app.set('trust proxy', 1);
+// Load balancer health check (no DB/auth work)
+app.get('/healthz', (req, res) => res.sendStatus(200));
 app.use('/api', apiRouter);
 
 if (process.env.NODE_ENV === 'production') {
@@ -35,6 +39,8 @@ if (process.env.NODE_ENV === 'production') {
 (async function () {
     try {
         await mongoose.connect(process.env.MONGO_URI, {
+            // Per process; total connections = instances x workers x this value
+            maxPoolSize: parseInt(process.env.MONGO_POOL_SIZE, 10) || 20,
             // useNewUrlParser: true,
             // useUnifiedTopology: true,
             // useCreateIndex: true,

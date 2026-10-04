@@ -1325,3 +1325,62 @@ spare instead of overflowing short screens. The mobile variant opts out of the c
 Verification: `npm run typecheck` — 0 errors; `npm test` — 55/55. Not verified in a browser
 or with a second account, so the live socket de-duplication and the conversation-switch race
 are untested beyond the types and the existing slice tests.
+
+---
+
+## 13. Backend horizontal scaling / load balancing
+
+**Goal:** run many stateless backend instances behind a load balancer. No code change can by itself
+guarantee "1 million concurrent users" — that is a capacity-planning result you verify with load tests
+(see "What's still needed").
+
+**Blocker removed:** the in-memory `userSocketMap` (userId → socketId) only worked on one instance.
+
+| Change | File |
+|---|---|
+| Each socket joins a room named after its user id; handlers emit with `io.to(userId)` (works across instances and a user's multiple tabs) | `socket/index.js`, `handlers/socketHandler.js` |
+| `getReceiverSocketId` export removed (it was only used by the handler) | `socket/index.js` |
+| Global `getOnlineUsers` broadcast removed — it sent every connected user id to every client on each connect/disconnect (O(N²)), and the frontend never handled it | `socket/index.js` |
+| Optional Redis: `@socket.io/redis-adapter` relays events between instances; set `REDIS_URL` to enable, unset = old single-instance behaviour | `utils/redis.js`, `socket/index.js` |
+| Post-creation rate limiter uses `rate-limit-redis` when `REDIS_URL` is set, so the 5/15 min limit holds across instances (pinned `rate-limit-redis@^4`; v6 needs express-rate-limit 8) | `routes/post.js` |
+| `GET /healthz` for LB health checks | `index.js` |
+| `MONGO_POOL_SIZE` (default 20) per process | `index.js` |
+| `npm run start:cluster` — one worker per core (`WEB_CONCURRENCY` to override) | `cluster.js` |
+| nginx config (least_conn, WebSocket upgrade, long read timeout) + Dockerfile + compose | `deploy/nginx.conf`, `backend/Dockerfile`, `docker-compose.yml` |
+
+No sticky sessions needed: the client connects with `transports: ['websocket']`.
+
+**Run:** `docker compose up --build --scale backend=4` (nginx on :9000; MongoDB stays external via `MONGO_URI`).
+Not run end to end here — only a local socket smoke test (room delivery) was verified; Redis path untested.
+
+**What's still needed for ~1M concurrent connections**
+- Load test (k6/Artillery) to find per-instance capacity; plan instance count from that (a Node process typically holds tens of thousands of sockets).
+- Raise OS limits (file descriptors, ephemeral ports, `net.core.somaxconn`) on LB and app hosts.
+- Managed Redis (cluster or sharded pub/sub), MongoDB Atlas sized for `instances × workers × MONGO_POOL_SIZE` connections plus read replicas/indexes, and a cloud LB (ALB/NLB) or several nginx nodes in front.
+- Caching for hot feeds/profiles, and moving image upload off the request path (multer temp files are local to an instance).
+- `trust proxy` is `1`; with a cloud LB *and* nginx (two hops) raise it so rate limiting sees client IPs.
+
+---
+
+## 14. Pentest findings and fixes
+
+**Goal:** fix every finding from a security review of `backend/` (auth, validation, injection
+surface, rate limiting, CORS).
+
+| Finding | Fix | File |
+|---|---|---|
+| `loginAuthentication` passed `req.body.usernameOrEmail`/`password` straight into a Mongo `$or` query. A client sending an object (e.g. `{"$gt": ""}`) instead of a string could inject a Mongo operator into the query, risking auth bypass. | Reject the request with a generic 400 ("incorrect credentials") whenever either field isn't a plain string, before the query is built. | `backend/controllers/authController.js` |
+| `searchUsers` built `new RegExp(username)` from the raw, unescaped `:username` route param. A crafted pattern (nested quantifiers) could hang the event loop for every request — and the endpoint is unauthenticated — while unbalanced parens throw synchronously. | Added `escapeRegExp()` and apply it to `username` before constructing the `RegExp`, so user input is matched literally instead of as a pattern. | `backend/utils/controllerUtils.js`, `backend/controllers/userController.js` |
+| No rate limiting on `/api/auth/login` or `/api/auth/register`, allowing unthrottled brute-force/credential-stuffing and registration spam. | Added a 10-requests/15-min limiter (reusing the Redis-backed store pattern from the post-creation limiter, so it holds across instances) on both routes. | `backend/routes/auth.js` |
+| JWTs issued by `jwt-simple` carried no `exp` claim and never expired — a leaked token stayed valid forever with no revocation path. | Added a `generateToken()` helper that sets `exp` 7 days out; `verifyJwt` now rejects a decoded token whose `exp` is in the past. | `backend/controllers/authController.js` |
+| Leftover debug `console.log("I am here", err)` in `changePassword`'s catch block could leak error/stack details into server logs. | Removed; the error still flows to `next(err)` and the central handler. | `backend/controllers/authController.js` |
+| CORS was wide open (`origin: "*"`) on both the Express app and the Socket.IO server. | Restricted to `process.env.HOME_URL` when set, falling back to `*` so local dev without it in `.env` keeps working. | `backend/index.js`, `backend/socket/index.js` |
+
+Verification: code review only — reasoned through each path and confirmed the fix sites by reading
+the surrounding controllers/routes. Not exercised against a running instance; no test runner exists
+in this repo (see root notes). Restart the backend (`npm run dev` doesn't hot-reload) before relying
+on these fixes. Existing tokens issued before this change have no `exp` claim, so `verifyJwt`'s
+`decoded.exp && ...` check treats them as still valid (never expiring) — only newly issued tokens
+get the 7-day lifetime; no migration needed, but mention this if you want to force-expire old
+sessions. If `HOME_URL` is set in production, double check it exactly matches the deployed frontend
+origin (scheme + host + port) or legitimate requests will start failing CORS.

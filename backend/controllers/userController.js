@@ -17,7 +17,7 @@ const {
     validateBio,
     validateWebsite,
 } = require('../utils/validation');
-const { sendConfirmationEmail } = require('../utils/controllerUtils');
+const { sendConfirmationEmail, escapeRegExp } = require('../utils/controllerUtils');
 
 module.exports.retrieveUser = async (req, res, next) => {
     const { username } = req.params;
@@ -429,7 +429,7 @@ module.exports.searchUsers = async (req, res, next) => {
         const users = await User.aggregate([
             {
                 $match: {
-                    username: { $regex: new RegExp(username), $options: 'i' },
+                    username: { $regex: new RegExp(escapeRegExp(username)), $options: 'i' },
                 },
             },
             {
